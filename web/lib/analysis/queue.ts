@@ -12,11 +12,39 @@ const globalForQueue = globalThis as unknown as {
   analysisQueue: Queue<AnalysisJobData> | undefined;
 };
 
+function resolveRedisConnection(): {
+  url: string;
+  tls?: Record<string, never>;
+} {
+  const raw = (process.env.REDIS_URL ?? "redis://localhost:6379").trim();
+  if (raw.startsWith("redis-cli")) {
+    throw new Error(
+      "REDIS_URL must contain only the Redis URL, not the redis-cli command",
+    );
+  }
+
+  const url = new URL(raw);
+  const isUpstash = url.hostname.endsWith(".upstash.io");
+  if (isUpstash && url.protocol === "redis:") {
+    url.protocol = "rediss:";
+  }
+
+  return {
+    url: url.toString(),
+    tls: isUpstash ? {} : undefined,
+  };
+}
+
 function getRedisConnection(): Redis {
   if (!globalForQueue.redis) {
-    const redisUrl = process.env.REDIS_URL ?? "redis://localhost:6379";
-    globalForQueue.redis = new Redis(redisUrl, {
-      maxRetriesPerRequest: null,
+    const connection = resolveRedisConnection();
+    globalForQueue.redis = new Redis(connection.url, {
+      maxRetriesPerRequest: 2,
+      tls: connection.tls,
+      retryStrategy: (attempt) => Math.min(attempt * 250, 2_000),
+    });
+    globalForQueue.redis.on("error", (error) => {
+      console.error(`[queue] Redis connection error: ${error.message}`);
     });
   }
   return globalForQueue.redis;
