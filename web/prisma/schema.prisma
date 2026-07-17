@@ -1,0 +1,340 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Better Auth core tables ───────────────────────────────────────────────
+
+model User {
+  id              String    @id
+  name            String
+  email           String
+  emailVerified   Boolean   @default(false)
+  image           String?
+  username        String?   @unique
+  displayUsername String?
+  role            String    @default("user")
+  createdAt       DateTime
+  updatedAt       DateTime
+  sessions        Session[]
+  accounts        Account[]
+  leads           Lead[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ─── Dashboard / platform data ───────────────────────────────────────────
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL_SENT
+  WON
+  LOST
+}
+
+model Lead {
+  id               String     @id @default(cuid())
+  name             String
+  email            String
+  company          String?
+  phone            String?
+  industry         String?
+  interest         String?
+  message          String?
+  notes            String?
+  status           LeadStatus @default(NEW)
+  source           String     @default("contact_form")
+  discoveryAnswers Json?
+  metadata         Json?
+  userId           String?
+  user             User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  analyses         Analysis[]
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@map("lead")
+}
+
+// ─── Phase 2: Analysis pipeline ────────────────────────────────────────────
+
+enum AnalysisStatus {
+  QUEUED
+  CRAWLING
+  DISCOVERING
+  AUDITING
+  ANALYZING
+  SYNTHESIZING
+  PRICING
+  GENERATING_PDF
+  DONE
+  FAILED
+}
+
+enum DomainStatus {
+  PROCESSING
+  COMPLETED
+}
+
+enum ProposalStatus {
+  DRAFT
+  SENT
+  VIEWED
+}
+
+model AnalyzedDomain {
+  id               String       @id @default(cuid())
+  normalizedDomain String       @unique
+  status           DomainStatus
+  lastAnalysisId   String?
+  completedAt      DateTime?
+  createdAt        DateTime     @default(now())
+
+  @@index([status])
+  @@map("analyzed_domain")
+}
+
+model Analysis {
+  id               String             @id @default(cuid())
+  leadId           String
+  lead             Lead               @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  domain           String
+  socialLinks      Json?
+  businessIntake   Json?
+  guestAccessToken String?            @unique
+  emailCapturedAt  DateTime?
+  status           AnalysisStatus     @default(QUEUED)
+  errorMsg         String?
+  createdAt        DateTime           @default(now())
+  completedAt      DateTime?
+  rawSignals       RawSignal[]
+  proposal         Proposal?
+  usageLogs        ToolUsageLog[]
+  activities       AnalysisActivity[]
+  runs             AnalysisRun[]
+  consultation     ConsultationMessage[]
+  currentRunId     String?
+
+  @@index([leadId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([guestAccessToken])
+  @@map("analysis")
+}
+
+model AnalysisRun {
+  id           String         @id @default(cuid())
+  analysisId   String
+  analysis     Analysis       @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  attempt      Int
+  status       AnalysisStatus @default(QUEUED)
+  coverageJson Json?
+  reportJson   Json?
+  pricingJson  Json?
+  roiJson      Json?
+  startedAt    DateTime       @default(now())
+  completedAt  DateTime?
+  errorMsg     String?
+  rawSignals   RawSignal[]
+  activities   AnalysisActivity[]
+  usageLogs    ToolUsageLog[]
+  evidence     AnalysisEvidence[]
+
+  @@unique([analysisId, attempt])
+  @@index([analysisId, startedAt])
+  @@map("analysis_run")
+}
+
+model ConsultationMessage {
+  id         String   @id @default(cuid())
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  role       String
+  content    String
+  inputJson  Json?
+  createdAt  DateTime @default(now())
+
+  @@index([analysisId, createdAt])
+  @@map("consultation_message")
+}
+
+model AnalysisEvidence {
+  id               String      @id @default(cuid())
+  runId            String
+  run              AnalysisRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  evidenceKey      String
+  provider         String
+  sourceType       String
+  title            String?
+  url              String?
+  query            String?
+  excerpt          String?
+  metricPath       String?
+  valueJson        Json?
+  entityConfidence Float?
+  capturedAt       DateTime    @default(now())
+
+  @@unique([runId, evidenceKey])
+  @@index([runId, provider])
+  @@map("analysis_evidence")
+}
+
+model AnalysisActivity {
+  id         String   @id @default(cuid())
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  runId      String?
+  run        AnalysisRun? @relation(fields: [runId], references: [id], onDelete: Cascade)
+  kind       String
+  message    String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([analysisId, createdAt])
+  @@index([runId, createdAt])
+  @@map("analysis_activity")
+}
+
+model RawSignal {
+  id         String   @id @default(cuid())
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  runId      String?
+  run        AnalysisRun? @relation(fields: [runId], references: [id], onDelete: Cascade)
+  source     String
+  payload    Json
+  fetchedAt  DateTime @default(now())
+
+  @@index([analysisId])
+  @@index([runId])
+  @@index([source])
+  @@map("raw_signal")
+}
+
+model Proposal {
+  id                  String         @id @default(cuid())
+  analysisId          String         @unique
+  analysis            Analysis       @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  strategyJson        Json?
+  techStack           Json?
+  automationBlueprint Json?
+  narrativeText       String?
+  costEstimateUSD     Int?
+  timelineWeeks       Int?
+  pdfUrl              String?
+  reportVersion       String         @default("1.0")
+  reportJson          Json?
+  pricingJson         Json?
+  roiJson             Json?
+  status              ProposalStatus @default(DRAFT)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  @@map("proposal")
+}
+
+model ProviderConfig {
+  id                 String  @id @default(cuid())
+  provider           String  @unique
+  monthlyBudgetUSD   Int
+  currentSpendUSD    Int     @default(0)
+  rateLimitPerMinute Int     @default(60)
+  isEnabled          Boolean @default(false)
+
+  @@map("provider_config")
+}
+
+model ToolUsageLog {
+  id              String   @id @default(cuid())
+  analysisId      String
+  analysis        Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  runId           String?
+  run             AnalysisRun? @relation(fields: [runId], references: [id], onDelete: Cascade)
+  provider        String
+  endpoint        String
+  creditsOrTokens Int      @default(0)
+  costEstimateUSD Float    @default(0)
+  latencyMs       Int
+  status          String
+  createdAt       DateTime @default(now())
+
+  @@index([analysisId])
+  @@index([runId])
+  @@index([provider])
+  @@index([createdAt])
+  @@map("tool_usage_log")
+}
+
+// ─── Phase 10: Admin audit trail ───────────────────────────────────────────
+
+model AdminEventLog {
+  id          String   @id @default(cuid())
+  adminUserId String
+  action      String
+  targetType  String?
+  targetId    String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([adminUserId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("admin_event_log")
+}

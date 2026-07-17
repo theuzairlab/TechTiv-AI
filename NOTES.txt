@@ -1,0 +1,234 @@
+
+
+TASKS:
+10-Jun-2026
+[✅]Researched and analyzed the TechTivAI platform requirements, features, and implementation roadmap.
+[✅]Planned the website architecture, user flows, and AI-powered modules for TechTivAI.
+[✅]Evaluated the technical stack, AI integrations, and automation tools required for the platform.
+
+11-Jun-2026
+[✅] Initialized the TechTivAI project and organized the complete folder structure.
+[✅] Installed and configured all required libraries and dependencies for the project setup.
+[✅] Set up global.css with the design system, including colors, fonts, glassmorphism effects, and grid utilities.
+[✅] Built reusable base UI components such as Buttons, Cards, Badges, Inputs, and Glass Panels.
+[✅] Developed core layouts and navigation components, including Navbar, Footer, Section Wrappers, and SEO metadata/Open Graph setup in the root layout.
+[✅] Structured the main application pages, including Home, Discovery, Services, Pricing, Case Studies, and Contact.
+[✅] Configured environment variables, site information, utility functions, and project-wide configuration files.
+
+15-Jun-2026
+
+[✅] Completed all 11 homepage sections (Hero to Final CTA), finalizing the Phase 1 homepage structure.
+[✅] Replaced generic section badges with clear, descriptive section labels for improved content hierarchy.
+[✅] Built the Final CTA section with four conversion paths: Discovery, Contact, Strategy Call, and Manual Onboarding.
+[✅] Resolved dashboard Live Activity hydration issues using SSR-safe timestamps and client-side updates.
+[✅] Integrated shadcn/ui and Aceternity World Map into the Trust & Global Positioning section.
+[✅] Implemented an animated world map showcasing global connections across the USA, UK, Europe, Middle East, and Australia.
+[✅] Fixed AI Service Ecosystem graph alignment by synchronizing node positions and connection lines.
+[✅] Optimized the Service Ecosystem layout with a larger graph area and structured automation details section.
+[✅] Restored and enhanced the custom Button component, including link support and multiple variant styles.
+
+16-Jun-2026
+[✅] Enhanced Home Page UI/UX for a more polished and user-friendly experience.
+[✅] Made all Home Page sections fully responsive across desktop, tablet, and mobile devices.
+[✅] Prepared production-ready code, deployed the latest updates, and pushed changes live on Vercel.
+[✅] Improved the NxTechNova Landing Page UI for better visual appeal and user engagement.
+[✅] Uploaded high-quality logos to ensure clear visibility and professional branding across the landing page.
+[✅] Refined the Landing Page to focus exclusively on Website Development services by removing unrelated content and updating all service-related messaging.
+
+
+17-Jun-2026
+[✅] Developed the AI Discovery page.
+[✅] Developed the Services page.
+[✅] Updated the NxTechNova landing page URL to '/web-landingpage'.
+
+
+
+18-Jun-2026
+[✅] Worked on the Nxtechnova Web Landing Page.
+[✅] Converted the TechTivAI Landing Page from HTML to React.js.
+[✅] Improved the AI Discovery and Services pages with UI/UX enhancements and content updates.
+
+19-Jun-2026
+[✅] Enhanced and refined the TechTivAI landing page UI/UX and content presentation.
+[✅] Designed and developed the Industry page.
+[✅] Created detailed sub-industry pages with dedicated content and structure.
+
+24-Jun-2026
+[✅] Replaced the homepage with the new landing page and moved the previous version to /old-home.
+[✅] Rebranded the site with a new color system, dark/light themes, and theme persistence.
+[✅] Restructured layouts with shared Navbar and Footer, and removed duplicate landing page components.
+[✅] Updated Navbar and Footer to align with the new brand identity.
+[✅] Improved light-theme contrast and standardized semantic styling tokens.
+[✅] Added a custom mouse cursor across all public pages (desktop only).
+[✅] Built the complete /pricing page with plans, calculator, comparison table, FAQ, and CTAs.
+[✅] Added the Google Ads script globally across all NxTechnova pages.
+
+25-Jun-2026
+[✅] Built the complete /case-studies page with social proof stats, interactive client stories, implementation timelines, workflow diagrams, testimonials, and CTA.
+[✅] Created case-studies page data layer (lib/case-studies-page-data.ts) and page view following Services/Pricing patterns.
+[✅] Built the complete /contact page (Contact & Consultation) with AI onboarding path, voice AI consultation, calendar scheduling, manual proposal form, FAQ, and CTA.
+[✅] Created contact page components: contact form, booking scheduler, and contact-page-data.
+[✅] Set up PostgreSQL + Prisma 7 with Better Auth schema (User, Session, Account, Verification) and Lead model for dashboard data.
+[✅] Configured Better Auth with email/password, username login, Google OAuth, and app/api/auth/[...all] route handler.
+[✅] Built interactive /login page — two-column layout, Sign in / Create account tabs, Google OAuth button, and branded form cards.
+[✅] Protected /dashboard with proxy.ts (Next.js 16 route guard) and server-side requireSession() in dashboard layout.
+[✅] Built protected admin dashboard shell with user session display, sign out, live lead count, and command center demo.
+[✅] Pushed Prisma schema to local PostgreSQL and added db scripts (generate, migrate, push, studio). 
+
+
+29-Jun-2026
+[✅] Set up the production database, completed migrations, and resolved production database issues.
+[✅] Connected the live production database to the backend server.
+[✅] Configured the live production environment and verified website-to-database connectivity.
+[✅] Configured Google OAuth for the live production website.
+[✅] Resolved NxtFlight production runtime issues and restored the application.
+[✅] Configured and validated production environment variables for Vercel, backend server, and database connectivity.
+
+30-Jun-2026
+[✅] Completed Phase 2 data pipe — POST /api/leads (Zod validation), GET /api/leads (admin-only), PATCH /api/leads/[id] (status updates).
+[✅] Extended Prisma Lead model with discoveryAnswers and metadata JSON fields; pushed schema to local PostgreSQL.
+[✅] Added lib/leads.ts (schemas, source/status labels), lib/leads-client.ts (submitLead helper), lib/leads-api.ts (admin API guard).
+[✅] Wired contact form → POST /api/leads (source: contact_form) with budget stored in metadata.
+[✅] Wired booking scheduler → POST /api/leads (source: booking) with date/time/timezone in metadata.
+[✅] Wired discovery wizard results → lead capture form (name + email) saves source: discovery with answers + ROI metadata.
+[✅] Replaced /admin/leads placeholder with real leads table — status counts, inline status dropdown, expandable details (message, discovery JSON, metadata).
+[✅] Updated admin overview — total leads + new leads counts; removed Phase 2 placeholder panel.
+[✅] Installed zod; verified production build passes.
+
+
+1-July-2026
+[✅] Created admin/leads page with proper stats updates and submit reports/notes.
+[✅] Created Notifications system for admin panel.
+[✅] Integrated Calendly API in contact page.
+[✅] Created API endpoints for Calendly.
+[✅] Created APIs for Notifications system.
+[✅] Tested all the endpoints and UI tasks.
+
+2-July-2026
+[✅] Rebuilt admin layout — reusable AdminSidebar in layout, AdminHeader, shared AdminShell (sidebar + header + main).
+[✅] Added admin nav config (lib/admin-nav.ts) with new-leads badge on Leads item.
+[✅] Rebuilt /admin/leads UI — master–detail layout, search/filters, readable discovery + metadata (no raw JSON).
+[✅] Simplified leads admin to status + internal notes + delete only.
+[✅] Added Lead.notes field to Prisma; PATCH /api/leads/[id] accepts status and/or notes; DELETE for remove.
+[✅] Improved admin overview — recent leads feed, pipeline snapshot, stat cards linking to leads.
+[✅] Built GET /api/admin/notifications — bell dropdown, 3-min poll + refresh on tab focus.
+[✅] Fixed notification count mismatch — bell, sidebar, and overview use same NEW-leads count (removed localStorage unread logic).
+[✅] Created GET /api/booking/availability and POST /api/booking (Calendly invitee + lead save).
+[✅] Added lib/calendly.ts — resolves scheduling URL to API event type URI via PAT token.
+[✅] Booking saves meeting link, reschedule URL, cancel URL, and Calendly URIs in lead metadata for admin.
+[✅] Fixed duplicate React keys in demo time slots; fixed Calendly 400/404 when env used scheduling link instead of API URI.
+[✅] Added .env.example Calendly vars (CALENDLY_API_TOKEN, CALENDLY_EVENT_TYPE_URI, CALENDLY_TIMEZONE).
+[✅] Hit Calendly Scheduling API limit — POST /invitees returns 403 (paid plan only); availability read worked on free tier.
+[✅] Removed headless Calendly booking, Google Calendar fallback, and custom booking scheduler.
+[✅] Simplified /contact scheduling to Calendly inline iframe embed (NEXT_PUBLIC_CALENDLY_URL only).
+[✅] Removed /api/booking routes, lib/calendly.ts, lib/booking*, googleapis, and related env vars from .env.example.
+[✅] Fixed Calendly embed height in React — initInlineWidget, resize, fixed 700px container + global iframe CSS.
+[✅] Skipped saving Calendly iframe bookings to admin DB (would need paid webhooks; bookings stay in Calendly dashboard).
+[✅] Verified lead status + notes persist on /admin/leads after refresh.
+[✅] Verified notification bell and sidebar show the same count when new leads arrive.
+[✅] Verify Calendly iframe loads full calendar on /contact.
+[✅] Confirm booking completes in Calendly widget and invite email is received.
+[✅] Fixed production build failure — /admin/leads prerender crashed on missing lead.notes column.
+[✅] Added Prisma migration add_lead_notes; build script now runs prisma migrate deploy before next build.
+[✅] Set admin + user layouts to force-dynamic — fixed headers() static prerender / auth session warnings at build time.
+[✅] Fixed discovery + contact form POST /api/leads 500s — migration added missing lead.discoveryAnswers and lead.metadata on Neon.
+[✅] Pushed updated code and database migrations to production; verified deploy and lead submissions work.
+
+
+06-July-2026
+[✅] Researched AI tools and LLM models for TechTiv automation workflows and integrations.
+[✅] Set up the TechTiv backend foundation for integrating LLM models and AI tools.
+
+07-July-2026
+[✅] Built the backend foundation for TechTiv AI, establishing the core architecture and project structure.
+[✅] Researched LangProcess workers and designed a structured database architecture accessible by both the backend worker and web applications.
+[✅] Documented and finalized the AI tools and LLMs to be integrated into the system's automation workflows.
+
+08-July-2026
+[✅] Added shared env contracts to web/.env.example and backend/.env.example (Redis, providers, R2).
+[✅] Scaffolded backend/ worker service (Node + TypeScript + BullMQ + Prisma + health checks).
+[✅] Verified Redis connectivity, DB connection, Prisma generate, and BullMQ job consume test.
+[✅] Extended Prisma schema with pipeline models: AnalyzedDomain, Analysis, RawSignal, Proposal, ProviderConfig, ToolUsageLog.
+[✅] Ran migration add_analysis_pipeline_models on Neon; seeded 7 ProviderConfig rows (all disabled).
+[✅] Synced schema to backend/ and added verify-phase1-schema.ts script.
+[✅] Built shared callProvider() wrapper (budget/enabled checks + ToolUsageLog) in web and backend.
+[✅] Added provider error classes and unit tests (8/8 passed in backend).
+[✅] Built lib/analysis (normalize-domain, dedup, rate-limit, queue, submit) and POST /api/analysis enqueue route.
+[✅] Added GET /api/analysis/[id] status route; wired BullMQ enqueue to analysis-jobs queue.
+[✅] Verified queued submission, in-progress dedup, rate limiting, and DB row creation (npm test + test:analysis).
+
+
+09-July-2026
+[✅] Phase 4 — Built worker pipeline orchestrator with status transitions (QUEUED → CRAWLING → … → DONE).
+[✅] Phase 4 — Added stub pipeline steps: crawl, audit, competitors, synthesize, pricing, narrative, pdf.
+[✅] Phase 4 — Wired worker to runPipeline(); on DONE updates AnalyzedDomain; on FAILED releases domain lock.
+[✅] Phase 4 — Verified success + failure paths (npm run test:pipeline).
+
+
+
+10-July-2026
+[✅] Created three new repositories under the @nxtechnova-dev GitHub organization and documented them for client presentations.
+[✅] Attended a meeting with Sir Latef to discuss the mobile application development plan and requirements.
+[✅] Researched the Lumina Visuals mobile app, including the recommended technology stack, development approach, and estimated project timeline.
+[✅] Phase 5 — Implemented real provider modules: Firecrawl, PageSpeed, DetectZeStack, Tavily, SerpAPI (all via callProvider).
+[✅] Phase 5 — Wired crawl, audit, and competitors pipeline steps to real providers; stubs via PIPELINE_USE_STUBS for local tests.
+[✅] Phase 5 — Added npm run test:providers isolation script and provider unit tests (11/11 passed).
+[✅] Replaced Wappalyzer with DetectZeStack for tech stack detection (free tier, X-API-Key auth).
+[✅] Tested complete workflows with real api keys (Firecrawl, PageSpeed, DetectZeStack, Tavily, SerpAPI)
+
+13-July-2026
+[✅] Phase 6 — Built Claude synthesis with strict Zod schema (businessSummary, painPoints, automation, stack, industry, team size).
+[✅] Phase 6 — Added claude provider via callProvider with token/cost logging and JSON parse retry.
+[✅] Phase 6 — Persist synthesis to Proposal.strategyJson, techStack, automationBlueprint + synthesis RawSignal.
+[✅] Phase 6 — Unit tests (17/17 passed); npm run test:phase6 isolation script added.
+[✅] Phase 7 — Built deterministic pricing engine (tiers, modifiers, industry multipliers, timeline weeks).
+[✅] Phase 7 — Wired price pipeline step; persists costEstimateUSD + timelineWeeks to Proposal.
+[✅] Phase 7 — Unit tests (25/25 passed); npm run test:phase7 isolation script added.
+
+14-July-2026
+[✅] Phase 8 — Resend analysis-ready + magic-link templates; Better Auth magicLink plugin + login UI.
+[✅] Phase 8 — Lead↔User email linking; POST /api/internal/analysis-ready; worker notify after DONE.
+[✅] Phase 8 — EMAIL_DRY_RUN support; npm run test:phase8 isolation script added.
+[✅] Phase 9 — Public /analyze guest flow with live progress + email-when-done message.
+[✅] Phase 9 — Dashboard analyses/proposals from DB; PDF download via /api/analysis/[id]/pdf.
+[✅] Phase 9 — Narrative + pdf pipeline steps persist narrativeText and pdfUrl.
+
+15-July-2026
+[✅] Phase 10 — Admin command center: upgraded /admin overview with users, analyses, proposals, provider spend/failures, avg pipeline time.
+[✅] Phase 10 — /admin/analyses list + detail (lead, proposal, raw signals, tool usage logs, retry failed).
+[✅] Phase 10 — /admin/providers monitoring (enable/disable, budget, reset spend).
+[✅] Phase 10 — AdminEventLog schema + audit on retry/provider updates; APIs POST /api/admin/analyses/[id]/retry, PATCH /api/admin/providers/[provider].
+Details
+Upgraded /admin overview
+Users, leads, analyses, in-flight/failed counts, completed proposals
+Provider spend and failure summary
+Average pipeline completion time
+Recent failed analyses with quick links
+Lead pipeline snapshot (kept from before)
+/admin/analyses
+Searchable list with status filters
+Retry button for failed analyses
+Detail page with lead, proposal, tool usage logs, and raw signals
+/admin/providers
+Per-provider spend, budget %, calls, failures, latency
+Enable/disable, set monthly budget, reset spend
+All changes logged to AdminEventLog
+APIs
+POST /api/admin/analyses/[id]/retry — re-enqueues failed analyses
+PATCH /api/admin/providers/[provider] — update provider config
+Schema
+AdminEventLog table for audit trail (migration applied)
+Nav
+Added Analyses and Providers to the admin sidebar
+============15-july-2026==================
+
+
+16-July-2026
+[✅] Intelligence upgrade Wave 1 — Rich /analyze intake, deferred email, live activity stream, teaser vs login gate.
+[✅] Fixed worker Prisma sync — backend output path must stay ../src/generated/prisma; added scripts/sync-prisma-schema.sh.
+[✅] Retested nxtflight.com end-to-end Wave 1: crawl→…→pdf DONE (20 activities).
+[✅] Intelligence upgrade Wave 2 — DISCOVERING step (social/CEO enrichment), GEO/AEO/SEO visibility signals, expanded synthesis (quick wins, phases, social/trust), richer narrative/PDF/teaser; soft-fail PageSpeed; Claude prompt compaction + JSON repair.
+[✅] Added Failure human-readable messages with proper reasons and try again button
+
+
+
