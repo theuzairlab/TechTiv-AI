@@ -29,8 +29,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const stored = getStoredTheme();
     const initial = stored ?? "dark";
-    setThemeState(initial);
     applyTheme(initial);
+    const syncTheme = window.setTimeout(() => setThemeState(initial), 0);
+    return () => window.clearTimeout(syncTheme);
   }, []);
 
   const setTheme = useCallback((next: Theme) => {

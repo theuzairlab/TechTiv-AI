@@ -2,7 +2,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   Calendar,
   FileText,
-  MessageSquare,
   Mic,
   Sparkles,
 } from "lucide-react";

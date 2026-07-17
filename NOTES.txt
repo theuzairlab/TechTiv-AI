@@ -230,5 +230,3 @@ Added Analyses and Providers to the admin sidebar
 [✅] Intelligence upgrade Wave 2 — DISCOVERING step (social/CEO enrichment), GEO/AEO/SEO visibility signals, expanded synthesis (quick wins, phases, social/trust), richer narrative/PDF/teaser; soft-fail PageSpeed; Claude prompt compaction + JSON repair.
 [✅] Added Failure human-readable messages with proper reasons and try again button
 
-
-

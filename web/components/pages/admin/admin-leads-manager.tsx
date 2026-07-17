@@ -102,14 +102,18 @@ export function AdminLeadsManager({
   }, []);
 
   useEffect(() => {
-    const leadId = searchParams.get("lead");
-    const statusParam = searchParams.get("status");
-    if (statusParam && LEAD_STATUSES.includes(statusParam as LeadStatus)) {
-      setStatusFilter(statusParam as LeadStatus);
-    }
-    if (!leadId) return;
-    const lead = leads.find((item) => item.id === leadId);
-    if (lead) openLead(lead);
+    const syncFromUrl = window.setTimeout(() => {
+      const leadId = searchParams.get("lead");
+      const statusParam = searchParams.get("status");
+      if (statusParam && LEAD_STATUSES.includes(statusParam as LeadStatus)) {
+        setStatusFilter(statusParam as LeadStatus);
+      }
+      if (!leadId) return;
+      const lead = leads.find((item) => item.id === leadId);
+      if (lead) openLead(lead);
+    }, 0);
+
+    return () => window.clearTimeout(syncFromUrl);
   }, [searchParams, leads, openLead]);
 
   const hasChanges =

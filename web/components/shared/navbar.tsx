@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { navLinks, siteConfig } from "@/lib/site";
+import { navLinks } from "@/lib/site";
 import { MobileMenu } from "@/components/shared/mobile-menu";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { cn } from "@/lib/utils";

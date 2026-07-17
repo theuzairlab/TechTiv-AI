@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import type { Session } from "@/lib/auth";
 import { AdminHeader } from "@/components/dashboard/admin-header";
 import { AdminSidebar } from "@/components/dashboard/admin-sidebar";
@@ -18,10 +18,6 @@ export function AdminShell({
 }: AdminShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [newLeadsCount, setNewLeadsCount] = useState(initialNewLeadsCount);
-
-  useEffect(() => {
-    setNewLeadsCount(initialNewLeadsCount);
-  }, [initialNewLeadsCount]);
 
   const handleCountChange = useCallback((count: number) => {
     setNewLeadsCount(count);

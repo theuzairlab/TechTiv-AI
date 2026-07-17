@@ -50,13 +50,16 @@ export function AdminNotifications({
   }, [onCountChange]);
 
   useEffect(() => {
-    fetchNotifications();
+    const initialFetch = window.setTimeout(() => {
+      void fetchNotifications();
+    }, 0);
 
     const interval = window.setInterval(fetchNotifications, POLL_INTERVAL_MS);
-    const onFocus = () => fetchNotifications();
+    const onFocus = () => void fetchNotifications();
     window.addEventListener("focus", onFocus);
 
     return () => {
+      window.clearTimeout(initialFetch);
       window.clearInterval(interval);
       window.removeEventListener("focus", onFocus);
     };
