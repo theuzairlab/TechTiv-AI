@@ -230,3 +230,19 @@ Added Analyses and Providers to the admin sidebar
 [✅] Intelligence upgrade Wave 2 — DISCOVERING step (social/CEO enrichment), GEO/AEO/SEO visibility signals, expanded synthesis (quick wins, phases, social/trust), richer narrative/PDF/teaser; soft-fail PageSpeed; Claude prompt compaction + JSON repair.
 [✅] Added Failure human-readable messages with proper reasons and try again button
 
+
+17-July-2026
+[✅] Agentic Analysis — Replaced the static intake wizard with a single-column Claude consultation transcript supporting text, radio-style single choice, and checkbox-style multi-choice questions.
+[✅] Live Intelligence Console — Added SSE activity streaming with search, thinking, insight, warning, status, retry, and deferred email-capture states.
+[✅] Analysis run isolation — Added AnalysisRun and linked activities, raw signals, evidence, and provider usage to the current run for safe retries and auditing.
+[✅] Evidence collection — Added bounded multi-page Firecrawl crawling, social/leadership discovery, competitor verification, GEO/AEO signals, technical audits, and normalized AnalysisEvidence records.
+[✅] Report V2 — Added coverage gates, evidence-cited Claude synthesis, grounding validation, confidence/unknowns, deterministic fallback reporting, and malformed/truncated JSON recovery.
+[✅] Pricing and ROI V2 — Added normalized scope-based deterministic pricing and conservative/base/upside ROI scenarios when sufficient business inputs are available.
+[✅] Report experience — Rebuilt the teaser, authenticated dashboard report, evidence appendix, and branded PDF around the shared Report V2 structure.
+[✅] Quality verification — Added Report V2 tests, business fixtures, and a complete stubbed agentic pipeline verification with retry-isolation checks.
+[✅] Email reliability — Moved the analysis-ready notification before final completion, allowed notification during GENERATING_PDF, and added success/failure activity logging.
+[✅] Worker deployment — Added /health and authenticated /wake endpoints so Vercel can wake the Render worker before queue processing.
+[✅] Hosted Redis — Enforced TLS/rediss for Upstash in both the web queue and Render worker, with retry and connection diagnostics.
+[✅] Deployment setup — Added monorepo README and Git ignore rules; documented Vercel web root/framework and Render worker configuration.
+[✅] Provider setup — Upserted and enabled Claude, Firecrawl, PageSpeed, DetectZeStack, Tavily, SerpAPI, and Resend in the live database.
+[✅] Verification — Web lint and all 11 web tests passed after the final provider configuration update.

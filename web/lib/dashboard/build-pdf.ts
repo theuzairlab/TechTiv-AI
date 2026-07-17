@@ -1,8 +1,26 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { AnalysisDetail } from "@/lib/dashboard/analyses";
 
+function pdfSafe(text: string): string {
+  return text
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/\u2026/g, "...")
+    .replace(/\u2022/g, "-")
+    .replace(/\u2192/g, "->")
+    .replace(/\u00A0/g, " ")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\x20-\x7E]/g, "");
+}
+
 function wrap(text: string, width = 88): string[] {
-  const words = text.replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
+  const words = pdfSafe(text)
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean);
   const lines: string[] = [];
   let line = "";
   for (const word of words) {
@@ -42,7 +60,7 @@ export async function buildProposalPdf(
   ) => {
     const size = options.size ?? 10;
     ensure(size + 7);
-    page.drawText(text, {
+    page.drawText(pdfSafe(text), {
       x: 48 + (options.indent ?? 0),
       y,
       size,
