@@ -14,6 +14,17 @@ export type SocialLinks = {
   youtube?: string;
 };
 
+export type SiteBrief = {
+  summary: string;
+  industry: string;
+  offerings: string[];
+  targetAudience: string;
+  notableTools: string[];
+  socialFindings: Record<string, string>;
+  sourcesUsed: string[];
+  generatedAt: string;
+};
+
 export type BusinessIntake = {
   companyName?: string;
   industry?: string;
@@ -23,6 +34,7 @@ export type BusinessIntake = {
   revenueRange?: string;
   additionalNotes?: string;
   socialLinks?: SocialLinks;
+  siteBrief?: SiteBrief;
 };
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -42,6 +54,34 @@ function asStringArray(value: unknown): string[] | undefined {
     .map((item) => (typeof item === "string" ? item.trim() : ""))
     .filter(Boolean);
   return items.length > 0 ? items : undefined;
+}
+
+function asStringRecord(value: unknown): Record<string, string> {
+  const root = asRecord(value);
+  if (!root) return {};
+  const result: Record<string, string> = {};
+  for (const [key, val] of Object.entries(root)) {
+    if (typeof val === "string" && val.trim()) result[key] = val.trim();
+  }
+  return result;
+}
+
+function asSiteBrief(value: unknown): SiteBrief | undefined {
+  const root = asRecord(value);
+  if (!root) return undefined;
+  const summary = asString(root.summary);
+  const industry = asString(root.industry);
+  if (!summary || !industry) return undefined;
+  return {
+    summary,
+    industry,
+    offerings: asStringArray(root.offerings) ?? [],
+    targetAudience: asString(root.targetAudience) ?? "",
+    notableTools: asStringArray(root.notableTools) ?? [],
+    socialFindings: asStringRecord(root.socialFindings),
+    sourcesUsed: asStringArray(root.sourcesUsed) ?? [],
+    generatedAt: asString(root.generatedAt) ?? new Date().toISOString(),
+  };
 }
 
 export function parseBusinessIntake(value: unknown): BusinessIntake | null {
@@ -76,6 +116,7 @@ export function parseBusinessIntake(value: unknown): BusinessIntake | null {
           youtube: asString(socialLinks.youtube),
         }
       : undefined,
+    siteBrief: asSiteBrief(root.siteBrief),
   };
 }
 

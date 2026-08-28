@@ -45,8 +45,8 @@ const STUB_SYNTHESIS: SynthesisResult = {
     { layer: "CRM", recommendation: "HubSpot", reason: "Central workflow record", evidenceRefs: [REF] },
   ],
   roadmap: [
-    { phase: "Foundation", objective: "Instrument the funnel", deliverables: ["CRM lifecycle", "Measurement baseline"], dependencies: [] },
-    { phase: "Automation", objective: "Automate lead response", deliverables: ["Routing", "Follow-up"], dependencies: ["Foundation"] },
+    { phase: "Foundation", objective: "Instrument the funnel", deliverables: ["CRM lifecycle", "Measurement baseline"], dependencies: [], estimatedWeeks: 2 },
+    { phase: "Automation", objective: "Automate lead response", deliverables: ["Routing", "Follow-up"], dependencies: ["Foundation"], estimatedWeeks: 3 },
   ],
   risks: ["Poor CRM data quality"],
   assumptions: ["Team can assign a workflow owner"],

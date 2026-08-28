@@ -27,7 +27,8 @@ async function json<T>(response: Response): Promise<T> {
 
 export async function startConsultation(input: {
   companyName: string;
-  footprint: string;
+  links: string;
+  additionalInfo?: string;
 }): Promise<{ analysisId: string; guestAccessToken: string }> {
   return json(
     await fetch("/api/consultation/start", {

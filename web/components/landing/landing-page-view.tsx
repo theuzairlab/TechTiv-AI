@@ -35,6 +35,7 @@ function serviceCardClass(span?: 1 | 2 | 3) {
 export function LandingPageView() {
   return (
     <>
+    {/* hero */}
       <section className="relative z-[1] grid min-h-[calc(100vh-68px)] place-items-center overflow-hidden px-[5%] pt-12 pb-20 max-md:px-[4%] max-md:pt-10 max-md:pb-[60px]">
         <div className="pointer-events-none absolute -top-[200px] -left-[200px] size-[700px] rounded-full bg-accent-cyan/[0.12] blur-[120px]" />
         <div className="pointer-events-none absolute -right-[100px] -bottom-[100px] size-[500px] rounded-full bg-[var(--hero-glow-accent)] blur-[120px]" />
@@ -106,6 +107,7 @@ export function LandingPageView() {
         </div>
       </section>
 
+      {/* ticker animations */}
       <div className="relative z-[1] overflow-hidden border-y border-border-subtle bg-bg-secondary py-3.5 [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]">
         <div className="flex w-max animate-ticker gap-12">
           {[...tickerItems, ...tickerItems].map((item, index) => (
@@ -120,151 +122,38 @@ export function LandingPageView() {
         </div>
       </div>
 
-      <section id="services" className={cn(sectionClass, "bg-bg-secondary")}>
+      {/* workflow automation */}
+      <LandingWorkflowSection />
+
+      {/* technology */}
+      <section id="stack" className={cn(sectionClass, "bg-bg-secondary")}>
         <div className="scroll-reveal mb-[70px]">
           <div className="s-label">
-            — Full Spectrum AI Services
+            — Technology
           </div>
           <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
-            Every AI Service
+            The Most Advanced
             <br />
-            Your Business Needs
+            AI Stack Available
           </h2>
-          <p className="max-w-[520px] text-base leading-[1.75] text-text-muted">
-            30+ enterprise-grade AI services across automation, agents, models,
-            data, and growth — all under one roof.
-          </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-6 overflow-hidden max-lg:grid-cols-2 max-md:grid-cols-1">
-          {landingServices.map((service) => (
+        <div className="mt-14 grid grid-cols-5 gap-3 max-lg:grid-cols-4 max-md:grid-cols-3">
+          {landingStack.map(([Icon, name, cat]) => (
             <div
-              key={service.num}
-              className={`${serviceCardClass(service.span)} rounded-surface-xl border border-border-subtle hover:border-border-highlight`}
-              style={
-                {
-                  "--svc-c1": service.c1,
-                  "--svc-c2": service.c2,
-                } as React.CSSProperties
-              }
+              key={name}
+              className="scroll-reveal cursor-default rounded-surface-md border border-border-subtle bg-surface-card px-4 py-[18px] text-center transition-all duration-200 hover:scale-[1.03] hover:border-border-highlight hover:bg-surface-elevated"
+              data-cursor-target
             >
-              <div className="svc-num mb-[22px]">
-                {service.num}
-              </div>
-              <div
-                className="svc-icon-wrap mb-[22px] flex size-[54px] items-center justify-center rounded-surface-sm text-brand-cyan transition-transform duration-300 group-hover:scale-[1.08] group-hover:-rotate-3 group-hover:border-accent-lime"
-              >
-                <AnimatedIcon icon={service.icon} size={26} className="text-brand-cyan" />
-              </div>
-              <div className="mb-2.5 font-display text-[1.15rem] font-semibold tracking-[-0.3px] text-text-primary">
-                {service.title}
-              </div>
-              <div className="mb-6 text-[0.875rem] leading-[1.7] text-text-muted">
-                {service.description}
-              </div>
-              <div className="flex flex-wrap gap-[7px]">
-                {service.pills.map((pill) => (
-                  <span key={pill} className="pill">
-                    {pill}
-                  </span>
-                ))}
-              </div>
+              <AnimatedIcon icon={Icon} size={24} className="mx-auto mb-2 text-brand-cyan" />
+              <div className="text-[0.78rem] font-semibold text-text-body">{name}</div>
+              <div className="mt-[3px] text-[0.65rem] text-text-muted">{cat}</div>
             </div>
           ))}
         </div>
       </section>
 
-      <section id="agents" className={cn(sectionClass, "bg-bg-secondary")}>
-        <div className="scroll-reveal mb-[70px]">
-          <div className="s-label">
-            — Autonomous AI Agents
-          </div>
-          <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
-            Meet Your
-            <br />
-            AI Workforce
-          </h2>
-          <p className="max-w-[520px] text-base leading-[1.75] text-text-muted">
-            Pre-built and custom autonomous agents ready to work across your
-            entire business stack — 24/7, no breaks.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-[1.4fr_1fr] gap-6 max-md:grid-cols-1">
-          <div className="scroll-reveal relative overflow-hidden rounded-surface-xl border border-border-subtle bg-surface-card p-12 max-md:p-10">
-            <div className="s-label">
-              — Featured Agent Platform
-            </div>
-            <h3 className="mb-3.5 font-display text-[1.8rem] leading-tight font-bold tracking-[-0.8px] text-text-primary">
-              AgentForce
-              <br />
-              <span className="text-brand-cyan">Enterprise Suite</span>
-            </h3>
-            <p className="mb-8 text-[0.9rem] leading-[1.7] text-text-muted">
-              Deploy a coordinated fleet of specialized AI agents that plan,
-              reason, use tools, and execute multi-step workflows autonomously.
-              Built on LangGraph + CrewAI with full observability.
-            </p>
-
-            <div className="mb-8 grid grid-cols-2 gap-3.5">
-              {landingAgentForceCards.map((card) => (
-                <div
-                  key={card.title}
-                  className="rounded-surface-md border border-border-subtle bg-surface-elevated p-[18px]"
-                >
-                  <AnimatedIcon
-                    icon={card.icon}
-                    size={22}
-                    className="mb-2 text-brand-cyan"
-                  />
-                  <div className="mb-1 text-[0.82rem] font-bold text-text-primary">{card.title}</div>
-                  <div className="text-xs text-text-muted">{card.desc}</div>
-                </div>
-              ))}
-            </div>
-
-            <a
-              href="#contact"
-              className="btn-lime inline-flex items-center gap-2 rounded-[10px] px-[30px] py-[15px] text-[0.9rem] no-underline"
-              data-cursor-target
-            >
-              Deploy Your Agent Fleet →
-            </a>
-          </div>
-
-          <div className="scroll-reveal flex flex-col gap-4">
-            {landingAgents.map((agent) => (
-              <div
-                key={agent.name}
-                className="flex cursor-default items-center gap-4 rounded-surface-md border border-border-subtle bg-surface-elevated px-6 py-5 transition-[border-color,transform] duration-300 hover:translate-x-1 hover:border-border-highlight"
-                data-cursor-target
-              >
-                <div
-                  className="flex size-[42px] shrink-0 items-center justify-center rounded-[10px] text-brand-cyan"
-                  style={{ background: agent.bg }}
-                >
-                  <AnimatedIcon icon={agent.icon} size={20} />
-                </div>
-                <div className="flex-1">
-                  <div className="text-[0.88rem] font-bold text-text-primary">{agent.name}</div>
-                  <div className="mt-0.5 text-[0.78rem] text-text-muted">{agent.role}</div>
-                </div>
-                <span
-                  className={cn(
-                    "rounded px-[9px] py-[3px] text-[0.68rem] font-semibold tracking-[1px]",
-                    agent.status === "LIVE" ? "status-live" : "status-beta",
-                  )}
-                >
-                  {agent.status}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <LandingWorkflowSection />
-
+      {/* data science & ai */}
       <section id="data" className={cn(sectionClass, "bg-bg-secondary")}>
         <div className="scroll-reveal mb-[70px]">
           <div className="s-label">
@@ -401,6 +290,152 @@ export function LandingPageView() {
         </div>
       </section>
 
+      {/* full spectrum ai services */}
+      <section id="services" className={cn(sectionClass, "bg-bg-secondary")}>
+        <div className="scroll-reveal mb-[70px]">
+          <div className="s-label">
+            — Full Spectrum AI Services
+          </div>
+          <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
+            Every AI Service
+            <br />
+            Your Business Needs
+          </h2>
+          <p className="max-w-[520px] text-base leading-[1.75] text-text-muted">
+            30+ enterprise-grade AI services across automation, agents, models,
+            data, and growth — all under one roof.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-6 overflow-hidden max-lg:grid-cols-2 max-md:grid-cols-1">
+          {landingServices.map((service) => (
+            <div
+              key={service.num}
+              className={`${serviceCardClass(service.span)} rounded-surface-xl border border-border-subtle hover:border-border-highlight`}
+              style={
+                {
+                  "--svc-c1": service.c1,
+                  "--svc-c2": service.c2,
+                } as React.CSSProperties
+              }
+            >
+              <div className="svc-num mb-[22px]">
+                {service.num}
+              </div>
+              <div
+                className="svc-icon-wrap mb-[22px] flex size-[54px] items-center justify-center rounded-surface-sm text-brand-cyan transition-transform duration-300 group-hover:scale-[1.08] group-hover:-rotate-3 group-hover:border-accent-lime"
+              >
+                <AnimatedIcon icon={service.icon} size={26} className="text-brand-cyan" />
+              </div>
+              <div className="mb-2.5 font-display text-[1.15rem] font-semibold tracking-[-0.3px] text-text-primary">
+                {service.title}
+              </div>
+              <div className="mb-6 text-[0.875rem] leading-[1.7] text-text-muted">
+                {service.description}
+              </div>
+              <div className="flex flex-wrap gap-[7px]">
+                {service.pills.map((pill) => (
+                  <span key={pill} className="pill">
+                    {pill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* autonomous ai agents */}
+      <section id="agents" className={cn(sectionClass, "bg-bg-secondary")}>
+        <div className="scroll-reveal mb-[70px]">
+          <div className="s-label">
+            — Autonomous AI Agents
+          </div>
+          <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
+            Meet Your
+            <br />
+            AI Workforce
+          </h2>
+          <p className="max-w-[520px] text-base leading-[1.75] text-text-muted">
+            Pre-built and custom autonomous agents ready to work across your
+            entire business stack — 24/7, no breaks.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-[1.4fr_1fr] gap-6 max-md:grid-cols-1">
+          <div className="scroll-reveal relative overflow-hidden rounded-surface-xl border border-border-subtle bg-surface-card p-12 max-md:p-10">
+            <div className="s-label">
+              — Featured Agent Platform
+            </div>
+            <h3 className="mb-3.5 font-display text-[1.8rem] leading-tight font-bold tracking-[-0.8px] text-text-primary">
+              AgentForce
+              <br />
+              <span className="text-brand-cyan">Enterprise Suite</span>
+            </h3>
+            <p className="mb-8 text-[0.9rem] leading-[1.7] text-text-muted">
+              Deploy a coordinated fleet of specialized AI agents that plan,
+              reason, use tools, and execute multi-step workflows autonomously.
+              Built on LangGraph + CrewAI with full observability.
+            </p>
+
+            <div className="mb-8 grid grid-cols-2 gap-3.5">
+              {landingAgentForceCards.map((card) => (
+                <div
+                  key={card.title}
+                  className="rounded-surface-md border border-border-subtle bg-surface-elevated p-[18px]"
+                >
+                  <AnimatedIcon
+                    icon={card.icon}
+                    size={22}
+                    className="mb-2 text-brand-cyan"
+                  />
+                  <div className="mb-1 text-[0.82rem] font-bold text-text-primary">{card.title}</div>
+                  <div className="text-xs text-text-muted">{card.desc}</div>
+                </div>
+              ))}
+            </div>
+
+            <a
+              href="#contact"
+              className="btn-lime inline-flex items-center gap-2 rounded-[10px] px-[30px] py-[15px] text-[0.9rem] no-underline"
+              data-cursor-target
+            >
+              Deploy Your Agent Fleet →
+            </a>
+          </div>
+
+          <div className="scroll-reveal flex flex-col gap-4">
+            {landingAgents.map((agent) => (
+              <div
+                key={agent.name}
+                className="flex cursor-default items-center gap-4 rounded-surface-md border border-border-subtle bg-surface-elevated px-6 py-5 transition-[border-color,transform] duration-300 hover:translate-x-1 hover:border-border-highlight"
+                data-cursor-target
+              >
+                <div
+                  className="flex size-[42px] shrink-0 items-center justify-center rounded-[10px] text-brand-cyan"
+                  style={{ background: agent.bg }}
+                >
+                  <AnimatedIcon icon={agent.icon} size={20} />
+                </div>
+                <div className="flex-1">
+                  <div className="text-[0.88rem] font-bold text-text-primary">{agent.name}</div>
+                  <div className="mt-0.5 text-[0.78rem] text-text-muted">{agent.role}</div>
+                </div>
+                <span
+                  className={cn(
+                    "rounded px-[9px] py-[3px] text-[0.68rem] font-semibold tracking-[1px]",
+                    agent.status === "LIVE" ? "status-live" : "status-beta",
+                  )}
+                >
+                  {agent.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* sales & marketing ai */}
       <section id="marketing" className={cn(sectionClass, "bg-bg-secondary")}>
         <div className="scroll-reveal mb-[70px]">
           <div className="s-label">
@@ -446,33 +481,40 @@ export function LandingPageView() {
         </div>
       </section>
 
-      <section id="stack" className={cn(sectionClass, "bg-bg-secondary")}>
+      {/* proven results */}
+      <section id="results" className={cn(sectionClass, "bg-bg-secondary")}>
         <div className="scroll-reveal mb-[70px]">
           <div className="s-label">
-            — Technology
+            — Proven Results
           </div>
           <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
-            The Most Advanced
+            Numbers That
             <br />
-            AI Stack Available
+            Speak for Themselves
           </h2>
         </div>
 
-        <div className="mt-14 grid grid-cols-5 gap-3 max-lg:grid-cols-4 max-md:grid-cols-3">
-          {landingStack.map(([Icon, name, cat]) => (
+        <div className="mt-14 grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-px overflow-hidden rounded-surface-xl border border-border-subtle">
+          {landingResults.map(([num, unit, label, sub], index, arr) => (
             <div
-              key={name}
-              className="scroll-reveal cursor-default rounded-surface-md border border-border-subtle bg-surface-card px-4 py-[18px] text-center transition-all duration-200 hover:scale-[1.03] hover:border-border-highlight hover:bg-surface-elevated"
-              data-cursor-target
+              key={label}
+              className={cn(
+                "scroll-reveal bg-surface-card px-9 py-11",
+                index < arr.length - 1 && "border-r border-border-subtle max-[250px]:border-r-0",
+              )}
             >
-              <AnimatedIcon icon={Icon} size={24} className="mx-auto mb-2 text-brand-cyan" />
-              <div className="text-[0.78rem] font-semibold text-text-body">{name}</div>
-              <div className="mt-[3px] text-[0.65rem] text-text-muted">{cat}</div>
+              <div className="mb-2 font-display text-[3.5rem] leading-none font-bold text-text-primary">
+                {num}
+                <span className="result-num-unit">{unit}</span>
+              </div>
+              <div className="mb-1.5 text-[0.88rem] font-semibold result-label-accent">{label}</div>
+              <div className="text-[0.78rem] leading-normal text-text-muted">{sub}</div>
             </div>
           ))}
         </div>
       </section>
 
+      {/* our process */}
       <section id="process" className={cn(sectionClass, "bg-bg-secondary")}>
         <div className="scroll-reveal mb-[70px]">
           <div className="s-label">
@@ -523,38 +565,7 @@ export function LandingPageView() {
         </div>
       </section>
 
-      <section id="results" className={cn(sectionClass, "bg-bg-secondary")}>
-        <div className="scroll-reveal mb-[70px]">
-          <div className="s-label">
-            — Proven Results
-          </div>
-          <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
-            Numbers That
-            <br />
-            Speak for Themselves
-          </h2>
-        </div>
-
-        <div className="mt-14 grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-px overflow-hidden rounded-surface-xl border border-border-subtle">
-          {landingResults.map(([num, unit, label, sub], index, arr) => (
-            <div
-              key={label}
-              className={cn(
-                "scroll-reveal bg-surface-card px-9 py-11",
-                index < arr.length - 1 && "border-r border-border-subtle max-[250px]:border-r-0",
-              )}
-            >
-              <div className="mb-2 font-display text-[3.5rem] leading-none font-bold text-text-primary">
-                {num}
-                <span className="result-num-unit">{unit}</span>
-              </div>
-              <div className="mb-1.5 text-[0.88rem] font-semibold result-label-accent">{label}</div>
-              <div className="text-[0.78rem] leading-normal text-text-muted">{sub}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
+      {/* pricing */}
       <section id="pricing" className={cn(sectionClass, "bg-bg-secondary")}>
         <div className="scroll-reveal mx-auto mb-[70px] max-w-[600px] text-center">
           <div className="s-label">
@@ -701,6 +712,7 @@ export function LandingPageView() {
         </div>
       </section>
 
+      {/* contact */}
       <section id="contact" className={cn(sectionClass, "bg-bg-secondary text-center")}>
         <div className="mx-auto max-w-[680px]">
           <div className="scroll-reveal text-center">

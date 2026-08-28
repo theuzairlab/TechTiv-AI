@@ -49,9 +49,14 @@ export async function createClaudeMessage(input: {
             system: input.system,
             messages: [{ role: "user", content: input.user }],
           }),
-          timeoutMs: 60_000,
-          retries: 0,
-          retryDelayMs: 1500,
+          // Large synthesis prompts (max_tokens 8192, full evidence bundle)
+          // can legitimately take 60-120s+ to complete a non-streamed
+          // response. The previous 60s timeout with zero retries meant any
+          // slow-but-healthy response was treated as a hard failure, which
+          // silently degraded reports to the deterministic fallback.
+          timeoutMs: 170_000,
+          retries: 1,
+          retryDelayMs: 3_000,
         },
       );
 

@@ -10,6 +10,7 @@ import { runDiscoverStep } from "./steps/discover.js";
 import { runNarrativeStep } from "./steps/narrative.js";
 import { runPdfStep } from "./steps/pdf.js";
 import { runPricingStep } from "./steps/price.js";
+import { runSocialStep } from "./steps/social.js";
 import { runSynthesizeStep } from "./steps/synthesize.js";
 import type { PipelineContext } from "./types.js";
 import {
@@ -46,6 +47,7 @@ type NamedStep = {
 const PIPELINE_STEPS: NamedStep[] = [
   { name: "crawl", run: runCrawlStep },
   { name: "discover", run: runDiscoverStep },
+  { name: "social", run: runSocialStep },
   { name: "audit", run: runAuditStep },
   { name: "competitors", run: runCompetitorsStep },
   { name: "synthesize", run: runSynthesizeStep },

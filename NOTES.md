@@ -246,3 +246,63 @@ Added Analyses and Providers to the admin sidebar
 [✅] Deployment setup — Added monorepo README and Git ignore rules; documented Vercel web root/framework and Render worker configuration.
 [✅] Provider setup — Upserted and enabled Claude, Firecrawl, PageSpeed, DetectZeStack, Tavily, SerpAPI, and Resend in the live database.
 [✅] Verification — Web lint and all 11 web tests passed after the final provider configuration update.
+[✅] Fix PDF report generation in production
+
+
+
+25-Aug-2026
+[✅] Diagnosed why /analyze asked ungrounded industry questions (e.g. drone questions for NxtFlight) — consultation asked before any website/social content was read, so Claude guessed from the business name alone.
+[✅] Added backend/src/consultation/site-brief.ts — mini-crawl (home + 2 priority pages) plus best-effort social profile scrape, summarized by Claude into a grounded siteBrief before the first consultation question.
+[✅] Rewired runConsultationTurn to use siteBrief context — Claude no longer asks what industry/business a company is in once siteBrief confirms it; questions now focus on real pain points, goals, tools, and team size.
+[✅] Added crawlDomainLite + exported scrapeUrl in firecrawl.ts for the pre-question mini-crawl and social profile fetches.
+[✅] Redesigned the /analyze intake form — merged website + multiple social profiles into one comma-separated "links" field, added optional "More information" field; added web/lib/analysis/links.ts parser.
+[✅] Added backend/src/pipeline/steps/social.ts — best-effort public read of each social profile (Firecrawl + Tavily mentions), honestly marking platforms that block unauthenticated scraping instead of inventing critique.
+[✅] Rebuilt the client-facing strategy report (dashboard + teaser + PDF) — removed evidence codes/appendix from client view, reframed as "Problems we found / Solutions we recommend / Timeline"; evidence kept internally for admin/QA.
+[✅] Added per-phase estimatedWeeks to the synthesis roadmap schema so the Timeline section shows real week ranges instead of a flat list.
+[✅] Root-caused why reports were falling back to a generic template — Claude synthesis calls used a 60s timeout with 0 retries, too short for the full evidence-bundle prompt; bumped to 170s + 1 retry.
+[✅] Rewrote buildFallbackSynthesis to pull real PageSpeed/tech-stack/consultation data instead of generic "core research sources were collected" placeholder text, for the rare case the fallback still triggers.
+[✅] Fixed a PDF text-overlap bug in build-pdf.ts — line() now wraps and measures every line itself instead of relying on pdf-lib's internal auto-wrap, which was desyncing the y-cursor between sections.
+[✅] Found and fixed a provider-budget bug — ProviderConfig.currentSpendUSD/monthlyBudgetUSD were Int columns with Math.ceil() rounding, so a $0.01 Tavily call charged a full $1 and exhausted a $40 budget in ~40 calls; migrated both columns to Float and removed the rounding in web + backend callProvider.
+[✅] Hardened markAnalysisDone — AnalyzedDomain update changed to upsert so a missing domain-lock row (deleted by an earlier failed attempt) can never discard a fully-completed report at the last pipeline step.
+[✅] Bumped font sizes across the /analyze intake, live research console, teaser results, and dashboard report — body text was too small to read comfortably.
+[✅] Verified end-to-end with a real re-run against nxtflight.com — confidence went from low/generic fallback to high with 7 real findings, 6 opportunities, and 4 roadmap phases; visually checked all 9 PDF pages for the overlap fix.
+[✅] Reset locally-exhausted Tavily/SerpAPI/Firecrawl dev spend after the budget-tracking fix; confirmed backend (39) and web (12) test suites plus both builds pass.
+
+
+25-Aug-2026
+[✅] Fixed ungrounded /analyze questions by adding website + social research before consultation.
+[✅] Added mini-crawl and social profile scraping to generate a grounded siteBrief.
+[✅] Updated consultation flow to focus on pain points, goals, tools, and team size instead of basic industry questions.
+[✅] Redesigned /analyze intake with a unified social/website links field and optional additional information.
+[✅] Added social research pipeline with honest handling of blocked platforms.
+
+
+26-Aug-2026
+[✅] Rebuilt client strategy reports (dashboard, teaser, PDF) with clearer Problems → Solutions → Timeline structure.
+[✅] Added phase-wise timeline estimates to show accurate roadmap week ranges.
+[✅] Increased Claude synthesis timeout/retries to reduce generic fallback reports.
+[✅] Improved fallback synthesis using real PageSpeed, tech-stack, and consultation data.
+[✅] Fixed PDF text-overlap issue by improving line wrapping and cursor positioning.
+[✅] Fixed provider budget tracking by migrating spend/budget fields from Int to Float and removing rounding.
+[✅] Hardened markAnalysisDone with an upsert to prevent completed reports from being lost.
+
+
+27-Aug-2026
+[✅] Increased font sizes across /analyze, research console, teaser, and dashboard reports.
+[✅] Completed end-to-end verification with nxtflight.com — 7 findings, 6 opportunities, 4 roadmap phases.
+[✅] Visually verified all 9 PDF pages after the layout fixes.
+[✅] Reset development provider budgets after fixing budget tracking.
+[✅] Verified backend (39) + web (12) test suites and both production builds successfully pass.
+
+
+
+
+1. hero
+2. Workflow Automation
+3. — Technology
+4. — Data Science & AI
+5. — Full Spectrum AI Services
+6. — Autonomous AI Agents
+7. — Sales & Marketing AI
+8. — Proven Results
+9. — Our Process

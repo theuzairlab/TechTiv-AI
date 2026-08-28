@@ -63,9 +63,19 @@ export async function markAnalysisDone(
         errorMsg: null,
       },
     }),
-    prisma.analyzedDomain.update({
+    // upsert, not update: a prior FAILED attempt on this same domain deletes
+    // the lock row (see markAnalysisFailed below). If a retry then succeeds,
+    // the row may not exist yet — a plain update would throw here and
+    // discard an otherwise fully-completed report at the very last step.
+    prisma.analyzedDomain.upsert({
       where: { normalizedDomain: domain },
-      data: {
+      create: {
+        normalizedDomain: domain,
+        status: "COMPLETED",
+        completedAt,
+        lastAnalysisId: analysisId,
+      },
+      update: {
         status: "COMPLETED",
         completedAt,
         lastAnalysisId: analysisId,

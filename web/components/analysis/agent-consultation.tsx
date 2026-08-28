@@ -38,7 +38,8 @@ export function AgentConsultation({
   );
   const [messages, setMessages] = useState<ConsultationMessage[]>([]);
   const [companyName, setCompanyName] = useState("");
-  const [footprint, setFootprint] = useState("");
+  const [links, setLinks] = useState("");
+  const [additionalInfo, setAdditionalInfo] = useState("");
   const [answer, setAnswer] = useState("");
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [waiting, setWaiting] = useState(Boolean(restoredSession));
@@ -107,7 +108,11 @@ export function AgentConsultation({
     setError(null);
     setWaiting(true);
     try {
-      const next = await startConsultation({ companyName, footprint });
+      const next = await startConsultation({
+        companyName,
+        links,
+        additionalInfo: additionalInfo.trim() || undefined,
+      });
       setSession(next);
       onSession(next);
       setMessages([
@@ -115,14 +120,19 @@ export function AgentConsultation({
           id: "opening",
           role: "assistant",
           content:
-            "I’ll learn how your business works, then research your market and build a practical AI plan.",
+            "I’ll research your business first, then ask only what matters before building your plan.",
           inputJson: null,
           createdAt: new Date().toISOString(),
         },
         {
           id: "initial",
           role: "user",
-          content: `${companyName} — ${footprint}`,
+          content: [
+            `${companyName} — ${links}`,
+            additionalInfo.trim() ? `Additional context: ${additionalInfo.trim()}` : null,
+          ]
+            .filter(Boolean)
+            .join("\n"),
           inputJson: null,
           createdAt: new Date().toISOString(),
         },
@@ -193,12 +203,13 @@ export function AgentConsultation({
       <form onSubmit={begin} className="mx-auto max-w-2xl space-y-5">
         <AgentBubble>
           <p className="text-base leading-relaxed text-text-primary">
-            Tell me the business name and one place I can find it online. I’ll
-            ask only what matters, then start the research.
+            Tell me the business name and where I can find it online. I’ll
+            research it first, ask only what matters, then start the deeper
+            research.
           </p>
         </AgentBubble>
         <div className="rounded-2xl border border-border-subtle bg-bg-secondary/50 p-4">
-          <label className="text-xs font-semibold text-text-muted">
+          <label className="text-sm font-semibold text-text-muted">
             Business name
           </label>
           <input
@@ -206,21 +217,37 @@ export function AgentConsultation({
             value={companyName}
             onChange={(event) => setCompanyName(event.target.value)}
             placeholder="Acme"
-            className="mt-2 h-11 w-full bg-transparent text-base text-text-primary outline-none"
+            className="mt-2 h-11 w-full bg-transparent text-lg text-text-primary outline-none"
           />
           <div className="my-2 border-t border-border-subtle" />
-          <label className="text-xs font-semibold text-text-muted">
-            Website or social profile
+          <label className="text-sm font-semibold text-text-muted">
+            Website and/or social profiles
           </label>
-          <div className="mt-2 flex items-center gap-2">
-            <input
-              required
-              type="url"
-              value={footprint}
-              onChange={(event) => setFootprint(event.target.value)}
-              placeholder="https://yourbusiness.com"
-              className="h-11 min-w-0 flex-1 bg-transparent text-base text-text-primary outline-none"
-            />
+          <textarea
+            required
+            rows={2}
+            value={links}
+            onChange={(event) => setLinks(event.target.value)}
+            placeholder="acme.com, instagram.com/acme, tiktok.com/@acme"
+            className="mt-2 min-h-11 w-full resize-none bg-transparent text-lg text-text-primary outline-none"
+          />
+          <p className="mt-1 text-sm text-text-muted">
+            Separate multiple links with commas — a website and any social
+            profiles you want reviewed.
+          </p>
+          <div className="my-2 border-t border-border-subtle" />
+          <label className="text-sm font-semibold text-text-muted">
+            More information{" "}
+            <span className="font-normal text-text-muted/70">(optional)</span>
+          </label>
+          <textarea
+            rows={2}
+            value={additionalInfo}
+            onChange={(event) => setAdditionalInfo(event.target.value)}
+            placeholder="Anything specific you want us to know — a problem you're facing, a goal you have, or context that isn't obvious from your site."
+            className="mt-2 min-h-10 w-full resize-none bg-transparent text-base text-text-primary outline-none placeholder:text-text-muted/60"
+          />
+          <div className="mt-3 flex justify-end">
             <button
               type="submit"
               disabled={waiting}
@@ -235,7 +262,7 @@ export function AgentConsultation({
             </button>
           </div>
         </div>
-        {error ? <p className="text-sm text-accent-rose">{error}</p> : null}
+        {error ? <p className="text-base text-accent-rose">{error}</p> : null}
       </form>
     );
   }
@@ -254,7 +281,7 @@ export function AgentConsultation({
             )}
           >
             {message.role === "user" ? (
-              <div className="max-w-[85%] rounded-2xl rounded-br-md bg-brand-cyan/12 px-4 py-3 text-sm leading-relaxed text-text-primary">
+              <div className="max-w-[85%] rounded-2xl rounded-br-md bg-brand-cyan/12 px-4 py-3 text-base leading-relaxed text-text-primary">
                 {message.content}
               </div>
             ) : (
@@ -263,9 +290,11 @@ export function AgentConsultation({
           </motion.div>
         ))}
         {waiting ? (
-          <div className="flex items-center gap-2 px-3 py-2 text-sm text-text-muted">
+          <div className="flex items-center gap-2 px-3 py-2 text-base text-text-muted">
             <Loader2 size={14} className="animate-spin text-brand-cyan" />
-            Reviewing your answer…
+            {latestQuestionTurn
+              ? "Reviewing your answer…"
+              : "Reading your website and social profiles…"}
           </div>
         ) : null}
         <div ref={endRef} />
@@ -276,8 +305,8 @@ export function AgentConsultation({
           <div className="flex items-start gap-3">
             <Check className="mt-0.5 size-5 text-brand" />
             <div className="flex-1">
-              <p className="font-medium text-text-primary">Brief ready</p>
-              <p className="mt-1 text-sm text-text-muted">
+              <p className="text-lg font-medium text-text-primary">Brief ready</p>
+              <p className="mt-1 text-base text-text-muted">
                 I’ll now verify the evidence, compare the market, and build your
                 action plan.
               </p>
@@ -293,7 +322,7 @@ export function AgentConsultation({
             latestQuestion.inputType,
           ) && latestQuestion.options?.length ? (
             <div className="mb-3 space-y-2">
-              <p className="px-1 text-[11px] text-text-muted">
+              <p className="px-1 text-xs text-text-muted">
                 {latestQuestion.inputType === "multi_choice"
                   ? "Select all that apply"
                   : "Select one option"}
@@ -315,7 +344,7 @@ export function AgentConsultation({
                     }
                   }}
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-sm transition-colors",
+                    "flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left text-base transition-colors",
                     selectedOptions.includes(option)
                       ? "border-brand-cyan/50 bg-brand-cyan/10 text-text-primary"
                       : "border-border-subtle text-text-muted hover:border-brand-cyan/35 hover:text-text-primary",
@@ -370,7 +399,7 @@ export function AgentConsultation({
                 }
               }}
               placeholder="Type your answer…"
-              className="max-h-32 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm text-text-primary outline-none"
+              className="max-h-32 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-base text-text-primary outline-none"
             />
             <button
               type="button"
@@ -384,7 +413,7 @@ export function AgentConsultation({
           ) : null}
         </div>
       ) : null}
-      {error ? <p className="mt-3 text-sm text-accent-rose">{error}</p> : null}
+      {error ? <p className="mt-3 text-base text-accent-rose">{error}</p> : null}
     </div>
   );
 }
@@ -395,7 +424,7 @@ function AgentBubble({ children }: { children: React.ReactNode }) {
       <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl bg-brand-cyan/12 text-brand-cyan">
         <Bot size={16} />
       </span>
-      <div className="rounded-2xl rounded-bl-md border border-border-subtle bg-bg-secondary/40 px-4 py-3 text-sm leading-relaxed text-text-primary">
+      <div className="rounded-2xl rounded-bl-md border border-border-subtle bg-bg-secondary/40 px-4 py-3 text-base leading-relaxed text-text-primary">
         {children}
       </div>
     </div>

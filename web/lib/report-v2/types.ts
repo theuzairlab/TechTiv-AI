@@ -64,6 +64,7 @@ export type ReportV2 = {
     objective: string;
     deliverables: string[];
     dependencies: string[];
+    estimatedWeeks: number;
   }>;
   risks: string[];
   assumptions: string[];

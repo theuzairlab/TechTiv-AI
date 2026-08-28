@@ -58,6 +58,7 @@ const validSynthesis = {
       objective: "Measure",
       deliverables: ["Baseline"],
       dependencies: [],
+      estimatedWeeks: 2,
     },
   ],
   risks: ["Data quality"],

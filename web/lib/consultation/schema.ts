@@ -2,7 +2,8 @@ import { z } from "zod";
 
 export const startConsultationSchema = z.object({
   companyName: z.string().trim().min(2).max(120),
-  footprint: z.string().trim().url().max(500),
+  links: z.string().trim().min(3).max(1000),
+  additionalInfo: z.string().trim().max(2000).optional().or(z.literal("")),
 });
 
 export const replyConsultationSchema = z.object({

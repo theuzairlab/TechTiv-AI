@@ -293,8 +293,11 @@ model Proposal {
 model ProviderConfig {
   id                 String  @id @default(cuid())
   provider           String  @unique
-  monthlyBudgetUSD   Int
-  currentSpendUSD    Int     @default(0)
+  // Stored as fractional USD (not integer dollars) — provider calls often
+  // cost fractions of a cent, and rounding those up to whole dollars caused
+  // budgets to exhaust roughly 100x faster than intended.
+  monthlyBudgetUSD   Float
+  currentSpendUSD    Float   @default(0)
   rateLimitPerMinute Int     @default(60)
   isEnabled          Boolean @default(false)
 

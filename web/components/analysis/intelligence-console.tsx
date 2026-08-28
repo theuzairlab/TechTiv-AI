@@ -188,20 +188,20 @@ export function IntelligenceConsole({
             )}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-text-primary">
+            <p className="truncate text-base font-medium text-text-primary">
               {failed
                 ? "Research paused"
                 : done
                   ? "Report ready"
                   : currentStep?.label}
             </p>
-            <p className="truncate text-xs text-text-muted">
+            <p className="truncate text-sm text-text-muted">
               {failed
                 ? friendlyErrorMessage(status?.errorMsg)
                 : currentStep?.description}
             </p>
           </div>
-          <span className="text-xs tabular-nums text-text-muted">
+          <span className="text-sm tabular-nums text-text-muted">
             {progressPercent(status?.status ?? "QUEUED", status?.errorMsg)}%
           </span>
         </div>
@@ -212,7 +212,7 @@ export function IntelligenceConsole({
           <Bot size={16} />
         </span>
         <div className="rounded-2xl rounded-tl-md border border-border-subtle bg-bg-secondary/40 px-4 py-3">
-          <p className="text-sm leading-relaxed text-text-primary">
+          <p className="text-base leading-relaxed text-text-primary">
             I’m researching {companyLabel ?? "your business"} now. I’ll show
             the sources I check and the useful signals I find.
           </p>
@@ -230,10 +230,10 @@ export function IntelligenceConsole({
           <div className="flex gap-3">
             <Mail size={17} className="mt-0.5 shrink-0 text-brand-cyan" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-text-primary">
+              <p className="text-base font-medium text-text-primary">
                 Want the full report delivered?
               </p>
-              <p className="mt-1 text-xs text-text-muted">
+              <p className="mt-1 text-sm text-text-muted">
                 Add your email while I continue. You can also stay here.
               </p>
               <form onSubmit={saveEmail} className="mt-3 flex gap-2">
@@ -243,7 +243,7 @@ export function IntelligenceConsole({
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="you@company.com"
-                  className="h-10 min-w-0 flex-1 rounded-xl border border-border-subtle bg-bg-primary/60 px-3 text-sm text-text-primary outline-none focus:border-brand-cyan/40"
+                  className="h-10 min-w-0 flex-1 rounded-xl border border-border-subtle bg-bg-primary/60 px-3 text-base text-text-primary outline-none focus:border-brand-cyan/40"
                 />
                 <Button type="submit" size="sm" disabled={emailSaving}>
                   {emailSaving ? "Saving…" : "Notify me"}
@@ -253,23 +253,23 @@ export function IntelligenceConsole({
           </div>
         </div>
       ) : emailSaved ? (
-        <p className="ml-11 text-xs text-brand">
+        <p className="ml-11 text-sm text-brand">
           Email saved — we’ll send the secure report link when ready.
         </p>
       ) : null}
 
       {failed ? (
         <div className="ml-11 rounded-2xl border border-accent-rose/30 bg-accent-rose/8 p-4">
-          <p className="text-sm font-medium text-text-primary">
+          <p className="text-base font-medium text-text-primary">
             I couldn’t complete this pass
           </p>
-          <p className="mt-1 text-sm leading-relaxed text-text-muted">
+          <p className="mt-1 text-base leading-relaxed text-text-muted">
             {friendlyErrorMessage(status?.errorMsg)}
           </p>
           {status?.errorMsg ? (
-            <details className="mt-2 text-xs text-text-muted">
+            <details className="mt-2 text-sm text-text-muted">
               <summary className="cursor-pointer">Technical details</summary>
-              <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap wrap-break-word rounded-lg bg-bg-primary/50 p-3 font-mono text-[10px] leading-relaxed">
+              <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap wrap-break-word rounded-lg bg-bg-primary/50 p-3 font-mono text-xs leading-relaxed">
                 {status.errorMsg.slice(0, 1200)}
                 {status.errorMsg.length > 1200
                   ? "\n…additional details hidden"
@@ -291,7 +291,7 @@ export function IntelligenceConsole({
           </Button>
         </div>
       ) : null}
-      {error ? <p className="text-sm text-accent-rose">{error}</p> : null}
+      {error ? <p className="text-base text-accent-rose">{error}</p> : null}
     </div>
   );
 }
@@ -300,12 +300,12 @@ function ActivityTurn({ activity }: { activity: AnalysisActivityItem }) {
   if (activity.kind === "search") {
     return (
       <details className="ml-11 rounded-xl border border-border-subtle/60 bg-bg-secondary/20 px-3 py-2">
-        <summary className="flex cursor-pointer list-none items-center gap-2 text-xs text-text-muted">
+        <summary className="flex cursor-pointer list-none items-center gap-2 text-sm text-text-muted">
           <Search size={13} className="text-brand-cyan" />
           Researching a source
           <ChevronDown size={12} className="ml-auto" />
         </summary>
-        <p className="mt-2 text-xs leading-relaxed text-text-muted">
+        <p className="mt-2 text-sm leading-relaxed text-text-muted">
           {activity.message}
         </p>
       </details>
@@ -314,7 +314,7 @@ function ActivityTurn({ activity }: { activity: AnalysisActivityItem }) {
 
   if (activity.kind === "status") {
     return (
-      <div className="ml-11 flex items-center gap-2 py-1 text-xs text-text-muted">
+      <div className="ml-11 flex items-center gap-2 py-1 text-sm text-text-muted">
         <Loader2 size={12} className="animate-spin text-brand-cyan" />
         {activity.message}
       </div>
@@ -338,7 +338,7 @@ function ActivityTurn({ activity }: { activity: AnalysisActivityItem }) {
         )}
       </span>
       <div className="rounded-2xl rounded-tl-md border border-border-subtle bg-bg-secondary/35 px-4 py-3">
-        <p className="text-sm leading-relaxed text-text-primary">
+        <p className="text-base leading-relaxed text-text-primary">
           {activity.message}
         </p>
       </div>

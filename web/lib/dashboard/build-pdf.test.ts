@@ -15,7 +15,7 @@ describe("buildProposalPdf", () => {
       evidence: [],
       proposal: {
         id: "proposal-1",
-        status: "READY",
+        status: "SENT",
         strategyJson: null,
         techStack: [],
         automationBlueprint: [],

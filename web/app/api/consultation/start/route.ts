@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createGuestSession } from "@/lib/analysis/capture-email";
+import { parseBusinessLinks } from "@/lib/analysis/links";
 import { resolveAnalysisDomain } from "@/lib/analysis/intake";
 import { enqueueConsultation } from "@/lib/analysis/queue";
 import { startConsultationSchema } from "@/lib/consultation/schema";
@@ -15,35 +16,49 @@ export async function POST(request: Request) {
       );
     }
 
-    const { companyName, footprint } = parsed.data;
+    const { companyName, links, additionalInfo } = parsed.data;
+    const { website, socialLinks, raw } = parseBusinessLinks(links);
+
+    if (!website && Object.keys(socialLinks).length === 0) {
+      return NextResponse.json(
+        {
+          error:
+            "Enter a website domain and/or at least one social profile link",
+        },
+        { status: 400 },
+      );
+    }
+
+    const resolvedSocialLinks = {
+      ...socialLinks,
+      ...(website ? { website } : {}),
+    };
+
     const { guestAccessToken, pendingEmail } = createGuestSession();
-    const isWebsite = !/(facebook|instagram|linkedin|twitter|x|tiktok|youtube)\.com/i.test(
-      footprint,
-    );
-    const socialLinks = isWebsite
-      ? { website: footprint }
-      : footprint.includes("linkedin")
-        ? { linkedin: footprint }
-        : footprint.includes("instagram")
-          ? { instagram: footprint }
-          : footprint.includes("facebook")
-            ? { facebook: footprint }
-            : footprint.includes("tiktok")
-              ? { tiktok: footprint }
-              : footprint.includes("youtube")
-                ? { youtube: footprint }
-                : { twitter: footprint };
+
     const domain = resolveAnalysisDomain({
       company: companyName,
-      businessIntake: { companyName, socialLinks },
+      businessIntake: { companyName, socialLinks: resolvedSocialLinks },
     });
+
+    const trimmedInfo = additionalInfo?.trim();
+    const openingUserMessage = [
+      `${companyName} — ${raw.join(", ")}`,
+      trimmedInfo ? `Additional context: ${trimmedInfo}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     const analysis = await prisma.analysis.create({
       data: {
         domain,
         guestAccessToken,
-        socialLinks,
-        businessIntake: { companyName, socialLinks },
+        socialLinks: resolvedSocialLinks,
+        businessIntake: {
+          companyName,
+          socialLinks: resolvedSocialLinks,
+          additionalNotes: trimmedInfo || undefined,
+        },
         lead: {
           create: {
             name: companyName,
@@ -57,12 +72,16 @@ export async function POST(request: Request) {
             {
               role: "assistant",
               content:
-                "I’ll learn how your business works, then research your market and build a practical AI plan.",
+                "I’ll research your business first, then ask only what matters before building your plan.",
             },
             {
               role: "user",
-              content: `${companyName} — ${footprint}`,
-              inputJson: { companyName, footprint },
+              content: openingUserMessage,
+              inputJson: {
+                companyName,
+                links: raw,
+                additionalInfo: trimmedInfo || null,
+              },
             },
           ],
         },

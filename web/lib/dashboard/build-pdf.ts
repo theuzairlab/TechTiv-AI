@@ -1,5 +1,6 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { AnalysisDetail } from "@/lib/dashboard/analyses";
+import type { ReportV2 } from "@/lib/report-v2/types";
 
 function pdfSafe(text: string): string {
   return text
@@ -35,6 +36,10 @@ function wrap(text: string, width = 88): string[] {
   return lines;
 }
 
+function totalWeeks(roadmap: ReportV2["roadmap"]): number {
+  return roadmap.reduce((sum, phase) => sum + (phase.estimatedWeeks || 1), 0);
+}
+
 export async function buildProposalPdf(
   detail: AnalysisDetail,
 ): Promise<Uint8Array> {
@@ -54,24 +59,35 @@ export async function buildProposalPdf(
   const ensure = (height: number) => {
     if (y - height < 56) newPage();
   };
+  // Character-width budget scaled from the base 88-char-at-size-10 heuristic.
+  // pdf-lib's own `maxWidth` auto-wrap is intentionally never used here: if a
+  // caller passes text longer than one visual line, relying on drawText's
+  // internal wrapping would silently render extra lines that our y-cursor
+  // never accounts for, causing the next section to overlap on top of it.
+  // Wrapping ourselves and decrementing y per rendered line avoids that.
+  const charWidthFor = (size: number, indent: number) =>
+    Math.max(20, Math.round((88 * 10) / size) - Math.round(indent / 5));
   const line = (
     text: string,
     options: { size?: number; strong?: boolean; color?: ReturnType<typeof rgb>; indent?: number } = {},
   ) => {
     const size = options.size ?? 10;
-    ensure(size + 7);
-    page.drawText(pdfSafe(text), {
-      x: 48 + (options.indent ?? 0),
-      y,
-      size,
-      font: options.strong ? bold : regular,
-      color: options.color ?? navy,
-      maxWidth: 516 - (options.indent ?? 0),
-    });
-    y -= size + 7;
+    const indent = options.indent ?? 0;
+    const segments = wrap(text, charWidthFor(size, indent));
+    for (const segment of segments) {
+      ensure(size + 7);
+      page.drawText(pdfSafe(segment), {
+        x: 48 + indent,
+        y,
+        size,
+        font: options.strong ? bold : regular,
+        color: options.color ?? navy,
+      });
+      y -= size + 7;
+    }
   };
   const paragraph = (text: string, size = 10) => {
-    for (const item of wrap(text)) line(item, { size, color: muted });
+    line(text, { size, color: muted });
     y -= 5;
   };
   const heading = (title: string) => {
@@ -98,21 +114,12 @@ export async function buildProposalPdf(
       );
     }
   };
-  const refs = (ids: string[]) => {
-    if (ids.length) {
-      line(`Evidence: ${ids.join(", ")}`, {
-        size: 7,
-        color: cyan,
-        indent: 8,
-      });
-    }
-  };
 
   line("TechTivAI", { size: 13, strong: true, color: cyan });
-  line("AI Business Decision Report", { size: 24, strong: true });
+  line("AI Business Strategy Report", { size: 24, strong: true });
   y -= 8;
   line(detail.domain, { size: 15, strong: true });
-  line(`Report V2 · ${new Date().toLocaleDateString()}`, {
+  line(`Generated ${new Date().toLocaleDateString()}`, {
     size: 9,
     color: muted,
   });
@@ -122,22 +129,17 @@ export async function buildProposalPdf(
     y -= 20;
     paragraph(
       detail.proposal?.narrativeText ??
-        "This analysis was generated before Report V2 and has no structured report.",
+        "This analysis has no structured report yet.",
     );
   } else {
-    heading("Executive summary");
+    const modeledWeeks = report.pricing?.timelineWeeks ?? totalWeeks(report.roadmap);
+
+    heading("What's happening in your business");
     paragraph(report.executiveSummary);
     line(
-      `Coverage ${report.coverage.score}% (${report.coverage.status}) · Confidence ${report.confidence.level}`,
+      `Modeled timeline: ${modeledWeeks} week${modeledWeeks === 1 ? "" : "s"} across ${report.roadmap.length} phase${report.roadmap.length === 1 ? "" : "s"}`,
       { size: 9, strong: true },
     );
-    paragraph(report.confidence.rationale, 9);
-    if (report.coverage.missing.length) {
-      line(`Coverage gaps: ${report.coverage.missing.join(", ")}`, {
-        size: 9,
-        color: rgb(0.72, 0.38, 0.05),
-      });
-    }
 
     heading("Business scorecard");
     for (const item of report.scorecard) {
@@ -146,46 +148,42 @@ export async function buildProposalPdf(
         strong: true,
       });
       paragraph(item.rationale, 9);
-      refs(item.evidenceRefs);
     }
 
-    heading("Evidence-backed findings");
+    heading("Problems we found");
     for (const item of report.findings) {
-      line(`${item.title} · ${item.severity} · ${item.category.replace(/_/g, " ")}`, {
+      line(`${item.title} · ${item.severity} priority · ${item.category.replace(/_/g, " ")}`, {
         size: 10,
         strong: true,
       });
       paragraph(item.summary, 9);
-      refs(item.evidenceRefs);
     }
 
     if (report.competitors.length) {
-      heading("Verified market context");
+      heading("How you compare");
       for (const item of report.competitors) {
         line(`${item.name}${item.verified ? " · verified" : ""}`, {
           size: 10,
           strong: true,
         });
         paragraph(item.positioning, 9);
-        refs(item.evidenceRefs);
       }
     }
 
-    heading("Prioritized opportunities");
+    heading("Solutions we recommend");
     report.opportunities.forEach((item, index) => {
       line(`${index + 1}. ${item.title}`, { size: 11, strong: true });
       paragraph(item.outcome, 9);
       line(
-        `Workflow: ${item.workflow} · Impact ${item.impact} · Effort ${item.effort}`,
+        `Fixes: ${item.workflow} · Impact ${item.impact} · Effort ${item.effort}`,
         { size: 8, color: muted },
       );
       if (item.integrations.length) {
-        line(`Integrations: ${item.integrations.join(", ")}`, {
+        line(`Tools involved: ${item.integrations.join(", ")}`, {
           size: 8,
           color: muted,
         });
       }
-      refs(item.evidenceRefs);
     });
 
     heading("Recommended architecture");
@@ -195,26 +193,31 @@ export async function buildProposalPdf(
         strong: true,
       });
       paragraph(item.reason, 9);
-      refs(item.evidenceRefs);
     }
 
-    heading("Implementation roadmap");
+    heading("Timeline");
+    let weekCursor = 1;
     for (const phase of report.roadmap) {
-      line(phase.phase, { size: 11, strong: true });
+      const weeks = phase.estimatedWeeks || 1;
+      const endWeek = weekCursor + weeks - 1;
+      const weekLabel =
+        weekCursor === endWeek ? `Week ${weekCursor}` : `Weeks ${weekCursor}-${endWeek}`;
+      line(`${phase.phase} — ${weekLabel}`, { size: 11, strong: true });
       paragraph(phase.objective, 9);
       bullets(phase.deliverables);
       if (phase.dependencies.length) {
-        line(`Dependencies: ${phase.dependencies.join(", ")}`, {
+        line(`Depends on: ${phase.dependencies.join(", ")}`, {
           size: 8,
           color: muted,
         });
       }
+      weekCursor = endWeek + 1;
     }
 
     if (report.pricing) {
-      heading("Deterministic scope and investment");
+      heading("Investment breakdown");
       line(
-        `$${report.pricing.range.lowUSD.toLocaleString()}–$${report.pricing.range.highUSD.toLocaleString()} · ${report.pricing.timelineWeeks} weeks`,
+        `$${report.pricing.range.lowUSD.toLocaleString()}-$${report.pricing.range.highUSD.toLocaleString()} · ${report.pricing.timelineWeeks} weeks`,
         { size: 14, strong: true },
       );
       for (const item of report.pricing.lineItems) {
@@ -225,7 +228,7 @@ export async function buildProposalPdf(
       bullets(report.pricing.assumptions);
     }
 
-    heading("ROI");
+    heading("Return on investment");
     if (report.roi?.available && report.roi.scenarios) {
       for (const [name, scenario] of Object.entries(report.roi.scenarios)) {
         line(
@@ -234,7 +237,7 @@ export async function buildProposalPdf(
         );
       }
     } else {
-      paragraph(report.roi?.note ?? "ROI was withheld because inputs are incomplete.");
+      paragraph(report.roi?.note ?? "ROI needs a few more confirmed business inputs.");
       if (report.roi?.missingInputs?.length) {
         line(`Inputs needed: ${report.roi.missingInputs.join(", ")}`, {
           size: 9,
@@ -242,25 +245,13 @@ export async function buildProposalPdf(
       }
     }
 
-    heading("Risks, assumptions, and unknowns");
+    heading("Worth knowing before you start");
     line("Risks", { size: 10, strong: true });
     bullets(report.risks);
     line("Assumptions", { size: 10, strong: true });
     bullets(report.assumptions);
-    line("Unknowns", { size: 10, strong: true });
+    line("Open questions", { size: 10, strong: true });
     bullets(report.unknowns);
-
-    heading("Evidence appendix");
-    for (const item of detail.evidence) {
-      line(`${item.key} · ${item.provider} · ${item.sourceType}`, {
-        size: 8,
-        strong: true,
-        color: cyan,
-      });
-      if (item.title) line(item.title, { size: 9, strong: true });
-      if (item.url) line(item.url, { size: 7, color: muted });
-      if (item.excerpt) paragraph(item.excerpt.slice(0, 700), 8);
-    }
   }
 
   const pages = pdf.getPages();
@@ -271,7 +262,7 @@ export async function buildProposalPdf(
       thickness: 0.5,
       color: rgb(0.82, 0.88, 0.9),
     });
-    pdfPage.drawText(`TechTivAI · Evidence-grounded Report V2`, {
+    pdfPage.drawText(`TechTivAI · AI Business Strategy Report`, {
       x: 48,
       y: 25,
       size: 7,

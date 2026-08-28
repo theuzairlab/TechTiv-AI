@@ -161,7 +161,7 @@ describe("callProviderWithClient", () => {
     });
     expect(providerConfigUpdate).toHaveBeenCalledWith({
       where: { provider: "firecrawl" },
-      data: { currentSpendUSD: { increment: 3 } },
+      data: { currentSpendUSD: { increment: 2.5 } },
     });
   });
 

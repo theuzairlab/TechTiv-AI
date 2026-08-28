@@ -170,11 +170,14 @@ export async function callProviderWithClient<T>(
     });
 
     if (costEstimateUSD > 0) {
+      // Store the real fractional cost — rounding up to a whole dollar per
+      // call (as this used to) exhausts a budget roughly 100x faster than
+      // intended for cheap calls like a $0.01 search.
       await db.providerConfig.update({
         where: { provider: opts.provider },
         data: {
           currentSpendUSD: {
-            increment: Math.ceil(costEstimateUSD),
+            increment: costEstimateUSD,
           },
         },
       });

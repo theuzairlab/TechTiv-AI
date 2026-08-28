@@ -82,6 +82,7 @@ const synthesis: SynthesisResult = {
       objective: "Measure",
       deliverables: ["Baseline"],
       dependencies: [],
+      estimatedWeeks: 2,
     },
   ],
   risks: [],

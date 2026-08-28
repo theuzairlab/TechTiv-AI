@@ -86,6 +86,7 @@ export const synthesisSchema = z.object({
         objective: z.string().min(1),
         deliverables: z.array(z.string().min(1)).min(1).max(8),
         dependencies: z.array(z.string()).max(8),
+        estimatedWeeks: z.number().int().min(1).max(24),
       }),
     )
     .min(1)
@@ -109,7 +110,7 @@ export const synthesisJsonSchemaForPrompt = `{
   "competitors":[{"name":"string","url":"https://... optional","positioning":"string","verified":true,"evidenceRefs":["evidence-key"]}],
   "opportunities":[{"title":"string","outcome":"string","workflow":"string","impact":"high|medium|low","effort":"high|medium|low","integrations":["string"],"evidenceRefs":["evidence-key"]}],
   "stackArchitecture":[{"layer":"string","recommendation":"string","reason":"string","evidenceRefs":["evidence-key"]}],
-  "roadmap":[{"phase":"string","objective":"string","deliverables":["string"],"dependencies":["string"]}],
+  "roadmap":[{"phase":"string","objective":"string","deliverables":["string"],"dependencies":["string"],"estimatedWeeks":1}],
   "risks":["string"],"assumptions":["string"],"unknowns":["string"],
   "confidence":{"level":"high|medium|low","rationale":"string"}
 }`;

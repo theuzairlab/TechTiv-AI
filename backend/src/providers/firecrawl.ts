@@ -20,7 +20,7 @@ type FirecrawlResponse = {
   error?: string;
 };
 
-async function scrapeUrl(
+export async function scrapeUrl(
   ctx: PipelineContext,
   url: string,
 ): Promise<FirecrawlScrapeResult> {
@@ -121,3 +121,30 @@ export const scrapeDomain = async (
   ctx: PipelineContext,
 ): Promise<FirecrawlScrapeResult> =>
   scrapeUrl(ctx, toWebsiteUrl(ctx.domain));
+
+/**
+ * Bounded pre-consultation scan: homepage plus a small number of priority
+ * pages, fetched with the extras in parallel to keep latency low enough to
+ * ground the first consultation question without a long wait.
+ */
+export async function crawlDomainLite(
+  ctx: PipelineContext,
+  maxExtraPages = 2,
+): Promise<{ pages: FirecrawlScrapeResult[]; coverage: string[] }> {
+  const home = await scrapeUrl(ctx, toWebsiteUrl(ctx.domain));
+  const urls = selectKeyPages(home).slice(0, maxExtraPages);
+  const extras = await Promise.allSettled(urls.map((url) => scrapeUrl(ctx, url)));
+  const pages = [
+    home,
+    ...extras
+      .filter(
+        (result): result is PromiseFulfilledResult<FirecrawlScrapeResult> =>
+          result.status === "fulfilled",
+      )
+      .map((result) => result.value),
+  ];
+  return {
+    pages,
+    coverage: pages.map((page) => new URL(page.url).pathname || "/"),
+  };
+}

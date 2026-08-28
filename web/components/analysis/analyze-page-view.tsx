@@ -101,7 +101,7 @@ export function AnalyzePageView() {
             Understand the business.{" "}
             <span className="text-gradient-cyan">Build the right system.</span>
           </h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-text-muted sm:text-base">
+          <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-text-muted sm:text-lg">
             Answer a few focused questions. We’ll research the evidence and
             return a practical AI roadmap.
           </p>

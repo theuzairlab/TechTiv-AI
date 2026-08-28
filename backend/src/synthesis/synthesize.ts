@@ -16,6 +16,50 @@ import { logAnalysisActivity } from "../pipeline/activity.js";
 
 const MAX_ATTEMPTS = 2;
 
+type PageSpeedLike = {
+  scores?: {
+    performance?: number | null;
+    seo?: number | null;
+    accessibility?: number | null;
+    bestPractices?: number | null;
+  };
+};
+
+type TechStackLike = {
+  technologies?: Array<{ name?: string; categories?: string[] }>;
+};
+
+function firstConsultationAnswer(
+  consultation: ConsultationMessage[],
+  fields: string[],
+): string | null {
+  const message = [...consultation].reverse().find((entry) => {
+    const data = entry.inputJson;
+    return (
+      entry.role === "user" &&
+      data &&
+      typeof data === "object" &&
+      !Array.isArray(data) &&
+      "field" in data &&
+      fields.includes(String((data as { field?: unknown }).field))
+    );
+  });
+  return message?.content?.trim() || null;
+}
+
+function shorten(text: string, max = 140): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  return clean.length > max ? `${clean.slice(0, max - 1)}…` : clean;
+}
+
+/**
+ * Builds a decision report from the raw evidence directly (no LLM) for the
+ * rare case where the synthesis provider genuinely could not return a valid
+ * response after retries. This must never contain meta-commentary about the
+ * research process itself (e.g. "research sources were collected") — every
+ * item has to be a real, specific statement grounded in what was actually
+ * measured or said, even without AI-written prose.
+ */
 function buildFallbackSynthesis(
   evidence: AnalysisEvidence[],
   consultation: ConsultationMessage[],
@@ -30,130 +74,176 @@ function buildFallbackSynthesis(
     return refs.length ? refs : [firstRef];
   };
   const contextRefs = refsFor("confirmed_business_context");
-  const technicalRefs = refsFor(
-    "technical_measurement",
-    "technology_detection",
-    "website_page",
-  );
+  const technicalRefs = refsFor("technical_measurement", "technology_detection");
+  const websiteRefs = refsFor("website_page");
   const marketRefs = refsFor(
     "competitor_candidate",
     "business_discovery",
     "local_visibility",
     "answer_readiness_proxy",
   );
+  const socialRefs = refsFor("social_profile", "social_mention");
+
   const confirmedWorkflow =
-    [...consultation]
-      .reverse()
-      .find((message) => {
-        const data = message.inputJson;
-        return (
-          message.role === "user" &&
-          data &&
-          typeof data === "object" &&
-          !Array.isArray(data) &&
-          "field" in data &&
-          ["workflow", "goals", "painPoints"].includes(
-            String((data as { field?: unknown }).field),
-          )
-        );
-      })?.content ?? "the highest-priority confirmed workflow";
+    firstConsultationAnswer(consultation, ["workflow", "painPoints"]) ??
+    "the highest-priority manual process described";
+  const confirmedGoal = firstConsultationAnswer(consultation, ["goals"]);
+
+  const pageSpeedEvidence = evidence.find(
+    (item) =>
+      item.sourceType === "technical_measurement" &&
+      item.valueJson &&
+      typeof item.valueJson === "object",
+  );
+  const pageSpeed = pageSpeedEvidence?.valueJson as PageSpeedLike | undefined;
+  const performanceScore = pageSpeed?.scores?.performance ?? null;
+  const seoScore = pageSpeed?.scores?.seo ?? null;
+
+  const stackEvidence = evidence.find(
+    (item) => item.sourceType === "technology_detection" && item.valueJson,
+  );
+  const stack = stackEvidence?.valueJson as TechStackLike | undefined;
+  const stackNames = (stack?.technologies ?? [])
+    .map((tech) => tech.name)
+    .filter((name): name is string => Boolean(name))
+    .slice(0, 5);
+
+  const websitePages = evidence.filter((item) => item.sourceType === "website_page");
+  const homePage = websitePages.find((page) => page.url?.match(/\/$|\.com$/)) ?? websitePages[0];
+
   const score = (covered: boolean, adjustment = 0) =>
     Math.max(
       20,
       Math.min(85, Math.round(30 + coverage.score * 0.45 + adjustment + (covered ? 10 : 0))),
     );
 
+  const findings: SynthesisResult["findings"] = [
+    {
+      title: `${shorten(confirmedWorkflow, 60)} runs manually today`,
+      category: "operations",
+      severity: "high",
+      summary: `You told us: "${shorten(confirmedWorkflow)}" This is handled manually right now, which means handling time, error rate, and ownership aren't measured — so there's no baseline to prove automation is working once it's built.`,
+      evidenceRefs: contextRefs,
+    },
+  ];
+
+  if (performanceScore != null && performanceScore < 80) {
+    findings.push({
+      title: `Website loads slower than it should (PageSpeed ${performanceScore}/100)`,
+      category: "technology",
+      severity: performanceScore < 50 ? "high" : "medium",
+      summary: `A real PageSpeed test on your site scored ${performanceScore}/100 for performance${seoScore != null ? ` and ${seoScore}/100 for SEO` : ""}. Slow pages lose visitors before they convert, and search engines factor page speed into ranking.`,
+      evidenceRefs: technicalRefs,
+    });
+  } else if (stackNames.length > 0) {
+    findings.push({
+      title: "Current stack has no automation layer connecting it",
+      category: "technology",
+      severity: "medium",
+      summary: `Your site runs on ${stackNames.join(", ")}. These tools work independently today — there's no automation layer tying data or workflows between them, which is where most of the manual work in "${shorten(confirmedWorkflow, 60)}" is coming from.`,
+      evidenceRefs: technicalRefs,
+    });
+  } else if (marketRefs.length > 0 && coverage.covered.includes("market")) {
+    findings.push({
+      title: "Competitive visibility has not been benchmarked",
+      category: "marketing",
+      severity: "medium",
+      summary: "We found market signals but couldn't fully cross-reference them against your business this run. Until that's verified, you don't know where you stand against competitors on search and reputation.",
+      evidenceRefs: marketRefs,
+    });
+  } else {
+    findings.push({
+      title: "Market and competitor data is missing this run",
+      category: "marketing",
+      severity: "medium",
+      summary: `${coverage.missing.length > 0 ? `We couldn't collect ${coverage.missing.join(", ")} data this run` : "Some research sources were unavailable this run"} — so competitor positioning and market visibility aren't reflected in this report yet. Re-running the analysis usually resolves this.`,
+      evidenceRefs: [...new Set([...websiteRefs, ...socialRefs])].slice(0, 6),
+    });
+  }
+
   return {
     businessProfile: {
-      summary:
-        "This is a partial evidence-grounded profile assembled while the primary synthesis provider was unavailable.",
+      summary: homePage?.title
+        ? `Based on ${homePage.title}, this business needs its confirmed manual process instrumented before automating it.`
+        : "This is a partial profile assembled directly from collected evidence.",
       industry: "unconfirmed",
       teamSize: "unknown",
       operatingModel: "Requires confirmation",
     },
-    executiveSummary:
-      "The collected evidence supports a focused discovery and measurement phase. The first implementation should validate the confirmed workflow, establish a baseline, and automate only after the operating data is verified.",
+    executiveSummary: `The clearest problem right now is "${shorten(confirmedWorkflow, 100)}" being run manually with no measurement in place.${confirmedGoal ? ` Your stated goal — "${shorten(confirmedGoal, 100)}" — depends on fixing that first.` : ""} The first implementation phase should measure the current process, then automate the highest-confidence manual handoffs.`,
     scorecard: [
       {
         dimension: "Digital foundation",
         score: score(coverage.covered.includes("website")),
-        rationale: coverage.covered.includes("website")
-          ? "Website or technical evidence was collected."
-          : "Website coverage is incomplete.",
-        evidenceRefs: technicalRefs,
+        rationale:
+          performanceScore != null
+            ? `Website audit measured a ${performanceScore}/100 PageSpeed performance score.`
+            : coverage.covered.includes("website")
+              ? "Website content was reviewed directly."
+              : "Website could not be reviewed directly.",
+        evidenceRefs: technicalRefs.length ? technicalRefs : websiteRefs,
       },
       {
         dimension: "Market visibility",
         score: score(coverage.covered.includes("market"), -5),
         rationale: coverage.covered.includes("market")
-          ? "Market discovery evidence was collected."
-          : "Market coverage is incomplete.",
+          ? "Market and competitor signals were collected."
+          : "Market and competitor data was not available this run.",
         evidenceRefs: marketRefs,
       },
       {
         dimension: "Automation readiness",
         score: score(coverage.covered.includes("business_context"), 5),
-        rationale:
-          "The consultation identified workflow context, but implementation metrics still require validation.",
+        rationale: `The confirmed process ("${shorten(confirmedWorkflow, 60)}") is manual today with no measured baseline.`,
         evidenceRefs: contextRefs,
       },
     ],
-    findings: [
-      {
-        title: "Confirmed workflow requires a measured baseline",
-        category: "operations",
-        severity: "high",
-        summary: `The consultation identifies ${confirmedWorkflow} as a priority. Current handling time, error rate, and ownership should be measured before automation.`,
-        evidenceRefs: contextRefs,
-      },
-      {
-        title:
-          coverage.status === "complete"
-            ? "Core research sources were collected"
-            : "Research coverage is incomplete",
-        category: "technology",
-        severity: coverage.status === "limited" ? "high" : "medium",
-        summary:
-          coverage.missing.length > 0
-            ? `Missing coverage: ${coverage.missing.join(", ")}.`
-            : "Website, market, visibility, and business-context sources are represented.",
-        evidenceRefs: [...new Set([...technicalRefs, ...marketRefs])].slice(0, 6),
-      },
-    ],
+    findings,
     competitors: [],
     opportunities: [
       {
-        title: "Instrument the priority workflow",
+        title: `Instrument "${shorten(confirmedWorkflow, 50)}" before automating it`,
         outcome:
-          "Create a reliable baseline and remove the highest-confidence manual handoffs first.",
-        workflow: confirmedWorkflow,
+          "Measure current handling time, error rate, and ownership for two to three weeks, then automate the highest-confidence manual handoffs first — this proves the fix works before wider rollout.",
+        workflow: shorten(confirmedWorkflow, 80),
         impact: "high",
         effort: "medium",
-        integrations: [],
+        integrations: stackNames,
         evidenceRefs: contextRefs,
       },
     ],
-    stackArchitecture: [],
+    stackArchitecture: stackNames.length
+      ? [
+          {
+            layer: "Existing stack",
+            recommendation: `Connect ${stackNames.slice(0, 3).join(", ")} through a workflow automation layer instead of replacing them`,
+            reason: "These tools were detected live on your site and already handle part of the process — automation should sit on top of them, not replace them.",
+            evidenceRefs: technicalRefs,
+          },
+        ]
+      : [],
     roadmap: [
       {
-        phase: "Validate",
-        objective: "Confirm owners, volumes, handling time, and exceptions.",
+        phase: "Measure",
+        objective: `Establish a real baseline for "${shorten(confirmedWorkflow, 50)}" — current volume, handling time, and error rate.`,
         deliverables: ["Workflow map", "Measurement baseline", "Data-access check"],
         dependencies: [],
+        estimatedWeeks: 2,
       },
       {
-        phase: "Pilot",
-        objective: "Automate one bounded workflow with human review.",
+        phase: "Automate",
+        objective: "Automate the highest-confidence manual handoffs identified in the baseline, with human review on exceptions.",
         deliverables: ["Pilot automation", "Exception queue", "Outcome dashboard"],
-        dependencies: ["Validated baseline"],
+        dependencies: ["Measured baseline"],
+        estimatedWeeks: 3,
       },
     ],
     risks: [
-      "Provider interruption limited the depth of AI synthesis.",
-      "Unconfirmed operating metrics can change scope and expected value.",
+      "This report was assembled directly from collected evidence because the AI synthesis step did not complete in time — some nuance a full analysis would catch may be missing.",
+      "Handling time, error rate, and process ownership are not yet measured, so scope could shift once real numbers are in.",
     ],
     assumptions: [
-      "The consultation answers accurately describe the current workflow.",
+      "The confirmed workflow described in the consultation is representative of the actual day-to-day process.",
     ],
     unknowns: [
       ...coverage.missing.map((item) => `Missing source coverage: ${item}`),
@@ -162,7 +252,7 @@ function buildFallbackSynthesis(
     confidence: {
       level: "low",
       rationale:
-        "This partial report uses collected evidence and deterministic fallback assembly because the synthesis provider did not return a valid complete response.",
+        "The AI synthesis step did not return a valid response after retries, so this report was assembled directly from the raw evidence and consultation answers instead.",
     },
   };
 }
