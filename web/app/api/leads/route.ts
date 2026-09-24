@@ -4,6 +4,8 @@ import { createLeadSchema } from "@/lib/leads";
 import { requireAdminApi } from "@/lib/leads-api";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/lib/generated/prisma/client";
+import { ensureCompanyForContact } from "@/lib/companies";
+import { notifyServiceRequestReceived } from "@/lib/email/notify-service-request";
 
 function toJsonValue(value: Record<string, unknown> | undefined): Prisma.InputJsonValue | undefined {
   if (!value) return undefined;
@@ -28,10 +30,20 @@ export async function POST(request: Request) {
     const data = parsed.data;
     const session = await getSession();
 
-    const metadata = {
+    const metadata: Record<string, unknown> = {
       ...(data.budget ? { budget: data.budget } : {}),
       ...(data.metadata ?? {}),
     };
+    const analysisDomain =
+      typeof metadata.analysisDomain === "string" ? metadata.analysisDomain : null;
+    const companyId = await ensureCompanyForContact({
+      email: data.email.toLowerCase(),
+      companyName: data.company,
+      personName: data.name,
+      domain: analysisDomain,
+      industry: data.industry,
+      userId: session?.user.id ?? null,
+    });
 
     const lead = await prisma.lead.create({
       data: {
@@ -44,6 +56,9 @@ export async function POST(request: Request) {
         message: data.message || null,
         source: data.source,
         userId: session?.user.id ?? null,
+        companyId,
+        implementationStatus:
+          data.source === "service_request" ? "REQUESTED" : null,
         discoveryAnswers: toJsonValue(data.discoveryAnswers),
         metadata: toJsonValue(
           Object.keys(metadata).length > 0 ? metadata : undefined,
@@ -51,6 +66,18 @@ export async function POST(request: Request) {
       },
       select: { id: true },
     });
+
+    if (data.source === "service_request") {
+      // Best-effort admin alert — never blocks lead creation.
+      notifyServiceRequestReceived({
+        leadId: lead.id,
+        name: data.name,
+        email: data.email,
+        metadata,
+      }).catch((error) => {
+        console.error("[api/leads] service request notification failed:", error);
+      });
+    }
 
     return NextResponse.json({ id: lead.id }, { status: 201 });
   } catch (error) {
@@ -81,6 +108,9 @@ export async function GET() {
         message: true,
         notes: true,
         status: true,
+        implementationStatus: true,
+        assignedAdminId: true,
+        companyId: true,
         source: true,
         discoveryAnswers: true,
         metadata: true,

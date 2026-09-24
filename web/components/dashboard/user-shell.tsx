@@ -1,8 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { FileText, Globe, LayoutDashboard, Sparkles } from "lucide-react";
+import {
+  FileText,
+  Globe,
+  Inbox,
+  LayoutDashboard,
+  MessageSquare,
+  Sparkles,
+} from "lucide-react";
 import type { Session } from "@/lib/auth";
 import { isAdmin } from "@/lib/roles";
 import { SignOutButton } from "@/components/dashboard/sign-out-button";
@@ -13,18 +21,48 @@ const userNav = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/dashboard/blueprints", label: "My Blueprints", icon: Sparkles },
   { href: "/dashboard/proposals", label: "Proposals", icon: FileText },
-  { href: "/analyze", label: "New analysis", icon: Globe },
+  { href: "/dashboard/messages", label: "Messages", icon: Inbox },
+  { href: "/dashboard/consultant", label: "AI Consultant", icon: MessageSquare },
+  { href: "/dashboard/analyze", label: "New analysis", icon: Globe },
 ] as const;
 
 type UserShellProps = {
   session: Session;
+  inboxUnreadCount?: number;
   children: React.ReactNode;
 };
 
-export function UserShell({ session, children }: UserShellProps) {
+export function UserShell({
+  session,
+  inboxUnreadCount = 0,
+  children,
+}: UserShellProps) {
   const pathname = usePathname();
   const user = session.user;
   const showAdminLink = isAdmin(user.role);
+  const [unreadCount, setUnreadCount] = useState(inboxUnreadCount);
+
+  useEffect(() => {
+    async function loadUnread() {
+      try {
+        const response = await fetch("/api/conversations/unread?scope=own");
+        if (!response.ok) return;
+        const payload = (await response.json()) as { unreadCount?: number };
+        setUnreadCount(payload.unreadCount ?? 0);
+      } catch {
+        // Keep the last known count if the poll fails.
+      }
+    }
+
+    void loadUnread();
+    const onChange = () => void loadUnread();
+    window.addEventListener("inbox-unread-changed", onChange);
+    window.addEventListener("focus", onChange);
+    return () => {
+      window.removeEventListener("inbox-unread-changed", onChange);
+      window.removeEventListener("focus", onChange);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-bg-primary">
@@ -86,6 +124,11 @@ export function UserShell({ session, children }: UserShellProps) {
                   >
                     <Icon size={16} />
                     {item.label}
+                    {item.href === "/dashboard/messages" && unreadCount > 0 ? (
+                      <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-cyan px-1.5 text-[10px] font-bold text-on-accent">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </span>
+                    ) : null}
                   </Link>
                 </li>
               );

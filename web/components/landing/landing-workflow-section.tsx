@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, type PanInfo } from "framer-motion";
 import { AnimatedIcon } from "@/components/ui/animated-icon";
 import {
   landingFlowCategories,
@@ -56,6 +56,106 @@ function WorkflowConnector({
           />
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function FlowCategoryCard({
+  category,
+}: {
+  category: (typeof landingFlowCategories)[number];
+}) {
+  return (
+    <div className="group relative h-full overflow-hidden rounded-surface-md border border-border-subtle bg-surface-elevated p-5 transition-colors duration-300 hover:border-border-highlight hover:bg-surface-card">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-accent-cyan/0 to-accent-lime/0 opacity-0 transition-opacity duration-300 group-hover:from-accent-cyan/6 group-hover:to-accent-lime/4 group-hover:opacity-100"
+      />
+      <div className="relative flex size-10 items-center justify-center rounded-surface-sm border border-border-subtle bg-surface-card/80">
+        <AnimatedIcon
+          icon={category.icon}
+          size={20}
+          className="text-brand-cyan"
+        />
+      </div>
+      <div className="relative mt-4 mb-1.5 text-[0.88rem] font-bold text-text-primary">
+        {category.title}
+      </div>
+      <div className="relative text-[0.78rem] leading-relaxed text-text-muted">
+        {category.desc}
+      </div>
+    </div>
+  );
+}
+
+function FlowCategoryCarousel({ reducedMotion }: { reducedMotion: boolean }) {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const total = landingFlowCategories.length;
+
+  useEffect(() => {
+    if (reducedMotion || paused) return;
+    const id = window.setInterval(() => {
+      setIndex((current) => (current + 1) % total);
+    }, 3200);
+    return () => window.clearInterval(id);
+  }, [paused, reducedMotion, total]);
+
+  const onDragEnd = (_: unknown, info: PanInfo) => {
+    const swipe = info.offset.x;
+    const velocity = info.velocity.x;
+    if (swipe < -50 || velocity < -400) {
+      setIndex((current) => (current + 1) % total);
+    } else if (swipe > 50 || velocity > 400) {
+      setIndex((current) => (current - 1 + total) % total);
+    }
+  };
+
+  return (
+    <div
+      className="sm:hidden"
+      onPointerEnter={() => setPaused(true)}
+      onPointerLeave={() => setPaused(false)}
+    >
+      <div className="overflow-hidden touch-pan-y">
+        <motion.div
+          className="flex cursor-grab active:cursor-grabbing"
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.18}
+          onDragStart={() => setPaused(true)}
+          onDragEnd={onDragEnd}
+          animate={{ x: `-${index * 100}%` }}
+          transition={{ type: "spring", stiffness: 280, damping: 30 }}
+        >
+          {landingFlowCategories.map((category) => (
+            <div key={category.title} className="w-full shrink-0 px-0.5">
+              <FlowCategoryCard category={category} />
+            </div>
+          ))}
+        </motion.div>
+      </div>
+
+      <div className="mt-4 flex items-center justify-center gap-2">
+        {landingFlowCategories.map((category, i) => (
+          <button
+            key={category.title}
+            type="button"
+            aria-label={`Show ${category.title}`}
+            onClick={() => {
+              setIndex(i);
+              setPaused(true);
+            }}
+            className={cn(
+              "h-2 rounded-full transition-all",
+              i === index ? "w-5 bg-accent-cyan" : "w-2 bg-border-subtle",
+            )}
+          />
+        ))}
+      </div>
+      <p className="mt-2 text-center text-[0.7rem] text-text-muted">
+        Swipe or drag · {index + 1}/{total}
+      </p>
     </div>
   );
 }
@@ -213,8 +313,10 @@ export function LandingWorkflowSection() {
 
           <div className="mx-auto mb-10 h-px max-w-3xl bg-gradient-to-r from-transparent via-border-highlight to-transparent" />
 
+          <FlowCategoryCarousel reducedMotion={!!reducedMotion} />
+
           <motion.div
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5"
+            className="hidden grid-cols-2 gap-4 sm:grid lg:grid-cols-4 lg:gap-5"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
@@ -226,25 +328,8 @@ export function LandingWorkflowSection() {
                 variants={fadeUp}
                 whileHover={{ y: -5 }}
                 transition={{ type: "spring", stiffness: 380, damping: 22 }}
-                className="group relative overflow-hidden rounded-surface-md border border-border-subtle bg-surface-elevated p-5 transition-colors duration-300 hover:border-border-highlight hover:bg-surface-card"
               >
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 bg-gradient-to-br from-accent-cyan/0 to-accent-lime/0 opacity-0 transition-opacity duration-300 group-hover:from-accent-cyan/6 group-hover:to-accent-lime/4 group-hover:opacity-100"
-                />
-                <div className="relative flex size-10 items-center justify-center rounded-surface-sm border border-border-subtle bg-surface-card/80">
-                  <AnimatedIcon
-                    icon={category.icon}
-                    size={20}
-                    className="text-brand-cyan"
-                  />
-                </div>
-                <div className="relative mt-4 mb-1.5 text-[0.88rem] font-bold text-text-primary">
-                  {category.title}
-                </div>
-                <div className="relative text-[0.78rem] leading-relaxed text-text-muted">
-                  {category.desc}
-                </div>
+                <FlowCategoryCard category={category} />
               </motion.div>
             ))}
           </motion.div>

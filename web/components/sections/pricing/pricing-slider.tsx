@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { formatNumber } from "@/lib/format-display";
 
 type PricingSliderProps = {
   label: string;
@@ -28,7 +29,7 @@ export function PricingSlider({
       <div className="flex items-center justify-between gap-3">
         <label className="text-sm font-medium text-text-primary">{label}</label>
         <span className="text-sm tabular-nums text-brand-cyan">
-          {value.toLocaleString()}
+          {formatNumber(value)}
           {unit ? ` ${unit}` : ""}
         </span>
       </div>

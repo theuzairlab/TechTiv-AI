@@ -15,3 +15,10 @@ export {
 } from "@/lib/admin/providers";
 export type { ProviderMonitorRow } from "@/lib/admin/providers";
 export { logAdminEvent } from "@/lib/admin/event-log";
+export {
+  listAdminClients,
+  getAdminClientDetail,
+  listAdminCompanies,
+  getAdminCompanyDetail,
+  listAdminAssignees,
+} from "@/lib/admin/clients";

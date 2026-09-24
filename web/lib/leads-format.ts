@@ -4,17 +4,12 @@ import {
   businessTools,
   businessTypes,
 } from "@/lib/discovery";
+import { formatDateTime, formatUsd } from "@/lib/format-display";
 import type { LeadSource, LeadStatus } from "@/lib/leads";
 import { leadSourceLabels, leadStatusLabels } from "@/lib/leads";
 
 export function formatLeadDate(iso: string) {
-  return new Date(iso).toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return formatDateTime(iso);
 }
 
 export function formatRelativeTime(iso: string) {
@@ -126,7 +121,7 @@ export function formatMetadata(value: unknown): { label: string; value: string }
     if (roi.monthlySavings) {
       rows.push({
         label: "Projected monthly savings",
-        value: `$${roi.monthlySavings.toLocaleString()}`,
+        value: formatUsd(roi.monthlySavings),
       });
     }
     if (roi.hoursSavedPerWeek) {
@@ -135,6 +130,28 @@ export function formatMetadata(value: unknown): { label: string; value: string }
         value: `${roi.hoursSavedPerWeek} hrs`,
       });
     }
+  }
+
+  if (meta.service) {
+    rows.push({ label: "Requested service", value: String(meta.service) });
+  }
+  if (meta.problem) {
+    rows.push({ label: "Problem", value: String(meta.problem) });
+  }
+  if (Array.isArray(meta.techStack) && meta.techStack.length > 0) {
+    rows.push({ label: "Tech stack", value: meta.techStack.map(String).join(", ") });
+  }
+  if (meta.estimatedScope) {
+    rows.push({ label: "Estimated scope", value: String(meta.estimatedScope) });
+  }
+  if (meta.estimatedTimelineWeeks) {
+    rows.push({
+      label: "Estimated timeline",
+      value: `${meta.estimatedTimelineWeeks} week${meta.estimatedTimelineWeeks === 1 ? "" : "s"}`,
+    });
+  }
+  if (meta.analysisDomain) {
+    rows.push({ label: "Source analysis", value: String(meta.analysisDomain) });
   }
 
   if (Array.isArray(meta.recommendations)) {

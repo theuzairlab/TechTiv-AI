@@ -6,9 +6,13 @@ import {
   buildAnalysisReadyText,
   buildMagicLinkHtml,
   buildMagicLinkText,
+  buildServiceRequestHtml,
+  buildServiceRequestText,
   magicLinkSubject,
+  serviceRequestSubject,
   type AnalysisReadyEmailParams,
   type MagicLinkEmailParams,
+  type ServiceRequestEmailParams,
 } from "@/lib/email/templates";
 
 const FROM_EMAIL =
@@ -89,5 +93,21 @@ export async function sendMagicLinkEmail(
     subject: magicLinkSubject(),
     html: buildMagicLinkHtml(params),
     text: buildMagicLinkText(params),
+  });
+}
+
+/**
+ * Internal admin alert for a new "Build This With TechTivAI" request.
+ * Best-effort — callers should not fail lead creation if this throws.
+ */
+export async function sendServiceRequestNotification(
+  to: string,
+  params: ServiceRequestEmailParams,
+): Promise<{ id: string }> {
+  return deliverEmail({
+    to,
+    subject: serviceRequestSubject(params),
+    html: buildServiceRequestHtml(params),
+    text: buildServiceRequestText(params),
   });
 }

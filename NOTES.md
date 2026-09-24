@@ -277,7 +277,7 @@ Added Analyses and Providers to the admin sidebar
 [✅] Added social research pipeline with honest handling of blocked platforms.
 
 
-26-Aug-2026
+27-Aug-2026
 [✅] Rebuilt client strategy reports (dashboard, teaser, PDF) with clearer Problems → Solutions → Timeline structure.
 [✅] Added phase-wise timeline estimates to show accurate roadmap week ranges.
 [✅] Increased Claude synthesis timeout/retries to reduce generic fallback reports.
@@ -287,22 +287,185 @@ Added Analyses and Providers to the admin sidebar
 [✅] Hardened markAnalysisDone with an upsert to prevent completed reports from being lost.
 
 
-27-Aug-2026
+28-Aug-2026
+[✅] Improved UI/UX and responsivenes of analyze, research console, and dashboard pages
 [✅] Increased font sizes across /analyze, research console, teaser, and dashboard reports.
-[✅] Completed end-to-end verification with nxtflight.com — 7 findings, 6 opportunities, 4 roadmap phases.
-[✅] Visually verified all 9 PDF pages after the layout fixes.
+[✅] Completed end-to-end verification with Business.
+[✅] Visually verified all PDF pages after the layout fixes.
 [✅] Reset development provider budgets after fixing budget tracking.
 [✅] Verified backend (39) + web (12) test suites and both production builds successfully pass.
+[✅] Rearanged home page all section with (hero, workflow, tech, DS & AI, AI Services, AI Agents, Sales & marketing, Results, Process)
+
+
+31-Aug-2026
+[✅] Fixed production issues on TechTivAI backend worker related to database and workflow failures.
+[✅] Tested and verified the analysis workflow end-to-end on the live site after fixes.
+[✅] Investigated the full codebase and current feature set to establish an accurate status baseline.
+[✅] Reviewed client's Final Developer Agenda PDF and mapped it against the existing codebase.
+[✅] Identified required changes, improvements, and new features to integrate (report/PDF sections, payments, voice AI, subscriptions, admin CMS, mobile app).
+[✅] Evaluated AI/LLM and voice tooling options (Gemini Live API, Vapi, ElevenLabs) and decided on an approach for upcoming AI consultation and voice workflows.
+[✅] Created an internal phased technical plan and a concise client-facing status & roadmap document for sign-off.
+
+
+01-Sep-2026
+[✅] Started Phase 1 (Report & PDF content overhaul) to match every section required by the Final Developer Agenda.
+[✅] Added currentTechStack, categorized opportunities (AI/Automation/AI Agent/Chatbot-Voice AI/Web-App Dev), socialGrowth, and recommendedServices to the synthesis schema and ReportV2 type.
+[✅] Made "Current Technology Stack" deterministic (computed from real PageSpeed/DetectZeStack evidence) instead of LLM-guessed, for factual accuracy.
+[✅] Updated the Claude synthesis prompt to categorize opportunities correctly and map findings to sellable TechTivAI services (Problem → Service → Stack → Scope → Timeline → CTA).
+[✅] Updated the no-LLM fallback synthesis path to populate all new sections from real evidence so degraded runs still produce a complete report.
+[✅] Worked on NxtFlight website (removed about page and added Trusted Businesses section to home page)
+
+
+
+02-Sep-2026
+[✅] Rebuilt the PDF report (build-pdf.ts) with all 13 required sections in the client's order, plus visual score bars and severity badges.
+[✅] Rebuilt the dashboard strategy report (analysis-detail-view.tsx) with matching sections, including a "Recommended TechTivAI Services" section with CTA buttons.
+[✅] Made the "Build This With TechTivAI" buttons on the dashboard report functional — added a popup form (name, email, phone, notes) that submits the request to the existing leads API, tagged with source "service_request" and full service context (problem, stack, scope, timeline) for admin visibility on /admin/leads.
+[✅] Updated backend + web test fixtures for the new schema fields and verified backend (39) + web (12) test suites and both production builds pass.
+
+
+03-Sep-2026
+[✅] Started (Homepage Product Experience) per Final Developer Agenda.
+[✅] Redesigned homepage hero: “Discover What AI Can Do For Your Business” with primary CTA “Get My AI Blueprint — $5” and secondary “Talk to AI Consultant” → /analyze.
+[✅] Added interactive AI Technology Stack after hero (Models → Agents → Automation → CRM → Voice → Development → Data & Cloud).
+[✅] Reordered homepage to agenda flow: Assessment → Consultant → Agentic → Automation → Web & App → How It Works → Blueprint Preview → Pricing ($5 entry) → FAQ → Final CTA.
+[✅] ReAdded workflow section below tech section and fixed technology section rendering issues
+[✅] Updated homepage-sections.ts canonical order and verified web typecheck + production build.
+[✅] Worked on Homepage responsiveness for small screens types
+[✅] Setup scrin.io in my system for traking work reports
+
+
+04-Sep-2026
+[✅] Started (Client Dashboard Expansion) per Final Developer Agenda — turned the portal from a simple analysis list into a full client dashboard.
+[✅] Added Business AI Score overview widget on /dashboard (avg scorecard score from latest completed blueprint) with opportunity, automation, and recommended-service counts.
+[✅] Enriched recent analyses / blueprints list cards with AI score, opportunity count, and top problem at a glance.
+[✅] Expanded analysis detail page with portal actions: AI Consultant entry, Voice Consultant placeholder, and entitlement-ready PDF unlock UI (`pdfUnlocked` flag for Stripe).
+[✅] Surfaced consultation conversation history on the blueprint detail page from saved `ConsultationMessage` records.
+[✅] Made /dashboard/proposals real: lists service_request leads (status, problem, scope, timeline) plus generated proposal blueprints with PDF/view actions.
+[✅] Added /dashboard/consultant portal page with blueprint context selection, text-chat entry, and voice consultant “coming soon” placeholder.
+[✅] Updated user sidebar nav to include AI Consultant and point “New analysis” into the portal.
+[✅] Split dashboard types/helpers into client-safe `lib/dashboard/types.ts` so Prisma/`pg` is not bundled into browser client components (fixed `Can't resolve 'dns'` crash).
+[✅] Added /dashboard/analyze for logged-in users (same analyze workflow as public /analyze); public /analyze redirects logged-in users to the portal page; guests still use the main /analyze page.
+[✅] Updated portal CTAs (overview, blueprints, proposals, consultant) to use /dashboard/analyze instead of the public analyze page.
+[✅] Verified web typecheck after dashboard + analyze-route changes.
+[✅] Fixed main pages rendering issues that calls same page multiple times stuck in that page
+[✅] Worked on Nxtechnova Website Remove the karachi address from the website and changed pixal with new one
+
+
+07-Sep-2026
+
+[✅] Started Admin CMS turn the ops console into a real CMS — client/company 360, two-way inbox, live pages for data we already have, and empty modules for payments / subscriptions / voice.
+
+Schema + backfill for database
+[✅] Added Company, Conversation, Message; Lead Status, Lead assigned, User/Lead.companyId.
+[✅] Wrote migration `admin_cms_company_inbox` with backfill (group existing leads into Company rows; attach users/leads; do not auto-create threads).
+[✅] Synced Prisma schema to the backend worker.
+
+Admin CRM (Clients / Companies)
+[✅] Built Clients directory + Client 360 (`/admin/clients`, `/admin/clients/[id]`) — profile, company, analyses, service requests, AI transcripts, inbox, assignee.
+[✅] Built Companies directory + company 360 (`/admin/companies`, `/admin/companies/[id]`) — org record, members, analyses, assignee.
+[✅] Rewired admin nav into CRM + Delivery + Operations + Commerce; Users KPI now opens `/admin/clients` (not the user portal).
+[✅] Extended Leads CRM with company, linked user, assignee, and jumps to 360 / inbox.
 
 
 
 
-1. hero
-2. Workflow Automation
-3. — Technology
-4. — Data Science & AI
-5. — Full Spectrum AI Services
-6. — Autonomous AI Agents
-7. — Sales & Marketing AI
-8. — Proven Results
-9. — Our Process
+08-Sep-2026
+[✅] Added shared Conversation / Message APIs (`GET/POST /api/conversations`, `GET/POST …/messages`, unread count).
+[✅] Built admin Inbox (`/admin/inbox`) and client Messages (`/dashboard/messages`) on the same threads.
+[✅] Unread badges on admin Inbox and user Messages; poll while the inbox is open; mark read when a thread is opened.
+[✅] “Message client” from admin CMS / implementation creates or reuses a thread (no auto-spam on signup).
+
+[✅] Admin Analyses: show the same client report the user sees (not only tool logs); tabs for Client report / AI conversation / Pipeline.
+[✅] AI Sessions: expandable full intake transcript (Client vs TivAI) instead of a last-message snippet.
+[✅] Build requests page: plain-language cards (what they asked us to build, why, scope, “Message the client”).
+[✅] Fixed Messages unread badge not clearing when the user opens Messages.
+[✅] Lightened admin + user dashboards so they are easier to scan.
+[✅] Worked on NxtFlight home page (Hero section removed search bar, and build cta buttons, fixed navbar and added login button and connect with login page for member user).
+
+
+
+09-Sep-2026
+Implementation queue
+[✅] Added Implementation / build-request queue (`/admin/implementation`) for `service_request` leads with delivery status (REQUESTED → CLOSED), separate from sales status.
+[✅] Surfaced implementation status + assigned admin name on the client portal (overview + proposals), not internal notes.
+
+Live modules + empty commerce
+[✅] Replaced Sessions / Proposals / Analytics stubs with live data: AI Sessions from consultation transcripts, Blueprints from real Proposal rows, Analytics funnel from existing counts.
+[✅] Admin overview KPIs per agenda: users, assessments, leads, consultation/service requests, converted (WON).
+[✅] Added production empty modules for Payments, Subscriptions, and Voice (real pages, empty states, no fake numbers).
+[✅] Tested overalll site for both sides (admin, user), the workflow and conversations...
+
+Nxtechnova & NxtFlight tasks
+[✅] Worked on NxtFlight, build entertainment page, created membor login button in navbar, fixes in divistions dropdown and rebuild private treval page images gallery section
+[✅] Worked on Nxtechnova home page contant replacemts with generic content, and meetings with team about nxtechnva generic content
+
+
+
+10-Sep-2026
+AI Consultant (chat + Gemini Live voice)
+[✅] Started in-dashboard AI Consultant on `/dashboard/consultant` — text chat + real-time voice after a completed blueprint (not only intake).
+[✅] Grounded TivAI in the client’s report: business profile, scorecard, problems, opportunities, current stack, recommended services, and intake transcript.
+[✅] Added Gemini text chat (`generateContent` + function calling) via `POST /api/consultant/chat` and message history via `GET /api/consultant/messages`.
+[✅] Added Gemini Live voice: server mints an ephemeral token, browser talks over WebSocket; tool calls round-trip through `/api/consultant/live/tool`; sessions end via `/api/consultant/live/end`.
+[✅] Built background multi-agent research so chat/voice can look up live facts: Tavily (`research_web`), SerpAPI (`research_google`), Firecrawl (`fetch_page`), and Tavily+SerpAPI together (`deep_research`).
+[✅] Added Prisma models `ConsultantSession`, `ConsultantMessage`, `VoiceSession`; applied migration `consultant_gemini_live`; synced schema to the backend worker.
+[✅] Seeded/enabled Gemini in ProviderConfig + `enable-providers.ts`; documented `GEMINI_API_KEY` / `GEMINI_CHAT_MODEL` / `GEMINI_LIVE_MODEL` in `web/.env.example`.
+[✅] Wired portal entry points: user sidebar AI Consultant, dashboard CTA, analysis-detail Open chat / Open voice.
+[✅] Replaced admin Voice placeholder with live Gemini Live session list (`/admin/voice`); Analytics “Voice calls” now counts real sessions.
+[✅] Fixed `/admin` crash — `Cannot read properties of undefined (reading 'count')` from a stale Prisma client missing `voiceSession`.
+[✅] Worked on NxtFlight simplify the login page rebuild it, changes of the images in entertainment, private and small groups pages and small fixes
+
+
+11-Sep-2026
+AI Consultant voice — make the live call usable
+[✅] Fixed scratchy / doubled AI speech: Gemini was sending each audio chunk once, and the app played it twice (`inlineData` and `message.data` are the same stream). Playback is now a single 24 kHz buffer.
+[✅] Fixed unreadable captions (words glued together like “thanksforjoining”): stop trimming Gemini’s spaces, merge cumulative vs delta transcripts, wrap as You / TivAI bubbles.
+[✅] Stopped the “Hello… Hello… Thanks for joining…” loop. Two causes: (1) the mic heard TivAI on the speakers so Gemini thought the user interrupted and restarted; (2) React Strict Mode opened two Live sessions at once. One session only; speaker echo is cancelled through an HTML audio element so Chrome can do echo cancellation.
+[✅] Stopped the call from feeling half-duplex (AI finishing its whole reply before listening). Gemini’s own voice activity detection now owns turn-taking (same pattern as Gemini Live / OpenAI Realtime): mic streams continuously, speaking over TivAI cuts playback immediately.
+[✅] Turned off web research during voice. Garbled speech was triggering Tavily/SerpAPI (“Voice research failed: UK USA executive travel…”) and jumping the conversation to SEO. Voice stays on the blueprint and the live conversation; text chat still has research tools.
+[✅] Stopped duplicate voice transcripts landing in chat after a call (`/api/consultant/live/end` is now idempotent if the session already ended).
+[✅] Tightened TivAI’s talking style for both chat and voice: short consultant answers (2–4 sentences, one idea, at most one question). Chat output is capped (`maxOutputTokens: 220`) so it cannot dump the whole report on “what’s up?”.
+[✅] Voice greeting is one short hello, then wait — no report recap, no stacked “should we also / maybe / what’s most practical” menus.
+[✅] Live model stays a real Live model (`gemini-3.1-flash-live-preview`); chat can stay on `gemini-3.6-flash`. Mic is requested on the Voice call click (Chrome blocks getUserMedia from a silent effect).
+[✅] Worked on NxtFlight, Rebuild contect us page in corptraveller.com contact us page layout and make some small changes and fixes as descussed im meeting
+[✅] Worked on Nxtechnova, apply hero background to overall home page, created trusted badges in footer, created top banner for home page, apply same home font to overall website for consistancy
+
+
+14-Sep-2026
+AI Consultant (chat + real-time voice) — fixed and confirmed
+[✅] Fixed and tested Chat + Gemini Live voice on `/dashboard/consultant` (user dashboard, completed blueprint).
+[✅] Fixed context: TivAI talks from that client’s analysis, not generic answers.
+[✅] Fixed lengthy / unreadable replies — short questions and concise answers only.
+[✅] Fixed voice smoothness (Gemini-style): barge-in, readable captions, no doubled or looping speech.
+[✅] Confirmed agentic analysis in-session via other AI tools (Tavily, SerpAPI, Firecrawl, deep_research) without derailing the live call.
+
+
+21-Sep-2026
+Phase 7 — Full Admin CMS (remaining items, excluding payments/subscriptions which stay pending)
+[✅] Audited codebase against the agenda plan to confirm real status of Phases 1–10 for the client; payments (Phase 2/6) intentionally kept pending until other phases are verified.
+[✅] Added admin "Consultant Chats" (`/admin/consultant-sessions`) — lists post-blueprint AI Consultant conversations (`ConsultantSession`/`ConsultantMessage`), separate from pre-report intake chat under AI Sessions; shows Text vs Voice badge and expands to full transcript.
+[✅] Wired Voice admin page (`/admin/voice`) to link each Gemini Live session to its saved transcript on Consultant Chats (deep link via `?session=`), closing the "transcripts" admin gap without building new recording storage.
+[✅] Added assignee picker (reusable `LeadAssigneeSelect`) to Leads detail panel and to each Build request card on `/admin/implementation` — account manager can now be set/changed directly from both screens (API already supported `assignedAdminId`; only the UI was missing).
+[✅] Added missing admin KPIs: "AI chat sessions" (new `ConsultantSession` count in `metrics.ts`), "New assessments (mo.)", and "Service opportunities" — surfaced as tiles on `/admin` overview and rows on `/admin/analytics`, alongside existing Voice calls.
+[✅] Verified web typecheck, lint (fixed a `setState`-in-effect issue on the new Consultant Chats list), full test suite (16/16), and production build after all Phase 7 changes.
+[✅] Confirmed remaining Phase 7 items are payments-only (live Payments/Subscriptions data, Paid Blueprints, Blueprint Revenue, Active Subscriptions) — deferred with the rest of Stripe work; optional CMS polish (editable client/company fields, voice recording storage) left as backlog, not blocking.
+
+
+
+22-Sep-2026
+Phase 9 — Full Automated Flow & Sales Handoff (non-payment items)
+[✅] Per client instruction, left the "Get My AI Blueprint — $5" CTA exactly as-is (still opens free `/analyze`, still says $5) — untouched until Stripe (Phase 2) ships.
+[✅] Relabeled the `/contact` voice player as a clear demo ("Voice AI (demo)" / "See the demo") instead of implying it's the real live consultant; added a CTA inside the demo panel pointing to `/analyze` → real Gemini Live voice in `/dashboard/consultant`; updated the matching FAQ answer.
+[✅] Added admin email alert when a client submits "Build This With TechTivAI": new `notifyServiceRequestReceived` (client, service, problem, scope, timeline, direct admin link) sent to `ADMIN_NOTIFICATION_EMAIL` (comma-separated, optional — skips silently if unset); best-effort, never blocks lead creation.
+[✅] Closed the sales-handoff loop after a service request: success screen now offers "Book a call now" → `/contact#schedule` (Calendly) in addition to "Close".
+[✅] Fixed a real bug in the shared `Button` component: `onClick` was silently dropped whenever `href` was also passed (Link branch never forwarded it) — now works on both branches.
+[✅] Verified Calendly embed already handles missing `NEXT_PUBLIC_CALENDLY_URL` gracefully (clear setup message instead of a broken widget); documented the env var is required for `/contact#schedule` to actually book calls in production.
+[✅] Reviewed remaining "Talk to AI Consultant" CTAs — confirmed `/analyze` is itself the AI consultant chat experience, so no change needed there; left the retired `/old-home` voice section untouched (not part of the live funnel).
+[✅] Verified web typecheck, lint, full test suite (16/16), and production build after all Phase 9 changes.
+
+
+
+
+
+

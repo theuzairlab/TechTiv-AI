@@ -13,6 +13,17 @@ export type MagicLinkEmailParams = {
   magicLinkUrl: string;
 };
 
+export type ServiceRequestEmailParams = {
+  clientName: string;
+  clientEmail: string;
+  service: string;
+  domain: string | null;
+  problem: string | null;
+  estimatedScope: string | null;
+  estimatedTimelineWeeks: number | null;
+  adminUrl: string;
+};
+
 export function analysisReadySubject(domain: string): string {
   return `Your TechTivAI blueprint for ${domain} is ready`;
 }
@@ -137,6 +148,72 @@ export function buildMagicLinkText(params: MagicLinkEmailParams): string {
     "",
     "If you didn’t request this, ignore this email.",
   ].join("\n");
+}
+
+export function serviceRequestSubject(params: ServiceRequestEmailParams): string {
+  return `New build request: ${params.service}${params.domain ? ` (${params.domain})` : ""}`;
+}
+
+export function buildServiceRequestHtml(params: ServiceRequestEmailParams): string {
+  const detailRow = (label: string, value: string) =>
+    `<p style="margin:0 0 8px;color:#334155;font-size:14px;"><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</p>`;
+
+  return `<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0f172a;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;">
+          <tr>
+            <td style="padding:32px 32px 16px;background:linear-gradient(135deg,#06b6d4,#84cc16);">
+              <p style="margin:0;color:#0f172a;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">TechTivAI</p>
+              <h1 style="margin:12px 0 0;color:#0f172a;font-size:22px;line-height:1.3;">New "Build This With TechTivAI" request</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px;">
+              ${detailRow("Client", `${params.clientName} <${params.clientEmail}>`)}
+              ${detailRow("Service requested", params.service)}
+              ${params.domain ? detailRow("Business", params.domain) : ""}
+              ${params.problem ? detailRow("Problem", params.problem) : ""}
+              ${params.estimatedScope ? detailRow("Suggested scope", params.estimatedScope) : ""}
+              ${
+                params.estimatedTimelineWeeks != null
+                  ? detailRow("Suggested timeline", `${params.estimatedTimelineWeeks} week${params.estimatedTimelineWeeks === 1 ? "" : "s"}`)
+                  : ""
+              }
+              <a href="${escapeHtml(params.adminUrl)}"
+                 style="display:inline-block;margin-top:16px;background:#0f172a;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 22px;border-radius:10px;">
+                Open in admin
+              </a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+export function buildServiceRequestText(params: ServiceRequestEmailParams): string {
+  const lines = [
+    "New build request from a client's blueprint.",
+    "",
+    `Client: ${params.clientName} <${params.clientEmail}>`,
+    `Service requested: ${params.service}`,
+  ];
+  if (params.domain) lines.push(`Business: ${params.domain}`);
+  if (params.problem) lines.push(`Problem: ${params.problem}`);
+  if (params.estimatedScope) lines.push(`Suggested scope: ${params.estimatedScope}`);
+  if (params.estimatedTimelineWeeks != null) {
+    lines.push(
+      `Suggested timeline: ${params.estimatedTimelineWeeks} week${params.estimatedTimelineWeeks === 1 ? "" : "s"}`,
+    );
+  }
+  lines.push("", "Open in admin:", params.adminUrl);
+  return lines.join("\n");
 }
 
 function escapeHtml(value: string): string {

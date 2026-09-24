@@ -80,7 +80,7 @@ export function ContactPageView() {
         description="AI onboarding, voice consultation, calendar scheduling, and manual proposal requests — every path leads to a tailored automation roadmap for your business."
         features={[
           { icon: Sparkles, label: "AI-assisted onboarding" },
-          { icon: Mic, label: "Voice AI consultation" },
+          { icon: Mic, label: "Voice AI demo" },
           { icon: MessageSquare, label: "Proposal requests" },
         ]}
       />
@@ -135,14 +135,14 @@ export function ContactPageView() {
 
       <SectionWrapper id="voice" className="bg-grid pt-0 scroll-mt-24">
         <SectionHeading
-          label="— Voice AI"
+          label="— Voice AI (demo)"
           title={
             <>
-              Talk to your{" "}
-              <span className="text-gradient-cyan">AI consultant</span>
+              See how a voice{" "}
+              <span className="text-gradient-cyan">consultation flows</span>
             </>
           }
-          description="Natural voice conversation — business analysis, workflow recommendations, pricing estimation, and meeting scheduling in real time."
+          description="A scripted preview of the conversation — business analysis, workflow recommendations, and pricing estimation. For a real live call grounded in your business, get your free blueprint and open AI Consultant in your dashboard."
         />
         <VoiceConsultantUI />
       </SectionWrapper>
@@ -344,7 +344,7 @@ export function ContactPageView() {
                 Start AI Discovery
               </Button>
               <Button href="#voice" variant="secondary" size="lg">
-                Talk to AI Consultant
+                See voice AI demo
               </Button>
             </div>
           </div>

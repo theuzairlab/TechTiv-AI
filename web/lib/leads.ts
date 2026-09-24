@@ -1,10 +1,12 @@
 import { z } from "zod";
+import { IMPLEMENTATION_STATUSES } from "@/lib/implementation";
 
 export const LEAD_SOURCES = [
   "contact_form",
   "discovery",
   "booking",
   "cta",
+  "service_request",
 ] as const;
 
 export type LeadSource = (typeof LEAD_SOURCES)[number];
@@ -44,10 +46,21 @@ export const updateLeadAdminSchema = z
   .object({
     status: z.enum(LEAD_STATUSES).optional(),
     notes: z.string().trim().max(5000).optional().or(z.literal("")),
+    implementationStatus: z.enum(IMPLEMENTATION_STATUSES).nullable().optional(),
+    assignedAdminId: z.string().min(1).nullable().optional(),
+    companyId: z.string().min(1).nullable().optional(),
   })
-  .refine((data) => data.status !== undefined || data.notes !== undefined, {
-    message: "Provide a status or notes update",
-  });
+  .refine(
+    (data) =>
+      data.status !== undefined ||
+      data.notes !== undefined ||
+      data.implementationStatus !== undefined ||
+      data.assignedAdminId !== undefined ||
+      data.companyId !== undefined,
+    {
+      message: "Provide a status, notes, implementation, assignee, or company update",
+    },
+  );
 
 export type UpdateLeadAdminInput = z.infer<typeof updateLeadAdminSchema>;
 
@@ -56,6 +69,7 @@ export const leadSourceLabels: Record<LeadSource, string> = {
   discovery: "AI Discovery",
   booking: "Strategy booking",
   cta: "CTA",
+  service_request: "Service request",
 };
 
 export const leadStatusLabels: Record<LeadStatus, string> = {

@@ -1,29 +1,40 @@
 import { Suspense } from "react";
 import { AdminLeadsManager } from "@/components/pages/admin/admin-leads-manager";
 import { prisma } from "@/lib/prisma";
+import { listAdminAssignees } from "@/lib/admin/clients";
 import type { LeadStatus } from "@/lib/leads";
 
 export async function AdminLeadsPageView() {
-  const leads = await prisma.lead.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 200,
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      company: true,
-      phone: true,
-      industry: true,
-      interest: true,
-      message: true,
-      notes: true,
-      status: true,
-      source: true,
-      discoveryAnswers: true,
-      metadata: true,
-      createdAt: true,
-    },
-  });
+  const [leads, assignees] = await Promise.all([
+    prisma.lead.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 200,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        company: true,
+        phone: true,
+        industry: true,
+        interest: true,
+        message: true,
+        notes: true,
+        status: true,
+        source: true,
+        discoveryAnswers: true,
+        metadata: true,
+        createdAt: true,
+        userId: true,
+        companyId: true,
+        implementationStatus: true,
+        assignedAdminId: true,
+        user: { select: { id: true, name: true } },
+        assignedAdmin: { select: { name: true } },
+        companyRecord: { select: { id: true, name: true } },
+      },
+    }),
+    listAdminAssignees(),
+  ]);
 
   const rows = leads.map((lead) => ({
     id: lead.id,
@@ -40,6 +51,12 @@ export async function AdminLeadsPageView() {
     discoveryAnswers: lead.discoveryAnswers,
     metadata: lead.metadata,
     createdAt: lead.createdAt.toISOString(),
+    userId: lead.userId,
+    userName: lead.user?.name ?? null,
+    companyId: lead.companyId,
+    companyRecordName: lead.companyRecord?.name ?? null,
+    assignedAdminId: lead.assignedAdminId,
+    assignedAdminName: lead.assignedAdmin?.name ?? null,
   }));
 
   const statusCounts = leads.reduce(
@@ -52,7 +69,11 @@ export async function AdminLeadsPageView() {
 
   return (
     <Suspense fallback={<div className="text-sm text-text-muted">Loading leads…</div>}>
-      <AdminLeadsManager initialLeads={rows} statusCounts={statusCounts} />
+      <AdminLeadsManager
+        initialLeads={rows}
+        statusCounts={statusCounts}
+        assignees={assignees}
+      />
     </Suspense>
   );
 }

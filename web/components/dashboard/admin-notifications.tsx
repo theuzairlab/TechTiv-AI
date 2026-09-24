@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bell, CheckCheck } from "lucide-react";
-import { formatRelativeTime, getSourceLabel } from "@/lib/leads-format";
+import { getSourceLabel } from "@/lib/leads-format";
+import { RelativeTime } from "@/components/ui/relative-time";
 import { cn } from "@/lib/utils";
 
 const POLL_INTERVAL_MS = 3 * 60 * 1000;
@@ -155,7 +156,7 @@ export function AdminNotifications({
                           </p>
                         </div>
                         <span className="shrink-0 text-[10px] text-text-muted">
-                          {formatRelativeTime(lead.createdAt)}
+                          <RelativeTime value={lead.createdAt} />
                         </span>
                       </div>
                     </Link>

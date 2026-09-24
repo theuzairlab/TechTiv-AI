@@ -6,7 +6,8 @@ import { requireUserSession } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "My Portal",
-  description: "Your TechTivAI portal — blueprints, proposals, and consultation status.",
+  description:
+    "Your TechTivAI portal — AI scores, blueprints, proposals, and consultation status.",
   robots: { index: false, follow: false },
 };
 
@@ -14,7 +15,9 @@ type DashboardPageProps = {
   searchParams: Promise<{ analysisId?: string }>;
 };
 
-export default async function UserDashboardPage({ searchParams }: DashboardPageProps) {
+export default async function UserDashboardPage({
+  searchParams,
+}: DashboardPageProps) {
   const session = await requireUserSession();
   const params = await searchParams;
 
@@ -31,8 +34,12 @@ export default async function UserDashboardPage({ searchParams }: DashboardPageP
         blueprints: stats.blueprints,
         proposals: stats.proposals,
         inFlight: stats.inFlight,
+        serviceRequests: stats.serviceRequests,
+        openServiceRequests: stats.openServiceRequests,
       }}
       recent={stats.recent}
+      highlight={stats.highlight}
+      serviceRequestPreview={stats.serviceRequestPreview}
     />
   );
 }

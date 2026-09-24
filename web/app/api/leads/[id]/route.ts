@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/leads-api";
 import { updateLeadAdminSchema } from "@/lib/leads";
 import { prisma } from "@/lib/prisma";
+import { logAdminEvent } from "@/lib/admin/event-log";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -18,6 +19,9 @@ const leadSelect = {
   message: true,
   notes: true,
   status: true,
+  implementationStatus: true,
+  assignedAdminId: true,
+  companyId: true,
   source: true,
   discoveryAnswers: true,
   metadata: true,
@@ -72,8 +76,23 @@ export async function PATCH(request: Request, context: RouteContext) {
       data: {
         ...(data.status !== undefined ? { status: data.status } : {}),
         ...(data.notes !== undefined ? { notes: data.notes || null } : {}),
+        ...(data.implementationStatus !== undefined
+          ? { implementationStatus: data.implementationStatus }
+          : {}),
+        ...(data.assignedAdminId !== undefined
+          ? { assignedAdminId: data.assignedAdminId }
+          : {}),
+        ...(data.companyId !== undefined ? { companyId: data.companyId } : {}),
       },
       select: leadSelect,
+    });
+
+    await logAdminEvent({
+      adminUserId: auth.session.user.id,
+      action: "lead.update",
+      targetType: "lead",
+      targetId: id,
+      metadata: data,
     });
 
     return NextResponse.json({ lead });

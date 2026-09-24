@@ -9,6 +9,7 @@ import {
   type AnalysisPreviewPayload,
 } from "@/lib/analysis/client";
 import type { AnalysisStatusPayload } from "@/lib/analysis/progress";
+import { cn } from "@/lib/utils";
 
 type Phase =
   | { kind: "consultation"; session?: Session | null }
@@ -29,7 +30,15 @@ type Phase =
 type Session = { analysisId: string; guestAccessToken: string };
 const SESSION_KEY = "techtivai_analysis_session_v2";
 
-export function AnalyzePageView() {
+type AnalyzePageViewProps = {
+  /** Public marketing page vs in-portal shell. Same backend workflow. */
+  variant?: "public" | "dashboard";
+};
+
+export function AnalyzePageView({
+  variant = "public",
+}: AnalyzePageViewProps) {
+  const isDashboard = variant === "dashboard";
   const [error, setError] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>({
     kind: "consultation",
@@ -71,11 +80,20 @@ export function AnalyzePageView() {
         });
         window.sessionStorage.removeItem(SESSION_KEY);
       } catch {
-        setError("Analysis finished but preview could not load. Try signing in.");
+        setError(
+          isDashboard
+            ? "Analysis finished but preview could not load. Open Blueprints or try again."
+            : "Analysis finished but preview could not load. Try signing in.",
+        );
       }
     },
-    [phase],
+    [phase, isDashboard],
   );
+
+  const completeHref =
+    phase.kind === "complete"
+      ? `/dashboard/analyses/${phase.analysisId}`
+      : "/dashboard";
 
   const loginUrl =
     phase.kind === "complete"
@@ -83,25 +101,65 @@ export function AnalyzePageView() {
       : "/login";
 
   return (
-    <div className="relative min-h-screen overflow-hidden pb-24 pt-24 sm:pt-28">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--accent-cyan)_18%,transparent),transparent_55%)]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,color-mix(in_srgb,var(--accent-lime)_8%,transparent),transparent_45%)]"
-      />
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid opacity-15" />
+    <div
+      className={cn(
+        "relative overflow-hidden",
+        isDashboard ? "pb-8" : "min-h-screen pb-24 pt-24 sm:pt-28",
+      )}
+    >
+      {!isDashboard ? (
+        <>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--accent-cyan)_18%,transparent),transparent_55%)]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,color-mix(in_srgb,var(--accent-lime)_8%,transparent),transparent_45%)]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-grid opacity-15"
+          />
+        </>
+      ) : null}
 
-      <div className="relative mx-auto max-w-3xl px-5 sm:px-8">
-        <header className="mb-8 text-center">
-          <p className="s-label">— AI business consultant</p>
-          <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-text-primary sm:text-4xl">
-            Understand the business.{" "}
-            <span className="text-gradient-cyan">Build the right system.</span>
+      <div
+        className={cn(
+          "relative",
+          isDashboard ? "mx-auto max-w-3xl" : "mx-auto max-w-3xl px-5 sm:px-8",
+        )}
+      >
+        <header className={cn("mb-8", isDashboard ? "text-left" : "text-center")}>
+          <p className="s-label">
+            {isDashboard ? "— New analysis" : "— AI business consultant"}
+          </p>
+          <h1
+            className={cn(
+              "mt-2 font-display font-semibold tracking-tight text-text-primary",
+              isDashboard
+                ? "text-3xl md:text-4xl"
+                : "text-3xl sm:text-4xl",
+            )}
+          >
+            {isDashboard ? (
+              <>
+                Analyze a business.{" "}
+                <span className="text-gradient-cyan">Build the right system.</span>
+              </>
+            ) : (
+              <>
+                Understand the business.{" "}
+                <span className="text-gradient-cyan">Build the right system.</span>
+              </>
+            )}
           </h1>
-          <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-text-muted sm:text-lg">
+          <p
+            className={cn(
+              "mt-3 text-base leading-relaxed text-text-muted sm:text-lg",
+              isDashboard ? "max-w-2xl" : "mx-auto max-w-xl",
+            )}
+          >
             Answer a few focused questions. We’ll research the evidence and
             return a practical AI roadmap.
           </p>
@@ -114,40 +172,41 @@ export function AnalyzePageView() {
         ) : null}
 
         <main>
-            {phase.kind === "consultation" ? (
-              <AgentConsultation
-                restoredSession={phase.session}
-                onSession={(session) =>
-                  persist({ kind: "consultation", session })
-                }
-                onConfirmed={(session, companyLabel) =>
-                  persist({
-                    kind: "processing",
-                    ...session,
-                    companyLabel,
-                  })
-                }
-              />
-            ) : null}
+          {phase.kind === "consultation" ? (
+            <AgentConsultation
+              restoredSession={phase.session}
+              onSession={(session) =>
+                persist({ kind: "consultation", session })
+              }
+              onConfirmed={(session, companyLabel) =>
+                persist({
+                  kind: "processing",
+                  ...session,
+                  companyLabel,
+                })
+              }
+            />
+          ) : null}
 
-            {phase.kind === "processing" ? (
-              <IntelligenceConsole
-                analysisId={phase.analysisId}
-                guestAccessToken={phase.guestAccessToken}
-                companyLabel={phase.companyLabel}
-                onComplete={handleComplete}
-              />
-            ) : null}
+          {phase.kind === "processing" ? (
+            <IntelligenceConsole
+              analysisId={phase.analysisId}
+              guestAccessToken={phase.guestAccessToken}
+              companyLabel={phase.companyLabel}
+              onComplete={handleComplete}
+            />
+          ) : null}
 
-            {phase.kind === "complete" ? (
-              <AnalysisTeaserResults
-                preview={phase.preview}
-                email={phase.email}
-                onRequestLogin={() => {
-                  window.location.href = loginUrl;
-                }}
-              />
-            ) : null}
+          {phase.kind === "complete" ? (
+            <AnalysisTeaserResults
+              preview={phase.preview}
+              email={phase.email}
+              authenticated={isDashboard}
+              onRequestLogin={() => {
+                window.location.href = isDashboard ? completeHref : loginUrl;
+              }}
+            />
+          ) : null}
         </main>
       </div>
     </div>

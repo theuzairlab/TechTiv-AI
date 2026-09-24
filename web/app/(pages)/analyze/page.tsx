@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { AnalyzePageView } from "@/components/analysis/analyze-page-view";
+import { getSession } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "Analyze your business",
@@ -7,6 +9,11 @@ export const metadata: Metadata = {
     "Start a free AI business intelligence session — no email required. Watch live research and unlock your full blueprint when ready.",
 };
 
-export default function AnalyzePage() {
-  return <AnalyzePageView />;
+export default async function AnalyzePage() {
+  const session = await getSession();
+  if (session) {
+    redirect("/dashboard/analyze");
+  }
+
+  return <AnalyzePageView variant="public" />;
 }

@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import { AdminPlaceholderPage } from "@/components/pages/admin/admin-placeholder-page";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Proposals",
+  title: "Blueprints",
   robots: { index: false, follow: false },
 };
 
-export default function AdminProposalsPage() {
-  return (
-    <AdminPlaceholderPage
-      title="Proposal generation"
-      description="Automation proposals, implementation plans, and PDF export status."
-    />
-  );
+export default function AdminProposalsRedirectPage() {
+  redirect("/admin/blueprints");
 }

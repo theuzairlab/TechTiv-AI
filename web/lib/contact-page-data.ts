@@ -30,10 +30,10 @@ export const contactPaths: ContactPath[] = [
   {
     id: "voice",
     icon: Mic,
-    title: "Voice AI consultation",
+    title: "Voice AI consultation (demo)",
     description:
-      "Talk to our AI consultant — business analysis, workflow recommendations, pricing estimates, and scheduling.",
-    cta: "Talk to AI",
+      "Preview how a voice consultation flows. For a real live voice call grounded in your business, get your free blueprint first.",
+    cta: "See the demo",
     anchor: "#voice",
   },
   {
@@ -117,7 +117,7 @@ export const contactFaqs = [
   {
     question: "How does the voice AI consultant work?",
     answer:
-      "Click 'Talk To Your AI Consultant' to start a voice session. The AI asks discovery questions, analyzes your needs, recommends automation systems, estimates pricing, and can book a follow-up meeting — all in natural conversation.",
+      "The player on this page is a scripted demo showing the conversation flow. For a real, live voice call — grounded in your actual business, tech stack, and blueprint — start a free analysis and open AI Consultant from your dashboard once it's ready.",
   },
   {
     question: "How quickly will I receive a proposal?",

@@ -42,20 +42,25 @@ export function Button({
   size,
   href,
   children,
+  onClick,
   ...props
 }: ButtonProps) {
   const classes = cn(buttonVariants({ variant, size }), className);
 
   if (href) {
     return (
-      <Link href={href} className={classes}>
+      <Link
+        href={href}
+        className={classes}
+        onClick={onClick as unknown as React.MouseEventHandler<HTMLAnchorElement>}
+      >
         {children}
       </Link>
     );
   }
 
   return (
-    <button type="button" className={classes} {...props}>
+    <button type="button" className={classes} onClick={onClick} {...props}>
       {children}
     </button>
   );

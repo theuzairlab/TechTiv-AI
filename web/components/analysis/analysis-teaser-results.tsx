@@ -5,16 +5,20 @@ import { Lock, ArrowRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import type { AnalysisPreviewPayload } from "@/lib/analysis/client";
+import { formatUsd } from "@/lib/format-display";
 
 type AnalysisTeaserResultsProps = {
   preview: AnalysisPreviewPayload;
   email?: string | null;
+  /** Logged-in portal users already have access — CTA opens the full blueprint. */
+  authenticated?: boolean;
   onRequestLogin: () => void;
 };
 
 export function AnalysisTeaserResults({
   preview,
   email,
+  authenticated = false,
   onRequestLogin,
 }: AnalysisTeaserResultsProps) {
   const { teaser } = preview;
@@ -154,7 +158,7 @@ export function AnalysisTeaserResults({
             title="ROI & investment model"
             description={
               teaser.costEstimateUSD != null
-                ? `Investment from $${teaser.costEstimateUSD.toLocaleString()} — unlock full breakdown.`
+                ? `Investment from ${formatUsd(teaser.costEstimateUSD)} — unlock full breakdown.`
                 : "Unlock detailed pricing breakdown and timeline phases."
             }
           />
@@ -165,22 +169,33 @@ export function AnalysisTeaserResults({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="font-display text-lg font-semibold text-text-primary">
-              Unlock your advanced report
+              {authenticated
+                ? "Open your full blueprint"
+                : "Unlock your advanced report"}
             </h3>
             <p className="mt-1 text-base text-text-muted">
-              Sign in to access the full problems-and-solutions breakdown,
-              implementation timeline, and PDF.
-              {email ? (
+              {authenticated ? (
                 <>
-                  {" "}
-                  We&apos;ll send a magic link to{" "}
-                  <strong className="text-text-primary">{email}</strong>.
+                  View the complete problems-and-solutions breakdown,
+                  implementation timeline, and PDF in your portal.
                 </>
-              ) : null}
+              ) : (
+                <>
+                  Sign in to access the full problems-and-solutions breakdown,
+                  implementation timeline, and PDF.
+                  {email ? (
+                    <>
+                      {" "}
+                      We&apos;ll send a magic link to{" "}
+                      <strong className="text-text-primary">{email}</strong>.
+                    </>
+                  ) : null}
+                </>
+              )}
             </p>
           </div>
           <Button onClick={onRequestLogin}>
-            Sign in for full report
+            {authenticated ? "Open full report" : "Sign in for full report"}
             <ArrowRight size={16} className="ml-1" />
           </Button>
         </div>

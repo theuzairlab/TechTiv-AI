@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AnalysisDetail } from "./analyses";
+import type { AnalysisDetail } from "./types";
 import { buildProposalPdf } from "./build-pdf";
 
 describe("buildProposalPdf", () => {
@@ -13,6 +13,8 @@ describe("buildProposalPdf", () => {
       completedAt: new Date().toISOString(),
       leadEmail: "owner@example.com",
       evidence: [],
+      consultation: [],
+      pdfUnlocked: true,
       proposal: {
         id: "proposal-1",
         status: "SENT",

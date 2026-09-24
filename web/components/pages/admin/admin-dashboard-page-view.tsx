@@ -70,30 +70,23 @@ export async function AdminDashboardPageView({ session }: AdminDashboardPageView
             <span className="text-gradient-cyan">{session.user.name.split(" ")[0]}</span>
           </>
         }
-        description="Monitor leads, pipeline health, provider spend, and analysis operations from one place."
+        description="What needs attention, then a snapshot of the pipeline."
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Users" value={metrics.users} href="/dashboard" />
-        <StatCard
-          label="Total leads"
-          value={metrics.leads}
-          href="/admin/leads"
-        />
         <StatCard
           label="New leads"
           value={metrics.newLeads}
           href="/admin/leads?status=NEW"
-          highlight={metrics.newLeads > 0}
+          hint="Waiting in CRM"
         />
         <StatCard
-          label="Analyses"
-          value={metrics.analyses}
-          href="/admin/analyses"
+          label="Build requests"
+          value={metrics.consultationRequests}
+          href="/admin/implementation"
+          highlight={metrics.consultationRequests > 0}
+          hint="Clients asking us to build"
         />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="In-flight analyses"
           value={metrics.inFlightAnalyses}
@@ -106,15 +99,51 @@ export async function AdminDashboardPageView({ session }: AdminDashboardPageView
           href="/admin/analyses?status=FAILED"
           highlight={metrics.failedAnalyses > 0}
         />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Clients" value={metrics.users} href="/admin/clients" />
         <StatCard
-          label="Completed proposals"
+          label="Completed reports"
           value={metrics.completedProposals}
-          href="/admin/proposals"
+          href="/admin/analyses?status=DONE"
+        />
+        <StatCard
+          label="Won clients"
+          value={metrics.convertedClients}
+          href="/admin/leads?status=WON"
         />
         <StatCard
           label="Provider spend"
           value={`$${metrics.providerSpendUSD.toFixed(2)}`}
           href="/admin/providers"
+        />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="New assessments (mo.)"
+          value={metrics.newAssessments}
+          href="/admin/analyses"
+          hint="Started this month"
+        />
+        <StatCard
+          label="AI chat sessions"
+          value={metrics.aiChatSessions}
+          href="/admin/consultant-sessions"
+          hint="Dashboard consultant"
+        />
+        <StatCard
+          label="Voice calls"
+          value={metrics.voiceCalls}
+          href="/admin/voice"
+          hint="Gemini Live sessions"
+        />
+        <StatCard
+          label="Service opportunities"
+          value={metrics.serviceOpportunities}
+          href="/admin/implementation"
+          hint="Open build requests"
         />
       </div>
 
@@ -328,11 +357,13 @@ function StatCard({
   value,
   href,
   highlight,
+  hint,
 }: {
   label: string;
   value: number | string;
   href: string;
   highlight?: boolean;
+  hint?: string;
 }) {
   return (
     <Link href={href} className="no-underline">
@@ -346,6 +377,7 @@ function StatCard({
           {label}
         </p>
         <p className="mt-2 font-display text-2xl font-bold text-text-primary">{value}</p>
+        {hint ? <p className="mt-1 text-xs text-text-muted">{hint}</p> : null}
       </GlassPanel>
     </Link>
   );

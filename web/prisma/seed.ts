@@ -14,6 +14,7 @@ const PROVIDERS = [
   { provider: "tavily", monthlyBudgetUSD: 40, rateLimitPerMinute: 30 },
   { provider: "serpapi", monthlyBudgetUSD: 40, rateLimitPerMinute: 30 },
   { provider: "claude", monthlyBudgetUSD: 200, rateLimitPerMinute: 20 },
+  { provider: "gemini", monthlyBudgetUSD: 100, rateLimitPerMinute: 30 },
   { provider: "resend", monthlyBudgetUSD: 20, rateLimitPerMinute: 60 },
 ] as const;
 

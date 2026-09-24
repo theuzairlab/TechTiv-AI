@@ -53,7 +53,7 @@ export function LandingChatWidget() {
     if (!trimmed) return;
 
     setShowQuickActions(false);
-    const time = new Date().toLocaleTimeString([], {
+    const time = new Date().toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -73,7 +73,7 @@ export function LandingChatWidget() {
           id: `ai-${prev.length}`,
           role: "ai",
           text: getReply(trimmed),
-          time: new Date().toLocaleTimeString([], {
+          time: new Date().toLocaleTimeString("en-US", {
             hour: "2-digit",
             minute: "2-digit",
           }),

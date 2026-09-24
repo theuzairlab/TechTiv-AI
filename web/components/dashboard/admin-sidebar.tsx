@@ -3,17 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
-import { adminNavItems } from "@/lib/admin-nav";
+import { adminNavItems, adminNavSections } from "@/lib/admin-nav";
 import { cn } from "@/lib/utils";
 
 type AdminSidebarProps = {
   newLeadsCount?: number;
+  inboxUnreadCount?: number;
   mobileOpen?: boolean;
   onMobileClose?: () => void;
 };
 
 export function AdminSidebar({
   newLeadsCount = 0,
+  inboxUnreadCount = 0,
   mobileOpen = false,
   onMobileClose,
 }: AdminSidebarProps) {
@@ -35,53 +37,63 @@ export function AdminSidebar({
               Admin Center
             </p>
             <p className="text-[10px] font-semibold uppercase tracking-wide text-brand">
-              Internal
+              CMS
             </p>
           </div>
         </Link>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 lg:px-4">
-        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
-          Navigation
-        </p>
-        <ul className="space-y-1">
-          {adminNavItems.map((item) => {
-            const active = item.exact
-              ? pathname === item.href
-              : pathname === item.href || pathname.startsWith(`${item.href}/`);
-            const Icon = item.icon;
-            const badge =
-              item.badgeKey === "newLeads" && newLeadsCount > 0
-                ? newLeadsCount
-                : null;
+        {adminNavSections.map((section) => {
+          const items = adminNavItems.filter((item) => item.section === section.id);
+          if (items.length === 0) return null;
+          return (
+            <div key={section.id} className="mb-4">
+              <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                {section.label}
+              </p>
+              <ul className="space-y-1">
+                {items.map((item) => {
+                  const active = item.exact
+                    ? pathname === item.href
+                    : pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const Icon = item.icon;
+                  const badge =
+                    item.badgeKey === "newLeads"
+                      ? newLeadsCount
+                      : item.badgeKey === "inbox"
+                        ? inboxUnreadCount
+                        : 0;
 
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={onMobileClose}
-                  className={cn(
-                    "flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-sm font-medium no-underline transition-colors",
-                    active
-                      ? "border border-brand-cyan/25 bg-brand-cyan/10 text-brand-cyan"
-                      : "text-text-muted hover:bg-bg-secondary/60 hover:text-text-primary",
-                  )}
-                >
-                  <span className="flex items-center gap-2.5">
-                    <Icon size={16} />
-                    {item.label}
-                  </span>
-                  {badge ? (
-                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-cyan px-1.5 text-[10px] font-bold text-on-accent">
-                      {badge > 99 ? "99+" : badge}
-                    </span>
-                  ) : null}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={onMobileClose}
+                        className={cn(
+                          "flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-sm font-medium no-underline transition-colors",
+                          active
+                            ? "border border-brand-cyan/25 bg-brand-cyan/10 text-brand-cyan"
+                            : "text-text-muted hover:bg-bg-secondary/60 hover:text-text-primary",
+                        )}
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <Icon size={16} />
+                          {item.label}
+                        </span>
+                        {badge > 0 ? (
+                          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-cyan px-1.5 text-[10px] font-bold text-on-accent">
+                            {badge > 99 ? "99+" : badge}
+                          </span>
+                        ) : null}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
       </nav>
 
       <div className="border-t border-border-subtle p-4">

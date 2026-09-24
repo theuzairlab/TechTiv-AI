@@ -69,6 +69,7 @@ const synthesis: SynthesisResult = {
       title: "Workflow",
       outcome: "Faster handling",
       workflow: "Lead routing",
+      type: "automation_opportunity",
       impact: "high",
       effort: "medium",
       integrations: ["CRM"],
@@ -76,6 +77,18 @@ const synthesis: SynthesisResult = {
     },
   ],
   stackArchitecture: [],
+  socialGrowth: [],
+  recommendedServices: [
+    {
+      problem: "Lead routing is manual.",
+      service: "AI Automation & Workflow",
+      techStack: ["CRM"],
+      estimatedScope: "Automate lead routing.",
+      estimatedTimelineWeeks: 3,
+      ctaLabel: "Build This With TechTivAI",
+    },
+  ],
+  currentTechStack: [],
   roadmap: [
     {
       phase: "Foundation",

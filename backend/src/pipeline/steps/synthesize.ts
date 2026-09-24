@@ -35,6 +35,7 @@ const STUB_SYNTHESIS: SynthesisResult = {
       title: "Lead response system",
       outcome: "Faster, measurable lead follow-up",
       workflow: "Lead capture and qualification",
+      type: "automation_opportunity",
       impact: "high",
       effort: "medium",
       integrations: ["CRM", "Email"],
@@ -43,6 +44,20 @@ const STUB_SYNTHESIS: SynthesisResult = {
   ],
   stackArchitecture: [
     { layer: "CRM", recommendation: "HubSpot", reason: "Central workflow record", evidenceRefs: [REF] },
+  ],
+  socialGrowth: [],
+  recommendedServices: [
+    {
+      problem: "Lead routing is not consistently automated.",
+      service: "AI Automation & Workflow",
+      techStack: ["HubSpot", "n8n"],
+      estimatedScope: "Automate lead capture, qualification, and routing into the CRM.",
+      estimatedTimelineWeeks: 4,
+      ctaLabel: "Build This With TechTivAI",
+    },
+  ],
+  currentTechStack: [
+    { category: "CRM", tool: "HubSpot", notes: "Detected live on the current website." },
   ],
   roadmap: [
     { phase: "Foundation", objective: "Instrument the funnel", deliverables: ["CRM lifecycle", "Measurement baseline"], dependencies: [], estimatedWeeks: 2 },

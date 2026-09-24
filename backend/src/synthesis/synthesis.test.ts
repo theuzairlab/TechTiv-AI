@@ -38,6 +38,7 @@ const validSynthesis = {
       title: "Lead routing",
       outcome: "Faster response",
       workflow: "Lead qualification",
+      type: "automation_opportunity",
       impact: "high",
       effort: "medium",
       integrations: ["CRM"],
@@ -52,6 +53,18 @@ const validSynthesis = {
       evidenceRefs: ["ev-1"],
     },
   ],
+  socialGrowth: [],
+  recommendedServices: [
+    {
+      problem: "Routing is manual.",
+      service: "AI Automation & Workflow",
+      techStack: ["HubSpot"],
+      estimatedScope: "Automate lead routing.",
+      estimatedTimelineWeeks: 3,
+      ctaLabel: "Build This With TechTivAI",
+    },
+  ],
+  currentTechStack: [],
   roadmap: [
     {
       phase: "Foundation",

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GlassPanel } from "@/components/ui/glass-panel";
@@ -145,8 +146,18 @@ export function VoiceConsultantUI() {
         ) : null}
 
         <p className="mt-4 text-center text-[10px] text-text-muted sm:text-xs">
-          Demo simulation — live Vapi voice connects in Phase 4
+          Scripted demo — shows the conversation flow, not a live AI call.
         </p>
+        <div className="mt-3 w-full rounded-xl border border-brand-cyan/20 bg-brand-cyan/5 p-3 text-center">
+          <p className="text-xs text-text-muted">
+            Want the real thing? Get your free blueprint, then talk live with
+            TivAI (Gemini Live voice) in your dashboard.
+          </p>
+          <Button href="/analyze" size="sm" variant="outline" className="mt-2.5">
+            Get my blueprint
+            <ArrowRight size={14} className="ml-1.5" />
+          </Button>
+        </div>
       </GlassPanel>
 
       <div className="flex flex-col gap-6">

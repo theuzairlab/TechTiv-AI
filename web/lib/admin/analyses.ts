@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import type { AnalysisStatus } from "@/lib/generated/prisma/client";
 import { retryFailedAnalysis as retryFailedAnalysisShared } from "@/lib/analysis/retry";
+import { asReportV2, type ReportV2 } from "@/lib/report-v2/types";
+import {
+  averageScorecardScore,
+  type ConsultationHistoryMessage,
+} from "@/lib/dashboard/types";
 
 export type AdminAnalysisListItem = {
   id: string;
@@ -12,8 +17,14 @@ export type AdminAnalysisListItem = {
   leadId: string;
   leadName: string;
   leadEmail: string;
+  leadUserId: string | null;
+  companyId: string | null;
+  companyName: string | null;
   proposalStatus: string | null;
   costEstimateUSD: number | null;
+  aiScore: number | null;
+  topFinding: string | null;
+  opportunityCount: number;
 };
 
 export type AdminAnalysisDetail = {
@@ -31,6 +42,7 @@ export type AdminAnalysisDetail = {
     company: string | null;
     status: string;
     userId: string | null;
+    companyId: string | null;
   };
   proposal: {
     id: string;
@@ -40,7 +52,9 @@ export type AdminAnalysisDetail = {
     pdfUrl: string | null;
     narrativeText: string | null;
     strategyJson: unknown;
+    reportJson: ReportV2 | null;
   } | null;
+  consultation: ConsultationHistoryMessage[];
   rawSignals: Array<{
     id: string;
     source: string;
@@ -57,6 +71,18 @@ export type AdminAnalysisDetail = {
     createdAt: string;
   }>;
 };
+
+function summarizeReport(reportJson: unknown) {
+  const report = asReportV2(reportJson);
+  if (!report) {
+    return { aiScore: null, topFinding: null, opportunityCount: 0 };
+  }
+  return {
+    aiScore: averageScorecardScore(report.scorecard),
+    topFinding: report.findings?.[0]?.title ?? null,
+    opportunityCount: report.opportunities?.length ?? 0,
+  };
+}
 
 export async function listAdminAnalyses(options?: {
   status?: AnalysisStatus;
@@ -82,26 +108,44 @@ export async function listAdminAnalyses(options?: {
     orderBy: { createdAt: "desc" },
     take: limit,
     include: {
-      lead: { select: { id: true, name: true, email: true } },
+      lead: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          userId: true,
+          companyId: true,
+          companyRecord: { select: { name: true } },
+        },
+      },
       proposal: {
-        select: { status: true, costEstimateUSD: true },
+        select: { status: true, costEstimateUSD: true, reportJson: true },
       },
     },
   });
 
-  return rows.map((row) => ({
-    id: row.id,
-    domain: row.domain,
-    status: row.status,
-    errorMsg: row.errorMsg,
-    createdAt: row.createdAt.toISOString(),
-    completedAt: row.completedAt?.toISOString() ?? null,
-    leadId: row.lead.id,
-    leadName: row.lead.name,
-    leadEmail: row.lead.email,
-    proposalStatus: row.proposal?.status ?? null,
-    costEstimateUSD: row.proposal?.costEstimateUSD ?? null,
-  }));
+  return rows.map((row) => {
+    const summary = summarizeReport(row.proposal?.reportJson);
+    return {
+      id: row.id,
+      domain: row.domain,
+      status: row.status,
+      errorMsg: row.errorMsg,
+      createdAt: row.createdAt.toISOString(),
+      completedAt: row.completedAt?.toISOString() ?? null,
+      leadId: row.lead.id,
+      leadName: row.lead.name,
+      leadEmail: row.lead.email,
+      leadUserId: row.lead.userId,
+      companyId: row.lead.companyId,
+      companyName: row.lead.companyRecord?.name ?? null,
+      proposalStatus: row.proposal?.status ?? null,
+      costEstimateUSD: row.proposal?.costEstimateUSD ?? null,
+      aiScore: summary.aiScore,
+      topFinding: summary.topFinding,
+      opportunityCount: summary.opportunityCount,
+    };
+  });
 }
 
 export async function getAdminAnalysisDetail(
@@ -118,9 +162,14 @@ export async function getAdminAnalysisDetail(
           company: true,
           status: true,
           userId: true,
+          companyId: true,
         },
       },
       proposal: true,
+      consultation: {
+        orderBy: { createdAt: "asc" },
+        select: { id: true, role: true, content: true, createdAt: true },
+      },
       rawSignals: { orderBy: { fetchedAt: "asc" } },
       usageLogs: { orderBy: { createdAt: "desc" } },
     },
@@ -146,8 +195,15 @@ export async function getAdminAnalysisDetail(
           pdfUrl: row.proposal.pdfUrl,
           narrativeText: row.proposal.narrativeText,
           strategyJson: row.proposal.strategyJson,
+          reportJson: asReportV2(row.proposal.reportJson),
         }
       : null,
+    consultation: row.consultation.map((message) => ({
+      id: message.id,
+      role: message.role,
+      content: message.content,
+      createdAt: message.createdAt.toISOString(),
+    })),
     rawSignals: row.rawSignals.map((signal) => ({
       id: signal.id,
       source: signal.source,

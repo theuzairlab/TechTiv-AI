@@ -222,27 +222,55 @@ export const landingMarketingCards = [
   { icon: RefreshCw, title: "Customer Retention AI", desc: "Churn prediction models, personalized re-engagement campaigns, and AI loyalty programs that keep your customers coming back automatically.", kpis: [["40%", "Churn reduction"], ["2.5x", "LTV boost"]] },
 ];
 
-export const landingStack: ReadonlyArray<readonly [LucideIcon, string, string]> = [
-  [Brain, "GPT-4o", "Foundation LLM"],
-  [Zap, "Claude 3.5", "Reasoning AI"],
-  [Sparkles, "Gemini 1.5", "Multimodal"],
-  [Layers, "LLaMA 3.1", "Open Source LLM"],
-  [Link2, "LangChain", "LLM Framework"],
-  [Workflow, "LangGraph", "Agent Orchestration"],
-  [Users, "CrewAI", "Multi-Agent"],
-  [Bot, "AutoGen", "Agent Framework"],
-  [Database, "LlamaIndex", "RAG Engine"],
-  [Box, "Pinecone", "Vector DB"],
-  [Search, "Weaviate", "Vector Search"],
-  [RefreshCw, "n8n", "Workflow Engine"],
-  [Settings, "Make.com", "Automation"],
-  [Cloud, "AWS Bedrock", "Cloud AI"],
-  [CloudCog, "Azure OpenAI", "Enterprise AI"],
-  [Sparkles, "Hugging Face", "Model Hub"],
-  [Mic, "Whisper", "Speech AI"],
-  [Eye, "CLIP", "Vision AI"],
-  [LineChart, "MLflow", "MLOps"],
-  [Rocket, "FastAPI", "AI API Backend"],
+export type LandingStackItem = {
+  icon: LucideIcon;
+  name: string;
+  category: string;
+  tab: "models" | "agents" | "automation" | "data-cloud" | "voice" | "development";
+};
+
+export const landingStackTabs = [
+  { id: "all", label: "All" },
+  { id: "models", label: "AI Models" },
+  { id: "agents", label: "AI Agents" },
+  { id: "automation", label: "Automation" },
+  { id: "data-cloud", label: "Data & Cloud" },
+  { id: "voice", label: "Voice AI" },
+  { id: "development", label: "Development" },
+] as const;
+
+export type LandingStackTabId = (typeof landingStackTabs)[number]["id"];
+
+export const landingStack: LandingStackItem[] = [
+  { icon: Brain, name: "GPT-4o", category: "Foundation LLM", tab: "models" },
+  { icon: Zap, name: "Claude 3.5", category: "Reasoning AI", tab: "models" },
+  { icon: Sparkles, name: "Gemini 1.5", category: "Multimodal", tab: "models" },
+  { icon: Layers, name: "LLaMA 3.1", category: "Open Source LLM", tab: "models" },
+  { icon: Link2, name: "LangChain", category: "LLM Framework", tab: "models" },
+  { icon: Workflow, name: "LangGraph", category: "Agent Orchestration", tab: "agents" },
+  { icon: Users, name: "CrewAI", category: "Multi-Agent", tab: "agents" },
+  { icon: Bot, name: "AutoGen", category: "Agent Framework", tab: "agents" },
+  { icon: Database, name: "LlamaIndex", category: "RAG Engine", tab: "data-cloud" },
+  { icon: Box, name: "Pinecone", category: "Vector DB", tab: "data-cloud" },
+  { icon: Search, name: "Weaviate", category: "Vector Search", tab: "data-cloud" },
+  { icon: RefreshCw, name: "n8n", category: "Workflow Engine", tab: "automation" },
+  { icon: Settings, name: "Make.com", category: "Automation", tab: "automation" },
+  { icon: Zap, name: "Zapier", category: "Automation", tab: "automation" },
+  { icon: Building2, name: "GHL", category: "CRM Automation", tab: "automation" },
+  { icon: Cloud, name: "AWS Bedrock", category: "Cloud AI", tab: "data-cloud" },
+  { icon: CloudCog, name: "Azure OpenAI", category: "Enterprise AI", tab: "data-cloud" },
+  { icon: Cloud, name: "Google Cloud", category: "Cloud AI", tab: "data-cloud" },
+  { icon: Sparkles, name: "Hugging Face", category: "Model Hub", tab: "models" },
+  { icon: Mic, name: "Whisper", category: "Speech AI", tab: "voice" },
+  { icon: Mic, name: "ElevenLabs", category: "Voice AI", tab: "voice" },
+  { icon: MessageSquare, name: "Vapi", category: "Voice Agents", tab: "voice" },
+  { icon: Eye, name: "CLIP", category: "Vision AI", tab: "voice" },
+  { icon: LineChart, name: "MLflow", category: "MLOps", tab: "development" },
+  { icon: Rocket, name: "FastAPI", category: "AI API Backend", tab: "development" },
+  { icon: Laptop, name: "Next.js", category: "Web Framework", tab: "development" },
+  { icon: Laptop, name: "React", category: "UI Library", tab: "development" },
+  { icon: Settings, name: "Node.js", category: "Runtime", tab: "development" },
+  { icon: Brain, name: "Python", category: "AI Language", tab: "development" },
 ];
 
 export const landingProcess = [
@@ -294,4 +322,162 @@ export const landingPerceptionItems = [
   { icon: Sparkles, label: "Sentiment NLP" },
   { icon: Eye, label: "Vision AI" },
   { icon: Mic, label: "Speech AI" },
+] as const;
+
+/** Phase 3 — interactive AI technology stack (agenda #9) */
+export const landingStackCategories = [
+  {
+    id: "models",
+    label: "AI Models",
+    items: ["OpenAI", "Claude", "Gemini", "LLaMA"],
+  },
+  {
+    id: "agents",
+    label: "AI Agents",
+    items: ["LangGraph", "CrewAI", "AutoGen"],
+  },
+  {
+    id: "automation",
+    label: "Automation",
+    items: ["n8n", "Make", "Zapier", "GHL"],
+  },
+  {
+    id: "crm",
+    label: "CRM",
+    items: ["HubSpot", "Salesforce", "GHL"],
+  },
+  {
+    id: "voice",
+    label: "Voice AI",
+    items: ["Gemini Live", "Vapi", "ElevenLabs", "Twilio"],
+  },
+  {
+    id: "development",
+    label: "Development",
+    items: ["Next.js", "React", "Node.js", "Python"],
+  },
+  {
+    id: "data-cloud",
+    label: "Data & Cloud",
+    items: ["Pinecone", "Weaviate", "AWS", "Azure", "Google Cloud"],
+  },
+] as const;
+
+export const landingAssessmentSteps = [
+  {
+    title: "Business & industry",
+    desc: "We research your company, market, and how you operate today.",
+  },
+  {
+    title: "Problems & tools",
+    desc: "We map bottlenecks, existing software, and your technology stack.",
+  },
+  {
+    title: "Marketing & social",
+    desc: "We review web, social, and digital presence for growth gaps.",
+  },
+  {
+    title: "AI & automation opportunities",
+    desc: "We recommend agents, automation, chatbots, web/app, and ML where they fit.",
+  },
+] as const;
+
+export const landingConsultantPoints = [
+  "Understands your business profile and assessment answers",
+  "Asks only what matters — grounded in your real website and socials",
+  "Recommends tools and TechTivAI services tied to your problems",
+  "Text chat and real-time voice after your blueprint",
+] as const;
+
+export const landingAutomationItems = [
+  {
+    title: "Workflow & CRM automation",
+    desc: "Connect lead capture, qualification, and follow-up with n8n, Make, Zapier, or GHL.",
+    pills: ["CRM sync", "Lead routing", "Email sequences"],
+  },
+  {
+    title: "Sales & support chatbots",
+    desc: "Qualify leads and deflect support across web, WhatsApp, and messaging.",
+    pills: ["WhatsApp", "Lead bots", "Support deflection"],
+  },
+  {
+    title: "Appointment & marketing ops",
+    desc: "Booking, reminders, nurture campaigns, and reporting on autopilot.",
+    pills: ["Scheduling", "Nurture", "Reporting"],
+  },
+] as const;
+
+export const landingWebAppItems = [
+  {
+    title: "AI-powered websites",
+    desc: "Sites that convert with AI search, personalization, and smart CTAs.",
+  },
+  {
+    title: "Web apps & customer portals",
+    desc: "SaaS dashboards and portals with AI assistants built in.",
+  },
+  {
+    title: "Mobile AI experiences",
+    desc: "iOS/Android apps with chat, voice, recommendations, and automation.",
+  },
+] as const;
+
+export const landingHowItWorks = [
+  {
+    num: "01",
+    title: "Share your business",
+    desc: "Enter your name, website, and social links. Optional context welcome.",
+  },
+  {
+    num: "02",
+    title: "Talk to the AI Consultant",
+    desc: "We research first, then ask focused questions about goals and pain points.",
+  },
+  {
+    num: "03",
+    title: "Get your blueprint preview",
+    desc: "See problems, opportunities, and recommended TechTivAI services.",
+  },
+  {
+    num: "04",
+    title: "Unlock the full plan",
+    desc: "Pay $5 for the complete AI Blueprint PDF and implementation roadmap.",
+  },
+] as const;
+
+export const landingBlueprintPreviewSections = [
+  "Business Analysis",
+  "Current Technology Stack",
+  "Business Problems",
+  "AI & Automation Opportunities",
+  "AI Agent & Chatbot Recommendations",
+  "Web/App Development Recommendations",
+  "Recommended Technology Stack",
+  "Social & Digital Growth",
+  "ROI / Impact Analysis",
+  "Implementation Roadmap",
+  "Recommended TechTivAI Services",
+] as const;
+
+export const landingFaqItems = [
+  {
+    q: "What is the AI Blueprint?",
+    a: "A personalized strategy report that analyzes your business, technology, and opportunities — then recommends specific AI, automation, web/app, and TechTivAI services with timelines.",
+  },
+  {
+    q: "Why is the full blueprint $5?",
+    a: "The assessment preview is free. $5 unlocks the complete blueprint and downloadable PDF so you get a professional plan before committing to a larger implementation.",
+  },
+  {
+    q: "Do I need a website to start?",
+    a: "A website helps, but you can also share social profile links. We research whatever public footprint you provide, then ask clarifying questions.",
+  },
+  {
+    q: "What happens after I get the blueprint?",
+    a: "You can request any recommended service with “Build This With TechTivAI.” Our team follows up for consultation, proposal, and delivery.",
+  },
+  {
+    q: "Is there a human consultant too?",
+    a: "Yes. The AI Consultant handles discovery and recommendations. High-ticket builds are delivered by TechTivAI’s implementation team.",
+  },
 ] as const;

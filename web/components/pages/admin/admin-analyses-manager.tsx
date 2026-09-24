@@ -3,30 +3,35 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { AlertCircle, ExternalLink, RefreshCw, Search } from "lucide-react";
+import { AlertCircle, RefreshCw, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { AdminPageHeader } from "@/components/pages/admin/admin-page-header";
 import { AnalysisStatusBadge } from "@/components/pages/admin/analysis-status-badge";
 import type { AdminAnalysisListItem } from "@/lib/admin/analyses";
 import type { AnalysisStatus } from "@/lib/generated/prisma/client";
-import { analysisStatusLabels } from "@/components/pages/admin/analysis-status-badge";
-import { formatRelativeTime } from "@/lib/leads-format";
+import { formatUsd } from "@/lib/format-display";
+import { RelativeTime } from "@/components/ui/relative-time";
 import { cn } from "@/lib/utils";
 
-const STATUS_FILTERS: Array<AnalysisStatus | "ALL"> = [
-  "ALL",
-  "QUEUED",
-  "CRAWLING",
-  "DISCOVERING",
-  "AUDITING",
-  "ANALYZING",
-  "SYNTHESIZING",
-  "PRICING",
-  "GENERATING_PDF",
-  "DONE",
-  "FAILED",
-];
+const SIMPLE_FILTERS = [
+  { id: "ALL", label: "All" },
+  { id: "IN_PROGRESS", label: "In progress" },
+  { id: "DONE", label: "Ready for client" },
+  { id: "FAILED", label: "Needs retry" },
+] as const;
+
+type SimpleFilter = (typeof SIMPLE_FILTERS)[number]["id"];
+
+function matchesSimpleFilter(
+  status: AnalysisStatus,
+  filter: SimpleFilter,
+) {
+  if (filter === "ALL") return true;
+  if (filter === "DONE") return status === "DONE";
+  if (filter === "FAILED") return status === "FAILED";
+  return status !== "DONE" && status !== "FAILED";
+}
 
 type AdminAnalysesManagerProps = {
   initialAnalyses: AdminAnalysisListItem[];
@@ -38,8 +43,12 @@ export function AdminAnalysesManager({
   const searchParams = useSearchParams();
   const [analyses, setAnalyses] = useState(initialAnalyses);
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
-  const [statusFilter, setStatusFilter] = useState<AnalysisStatus | "ALL">(
-    (searchParams.get("status") as AnalysisStatus | null) ?? "ALL",
+  const [statusFilter, setStatusFilter] = useState<SimpleFilter>(
+    searchParams.get("status") === "FAILED"
+      ? "FAILED"
+      : searchParams.get("status") === "DONE"
+        ? "DONE"
+        : "ALL",
   );
   const [retryingId, setRetryingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +56,7 @@ export function AdminAnalysesManager({
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return analyses.filter((row) => {
-      if (statusFilter !== "ALL" && row.status !== statusFilter) return false;
+      if (!matchesSimpleFilter(row.status, statusFilter)) return false;
       if (!q) return true;
       return (
         row.domain.toLowerCase().includes(q) ||
@@ -58,13 +67,14 @@ export function AdminAnalysesManager({
   }, [analyses, search, statusFilter]);
 
   const statusCounts = useMemo(() => {
-    return analyses.reduce(
-      (acc, row) => {
-        acc[row.status] = (acc[row.status] ?? 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
+    return {
+      ALL: analyses.length,
+      IN_PROGRESS: analyses.filter((row) =>
+        matchesSimpleFilter(row.status, "IN_PROGRESS"),
+      ).length,
+      DONE: analyses.filter((row) => row.status === "DONE").length,
+      FAILED: analyses.filter((row) => row.status === "FAILED").length,
+    };
   }, [analyses]);
 
   async function handleRetry(analysisId: string) {
@@ -95,9 +105,9 @@ export function AdminAnalysesManager({
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        label="Pipeline operations"
+        label="Delivery"
         title="Analyses"
-        description="Monitor every analysis run, inspect failures, and retry stuck or failed jobs."
+        description="Open a report to see the same findings the client received. Pipeline tools stay on a separate tab."
       />
 
       {error ? (
@@ -123,17 +133,14 @@ export function AdminAnalysesManager({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {STATUS_FILTERS.map((status) => {
-            const count =
-              status === "ALL"
-                ? analyses.length
-                : (statusCounts[status] ?? 0);
-            const active = statusFilter === status;
+          {SIMPLE_FILTERS.map((filter) => {
+            const count = statusCounts[filter.id];
+            const active = statusFilter === filter.id;
             return (
               <button
-                key={status}
+                key={filter.id}
                 type="button"
-                onClick={() => setStatusFilter(status)}
+                onClick={() => setStatusFilter(filter.id)}
                 className={cn(
                   "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
                   active
@@ -141,7 +148,7 @@ export function AdminAnalysesManager({
                     : "bg-bg-secondary/80 text-text-muted hover:text-text-primary",
                 )}
               >
-                {status === "ALL" ? "All" : analysisStatusLabels[status]} ({count})
+                {filter.label} ({count})
               </button>
             );
           })}
@@ -158,10 +165,10 @@ export function AdminAnalysesManager({
             <table className="min-w-full text-left text-sm">
               <thead className="border-b border-border-subtle/60 bg-bg-secondary/40 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
                 <tr>
-                  <th className="px-4 py-3">Domain</th>
-                  <th className="px-4 py-3">Lead</th>
+                  <th className="px-4 py-3">Business</th>
+                  <th className="px-4 py-3">Client</th>
                   <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Proposal</th>
+                  <th className="px-4 py-3">AI score</th>
                   <th className="px-4 py-3">Created</th>
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
@@ -171,6 +178,11 @@ export function AdminAnalysesManager({
                   <tr key={row.id} className="hover:bg-bg-secondary/30">
                     <td className="px-4 py-3">
                       <div className="font-medium text-text-primary">{row.domain}</div>
+                      {row.topFinding ? (
+                        <p className="mt-1 max-w-xs truncate text-xs text-text-muted">
+                          {row.topFinding}
+                        </p>
+                      ) : null}
                       {row.errorMsg ? (
                         <p className="mt-1 max-w-xs truncate text-xs text-destructive">
                           {row.errorMsg}
@@ -180,20 +192,49 @@ export function AdminAnalysesManager({
                     <td className="px-4 py-3">
                       <div className="text-text-primary">{row.leadName}</div>
                       <div className="text-xs text-text-muted">{row.leadEmail}</div>
+                      <div className="mt-1 flex flex-wrap gap-2 text-xs">
+                        {row.leadUserId ? (
+                          <Link
+                            href={`/admin/clients/${row.leadUserId}`}
+                            className="text-brand-cyan no-underline hover:underline"
+                          >
+                            Client
+                          </Link>
+                        ) : null}
+                        {row.companyId ? (
+                          <Link
+                            href={`/admin/companies/${row.companyId}`}
+                            className="text-brand-cyan no-underline hover:underline"
+                          >
+                            {row.companyName ?? "Company"}
+                          </Link>
+                        ) : null}
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <AnalysisStatusBadge status={row.status} />
                     </td>
                     <td className="px-4 py-3 text-text-muted">
-                      {row.proposalStatus ?? "—"}
-                      {row.costEstimateUSD != null ? (
-                        <div className="text-xs">
-                          ${row.costEstimateUSD.toLocaleString()}
+                      {row.aiScore != null ? (
+                        <div>
+                          <span className="font-semibold text-text-primary">
+                            {row.aiScore}
+                          </span>
+                          <span className="text-xs">/100</span>
+                          {row.opportunityCount > 0 ? (
+                            <div className="text-xs">
+                              {row.opportunityCount} opportunities
+                            </div>
+                          ) : null}
                         </div>
-                      ) : null}
+                      ) : row.costEstimateUSD != null ? (
+                        formatUsd(row.costEstimateUSD)
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td className="px-4 py-3 text-xs text-text-muted">
-                      {formatRelativeTime(row.createdAt)}
+                      <RelativeTime value={row.createdAt} />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
@@ -218,7 +259,7 @@ export function AdminAnalysesManager({
                           href={`/admin/analyses/${row.id}`}
                           className="inline-flex items-center gap-1 rounded-lg border border-border-subtle px-3 py-1.5 text-xs font-medium text-text-muted no-underline hover:border-brand-cyan/30 hover:text-brand-cyan"
                         >
-                          View <ExternalLink size={12} />
+                          Open report
                         </Link>
                       </div>
                     </td>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
   Mail,
@@ -18,6 +19,10 @@ import { GlassPanel } from "@/components/ui/glass-panel";
 import { AdminPageHeader } from "@/components/pages/admin/admin-page-header";
 import { LeadStatusBadge } from "@/components/pages/admin/lead-status-badge";
 import {
+  LeadAssigneeSelect,
+  type LeadAssignee,
+} from "@/components/admin/lead-assignee-select";
+import {
   formatLeadInterest,
   LEAD_STATUSES,
   leadStatusLabels,
@@ -27,9 +32,10 @@ import {
   formatDiscoveryAnswers,
   formatLeadDate,
   formatMetadata,
-  formatRelativeTime,
   getSourceLabel,
 } from "@/lib/leads-format";
+import { RelativeTime } from "@/components/ui/relative-time";
+import { MessageClientButton } from "@/components/admin/message-client-button";
 import { cn } from "@/lib/utils";
 
 export type LeadRecord = {
@@ -47,6 +53,12 @@ export type LeadRecord = {
   discoveryAnswers: unknown;
   metadata: unknown;
   createdAt: string;
+  userId: string | null;
+  userName: string | null;
+  companyId: string | null;
+  companyRecordName: string | null;
+  assignedAdminId: string | null;
+  assignedAdminName: string | null;
 };
 
 const selectClassName =
@@ -55,11 +67,13 @@ const selectClassName =
 type AdminLeadsManagerProps = {
   initialLeads: LeadRecord[];
   statusCounts: Record<string, number>;
+  assignees: LeadAssignee[];
 };
 
 export function AdminLeadsManager({
   initialLeads,
   statusCounts,
+  assignees,
 }: AdminLeadsManagerProps) {
   const searchParams = useSearchParams();
   const [leads, setLeads] = useState(initialLeads);
@@ -283,7 +297,7 @@ export function AdminLeadsManager({
                           <div className="flex shrink-0 flex-col items-end gap-2">
                             <LeadStatusBadge status={lead.status} />
                             <span className="text-[10px] text-text-muted">
-                              {formatRelativeTime(lead.createdAt)}
+                              <RelativeTime value={lead.createdAt} />
                             </span>
                           </div>
                         </div>
@@ -341,6 +355,65 @@ export function AdminLeadsManager({
                 ) : null}
                 {selectedLead.company ? (
                   <DetailRow icon={Building2} label="Company" value={selectedLead.company} />
+                ) : null}
+                {selectedLead.companyId ? (
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                      Company record
+                    </p>
+                    <Link
+                      href={`/admin/companies/${selectedLead.companyId}`}
+                      className="mt-1 inline-block text-sm text-brand-cyan no-underline hover:underline"
+                    >
+                      {selectedLead.companyRecordName ?? "Open company"}
+                    </Link>
+                  </div>
+                ) : null}
+                {selectedLead.userId ? (
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                      Portal user
+                    </p>
+                    <Link
+                      href={`/admin/clients/${selectedLead.userId}`}
+                      className="mt-1 inline-block text-sm text-brand-cyan no-underline hover:underline"
+                    >
+                      {selectedLead.userName ?? "Open client 360"}
+                    </Link>
+                  </div>
+                ) : null}
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                    Account manager
+                  </p>
+                  <div className="mt-1.5">
+                    <LeadAssigneeSelect
+                      leadId={selectedLead.id}
+                      currentAdminId={selectedLead.assignedAdminId}
+                      assignees={assignees}
+                      onAssigned={(adminId, adminName) => {
+                        setLeads((prev) =>
+                          prev.map((lead) =>
+                            lead.id === selectedLead.id
+                              ? {
+                                  ...lead,
+                                  assignedAdminId: adminId,
+                                  assignedAdminName: adminName,
+                                }
+                              : lead,
+                          ),
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+                {selectedLead.userId ? (
+                  <div className="flex flex-wrap gap-2">
+                    <MessageClientButton
+                      userId={selectedLead.userId}
+                      relatedLeadId={selectedLead.id}
+                    />
+                  </div>
                 ) : null}
                 {selectedLead.industry ? (
                   <DetailRow icon={User} label="Industry" value={selectedLead.industry} />

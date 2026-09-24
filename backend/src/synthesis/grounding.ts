@@ -33,6 +33,13 @@ export function groundSynthesis(
       assumptions.push(`Potential opportunity requiring validation: ${item.title}`);
       return false;
     });
+  const socialGrowth = (result.socialGrowth ?? [])
+    .map((item) => ({ ...item, evidenceRefs: validRefs(item.evidenceRefs, known) }))
+    .filter((item) => {
+      if (item.evidenceRefs.length) return true;
+      assumptions.push(`Unverified social finding: ${item.platform} — ${item.finding}`);
+      return false;
+    });
   const competitors = result.competitors
     .map((item) => {
       const refs = validRefs(item.evidenceRefs, known);
@@ -62,6 +69,7 @@ export function groundSynthesis(
     findings,
     opportunities,
     competitors,
+    socialGrowth,
     assumptions: Array.from(new Set(assumptions)).slice(0, 12),
     stackArchitecture: result.stackArchitecture.map((item) => ({
       ...item,

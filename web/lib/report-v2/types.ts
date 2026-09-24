@@ -47,6 +47,12 @@ export type ReportV2 = {
       title: string;
       outcome: string;
       workflow: string;
+      type:
+        | "ai_opportunity"
+        | "automation_opportunity"
+        | "ai_agent"
+        | "chatbot_voice_ai"
+        | "web_app_development";
       impact: "high" | "medium" | "low";
       effort: "high" | "medium" | "low";
       integrations: string[];
@@ -59,6 +65,26 @@ export type ReportV2 = {
       reason: string;
     }
   >;
+  currentTechStack: Array<{
+    category: string;
+    tool: string;
+    notes: string;
+  }>;
+  socialGrowth: Array<
+    EvidenceRefItem & {
+      platform: string;
+      finding: string;
+      recommendation: string;
+    }
+  >;
+  recommendedServices: Array<{
+    problem: string;
+    service: string;
+    techStack: string[];
+    estimatedScope: string;
+    estimatedTimelineWeeks: number;
+    ctaLabel: string;
+  }>;
   roadmap: Array<{
     phase: string;
     objective: string;

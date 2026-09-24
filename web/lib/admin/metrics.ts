@@ -6,6 +6,15 @@ export type AdminOverviewMetrics = {
   leads: number;
   newLeads: number;
   analyses: number;
+  newAssessments: number;
+  consultationRequests: number;
+  convertedClients: number;
+  serviceOpportunities: number;
+  paidBlueprints: number;
+  blueprintRevenueUSD: number;
+  activeSubscriptions: number;
+  voiceCalls: number;
+  aiChatSessions: number;
   analysesByStatus: Record<AnalysisStatus, number>;
   failedAnalyses: number;
   inFlightAnalyses: number;
@@ -29,6 +38,22 @@ function monthStart(): Date {
   return new Date(d.getFullYear(), d.getMonth(), 1);
 }
 
+function countVoiceSessions() {
+  try {
+    return prisma.voiceSession?.count() ?? Promise.resolve(0);
+  } catch {
+    return Promise.resolve(0);
+  }
+}
+
+function countConsultantSessions() {
+  try {
+    return prisma.consultantSession?.count() ?? Promise.resolve(0);
+  } catch {
+    return Promise.resolve(0);
+  }
+}
+
 export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
   const startOfMonth = monthStart();
 
@@ -37,8 +62,14 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
     leads,
     newLeads,
     analyses,
+    newAssessments,
+    consultationRequests,
+    convertedClients,
+    serviceOpportunities,
     statusGroups,
     completedProposals,
+    voiceCalls,
+    aiChatSessions,
     providerConfigs,
     failureGroups,
     recentFailed,
@@ -48,6 +79,14 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
     prisma.lead.count(),
     prisma.lead.count({ where: { status: "NEW" } }),
     prisma.analysis.count(),
+    prisma.analysis.count({
+      where: { createdAt: { gte: startOfMonth } },
+    }),
+    prisma.lead.count({ where: { source: "service_request" } }),
+    prisma.lead.count({ where: { status: "WON" } }),
+    prisma.lead.count({
+      where: { source: "service_request", status: { not: "LOST" } },
+    }),
     prisma.analysis.groupBy({
       by: ["status"],
       _count: { status: true },
@@ -55,6 +94,8 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
     prisma.proposal.count({
       where: { analysis: { status: "DONE" } },
     }),
+    countVoiceSessions().catch(() => 0),
+    countConsultantSessions().catch(() => 0),
     prisma.providerConfig.findMany({
       orderBy: { provider: "asc" },
     }),
@@ -103,7 +144,7 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
   } satisfies Record<AnalysisStatus, number>;
 
   for (const row of statusGroups) {
-    analysesByStatus[row.status] = row._count.status;
+    analysesByStatus[row.status] = row._count?.status ?? 0;
   }
 
   const failedAnalyses = analysesByStatus.FAILED;
@@ -135,6 +176,15 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
     leads,
     newLeads,
     analyses,
+    newAssessments,
+    consultationRequests,
+    convertedClients,
+    serviceOpportunities,
+    paidBlueprints: 0,
+    blueprintRevenueUSD: 0,
+    activeSubscriptions: 0,
+    voiceCalls,
+    aiChatSessions,
     analysesByStatus,
     failedAnalyses,
     inFlightAnalyses,
@@ -143,7 +193,7 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
     providerFailures: failureGroups
       .map((row) => ({
         provider: row.provider,
-        count: row._count.provider,
+        count: row._count?.provider ?? 0,
       }))
       .sort((a, b) => b.count - a.count),
     avgPipelineMinutes,
@@ -152,7 +202,7 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
       domain: row.domain,
       errorMsg: row.errorMsg,
       createdAt: row.createdAt.toISOString(),
-      leadEmail: row.lead.email,
+      leadEmail: row.lead?.email ?? "",
     })),
   };
 }

@@ -13,6 +13,7 @@ import { synthesisSchema, type SynthesisResult } from "./schema.js";
 import type { CoverageSummary } from "./coverage.js";
 import { groundSynthesis } from "./grounding.js";
 import { logAnalysisActivity } from "../pipeline/activity.js";
+import { computeCurrentTechStack } from "./current-stack.js";
 
 const MAX_ATTEMPTS = 2;
 
@@ -111,6 +112,10 @@ function buildFallbackSynthesis(
   const websitePages = evidence.filter((item) => item.sourceType === "website_page");
   const homePage = websitePages.find((page) => page.url?.match(/\/$|\.com$/)) ?? websitePages[0];
 
+  const socialProfileEvidence = evidence.filter(
+    (item) => item.sourceType === "social_profile",
+  );
+
   const score = (covered: boolean, adjustment = 0) =>
     Math.max(
       20,
@@ -206,12 +211,33 @@ function buildFallbackSynthesis(
         outcome:
           "Measure current handling time, error rate, and ownership for two to three weeks, then automate the highest-confidence manual handoffs first — this proves the fix works before wider rollout.",
         workflow: shorten(confirmedWorkflow, 80),
+        type: "automation_opportunity",
         impact: "high",
         effort: "medium",
         integrations: stackNames,
         evidenceRefs: contextRefs,
       },
     ],
+    socialGrowth: socialProfileEvidence.map((item) => ({
+      platform: (item.title ?? "Social profile").replace(/\s*profile$/i, ""),
+      finding: item.excerpt
+        ? `Public profile content was reviewed directly: "${shorten(item.excerpt, 100)}"`
+        : "Profile was not publicly readable without login — reviewed via public mentions only.",
+      recommendation:
+        "Confirm posting cadence and response times manually, then decide if a content/response workflow is worth automating.",
+      evidenceRefs: [item.evidenceKey],
+    })),
+    recommendedServices: [
+      {
+        problem: `"${shorten(confirmedWorkflow, 60)}" is handled manually with no measured baseline.`,
+        service: "AI Automation & Workflow",
+        techStack: stackNames.length ? stackNames.slice(0, 3) : ["n8n", "Make"],
+        estimatedScope: "Map the workflow, instrument a baseline, then automate the highest-confidence manual handoffs.",
+        estimatedTimelineWeeks: 4,
+        ctaLabel: "Build This With TechTivAI",
+      },
+    ],
+    currentTechStack: computeCurrentTechStack(evidence),
     stackArchitecture: stackNames.length
       ? [
           {
@@ -317,7 +343,8 @@ export async function synthesizeFromSignals(
 
       lastOutput = text;
       const parsed = extractJsonFromText(text);
-      return groundSynthesis(synthesisSchema.parse(parsed), evidence);
+      const grounded = groundSynthesis(synthesisSchema.parse(parsed), evidence);
+      return { ...grounded, currentTechStack: computeCurrentTechStack(evidence) };
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       await logAnalysisActivity({

@@ -1,23 +1,32 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import {
   ArrowRight,
+  Bot,
+  MessageSquare,
   Rocket,
   Sparkles,
   Zap,
 } from "lucide-react";
 import { AnimatedIcon } from "@/components/ui/animated-icon";
+import { LandingPricingCards } from "@/components/landing/landing-pricing-cards";
 import { LandingWorkflowSection } from "@/components/landing/landing-workflow-section";
 import {
   landingAgentForceCards,
   landingAgents,
-  landingMarketingCards,
-  landingPerceptionItems,
-  landingProcess,
-  landingResults,
+  landingAssessmentSteps,
+  landingAutomationItems,
+  landingBlueprintPreviewSections,
+  landingConsultantPoints,
+  landingFaqItems,
+  landingHowItWorks,
   landingServices,
   landingStack,
+  landingStackTabs,
+  landingWebAppItems,
   tickerItems,
+  type LandingStackTabId,
 } from "@/lib/landing-page-data";
 import { cn } from "@/lib/utils";
 
@@ -33,88 +42,67 @@ function serviceCardClass(span?: 1 | 2 | 3) {
 }
 
 export function LandingPageView() {
+  const [activeStackTab, setActiveStackTab] = useState<LandingStackTabId>("all");
+  const filteredStack = useMemo(
+    () =>
+      activeStackTab === "all"
+        ? landingStack
+        : landingStack.filter((item) => item.tab === activeStackTab),
+    [activeStackTab],
+  );
+
   return (
     <>
-    {/* hero */}
+      {/* 1. Hero — agenda #9 */}
       <section className="relative z-[1] grid min-h-[calc(100vh-68px)] place-items-center overflow-hidden px-[5%] pt-12 pb-20 max-md:px-[4%] max-md:pt-10 max-md:pb-[60px]">
         <div className="pointer-events-none absolute -top-[200px] -left-[200px] size-[700px] rounded-full bg-accent-cyan/[0.12] blur-[120px]" />
         <div className="pointer-events-none absolute -right-[100px] -bottom-[100px] size-[500px] rounded-full bg-[var(--hero-glow-accent)] blur-[120px]" />
         <div className="pointer-events-none absolute top-[30%] left-[55%] size-[300px] rounded-full bg-accent-cyan/[0.07] blur-[120px]" />
 
-        <div className="relative max-w-[900px] text-center">
+        <div className="relative max-w-[920px] text-center">
           <div className="hero-eyebrow mb-8 animate-fade-up">
             <AnimatedIcon icon={Zap} size={14} className="text-brand" />
-            Most Advanced AI & Automation Company
+            TechTivAI — AI Business Consultant & Transformation Platform
           </div>
 
-          <h1 className="mb-7 animate-fade-up font-display text-[clamp(3.2rem,8vw,7.5rem)] leading-[0.95] font-bold tracking-[-3px] text-text-primary [animation-delay:0.08s]">
-            We Don&apos;t Just
+          <h1 className="mb-7 animate-fade-up font-display text-[clamp(2.6rem,7vw,5.5rem)] leading-[1.02] font-bold tracking-[-2px] text-text-primary [animation-delay:0.08s]">
+            Discover What{" "}
             <br />
-            <span className="text-gradient-hero">Automate.</span>
+            <span className="text-gradient-hero">AI Can Don For </span>
             <br />
-            We <span className="text-stroke-hero">Intelligify.</span>
+            Your Business
           </h1>
 
-          <p className="mx-auto mb-12 max-w-[580px] animate-fade-up text-[1.1rem] leading-[1.75] text-text-muted [animation-delay:0.16s]">
-            TechTivAI delivers enterprise-grade AI automation, autonomous agents,
-            custom LLMs, and intelligent workflows that transform every layer of
-            your business — operations, sales, data, and beyond.
+          <p className="mx-auto mb-12 max-w-[560px] animate-fade-up text-[1.1rem] leading-[1.75] text-text-muted [animation-delay:0.16s]">
+            AI analyzes your business, identifies opportunities, and recommends
+            the right AI, automation, web, app, and digital solutions.
           </p>
 
           <div className="flex animate-fade-up flex-wrap items-center justify-center gap-3.5 [animation-delay:0.24s]">
             <a
-              href="#contact"
+              href="/analyze"
               className="btn-lime flex items-center gap-2 rounded-[10px] px-[30px] py-[15px] text-[0.9rem] no-underline"
               data-cursor-target
             >
               <AnimatedIcon icon={Rocket} size={18} className="text-on-accent" />
-              Get Your AI Roadmap — Free
+              Get My AI Blueprint — $5
             </a>
             <a
-              href="#services"
+              href="/analyze"
               className="btn-ghost rounded-[10px] px-[30px] py-[15px] text-[0.9rem] no-underline"
               data-cursor-target
             >
-              <ArrowRight size={16} strokeWidth={2} />
-              Explore 30+ AI Services
+              <MessageSquare size={16} strokeWidth={2} />
+              Talk to AI Consultant
             </a>
-          </div>
-
-          <div className="mx-auto mt-20 flex max-w-[800px] animate-fade-up flex-wrap justify-center overflow-hidden rounded-surface-lg border border-border-subtle bg-surface-card [animation-delay:0.32s] max-md:hidden">
-            {[
-              ["300", "+", "AI Projects Deployed"],
-              ["85", "%", "Avg. Cost Reduction"],
-              ["12", "x", "Productivity Gain"],
-              ["24", "/7", "AI Always On"],
-            ].map(([val, unit, label], index, arr) => (
-              <div
-                key={label}
-                className={cn(
-                  "min-w-40 flex-1 px-6 py-7 text-center",
-                  index < arr.length - 1 && "border-r border-border-subtle",
-                )}
-              >
-                <div className="metric-val">
-                  {val}
-                  <span className="metric-unit">{unit}</span>
-                </div>
-                <div className="metric-lbl">
-                  {label}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* ticker animations */}
       <div className="relative z-[1] overflow-hidden border-y border-border-subtle bg-bg-secondary py-3.5 [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]">
         <div className="flex w-max animate-ticker gap-12">
           {[...tickerItems, ...tickerItems].map((item, index) => (
-            <span
-              key={`${item}-${index}`}
-              className="ticker-item gap-2.5"
-            >
+            <span key={`${item}-${index}`} className="ticker-item gap-2.5">
               {item}{" "}
               <Sparkles size={12} className="ticker-sep" aria-hidden />
             </span>
@@ -122,262 +110,205 @@ export function LandingPageView() {
         </div>
       </div>
 
-      {/* workflow automation */}
-      <LandingWorkflowSection />
-
-      {/* technology */}
+      {/* 2. Technology stack — grid + category tabs (All + filters) */}
       <section id="stack" className={cn(sectionClass, "bg-bg-secondary")}>
-        <div className="scroll-reveal mb-[70px]">
-          <div className="s-label">
-            — Technology
-          </div>
+        <div className="scroll-reveal mb-[50px]">
+          <div className="s-label">— Technology</div>
           <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
             The Most Advanced
             <br />
             AI Stack Available
           </h2>
+          <p className="max-w-[520px] text-base leading-[1.75] text-text-muted">
+            Browse the full stack, or filter by category — models, agents,
+            automation, data, voice, and development.
+          </p>
         </div>
 
-        <div className="mt-14 grid grid-cols-5 gap-3 max-lg:grid-cols-4 max-md:grid-cols-3">
-          {landingStack.map(([Icon, name, cat]) => (
-            <div
-              key={name}
-              className="scroll-reveal cursor-default rounded-surface-md border border-border-subtle bg-surface-card px-4 py-[18px] text-center transition-all duration-200 hover:scale-[1.03] hover:border-border-highlight hover:bg-surface-elevated"
+        <div className="scroll-reveal mb-8 flex flex-wrap gap-2.5">
+          {landingStackTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveStackTab(tab.id)}
+              className={cn(
+                "rounded-full border px-4 py-2 text-[0.82rem] font-semibold transition-colors",
+                activeStackTab === tab.id
+                  ? "border-accent-lime/50 bg-accent-lime/10 text-brand"
+                  : "border-border-subtle bg-surface-card text-text-muted hover:border-border-highlight hover:text-text-primary",
+              )}
               data-cursor-target
             >
-              <AnimatedIcon icon={Icon} size={24} className="mx-auto mb-2 text-brand-cyan" />
-              <div className="text-[0.78rem] font-semibold text-text-body">{name}</div>
-              <div className="mt-[3px] text-[0.65rem] text-text-muted">{cat}</div>
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-2 grid grid-cols-5 gap-3 max-lg:grid-cols-4 max-md:grid-cols-3 max-sm:grid-cols-2">
+          {filteredStack.map((item) => (
+            <div
+              key={`${item.name}-${item.category}`}
+              className="cursor-default rounded-surface-md border border-border-subtle bg-surface-card px-4 py-[18px] text-center transition-all duration-200 hover:scale-[1.03] hover:border-border-highlight hover:bg-surface-elevated"
+              data-cursor-target
+            >
+              <AnimatedIcon
+                icon={item.icon}
+                size={24}
+                className="mx-auto mb-2 text-brand-cyan"
+              />
+              <div className="text-[0.78rem] font-semibold text-text-body">
+                {item.name}
+              </div>
+              <div className="mt-[3px] text-[0.65rem] text-text-muted">
+                {item.category}
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* data science & ai */}
-      <section id="data" className={cn(sectionClass, "bg-bg-secondary")}>
-        <div className="scroll-reveal mb-[70px]">
-          <div className="s-label">
-            — Data Science & AI
-          </div>
+      {/* Workflow Automation — keep below technology stack */}
+      <LandingWorkflowSection />
+
+      {/* 3. AI Business Assessment */}
+      <section id="assessment" className={cn(sectionClass, "bg-bg-secondary")}>
+        <div className="scroll-reveal mb-[60px] ">
+          <div className="s-label">— AI Business Assessment</div>
           <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
-            Turn Raw Data Into
+            We research your business
             <br />
-            Competitive Intelligence
+            before we recommend anything
           </h2>
-          <p className="max-w-[520px] text-base leading-[1.75] text-text-muted">
-            From data pipelines to production ML models — we build the full data
-            + AI stack that gives you predictive power.
+          <p className="text-base leading-[1.75] text-text-muted">
+            From industry and operations to tools, marketing, and social — then
+            we surface automation and AI opportunities that actually fit.
           </p>
         </div>
 
-        <div className="grid grid-cols-3 grid-rows-[auto_auto] gap-5 max-md:grid-cols-1">
-          <div className="scroll-reveal relative row-span-2 overflow-hidden rounded-surface-xl border border-border-subtle bg-surface-card p-11 transition-colors duration-300 hover:border-border-highlight max-md:row-span-1 max-md:p-9">
-            <div className="s-label-sm">
-              ML Engineering
-            </div>
-            <div className="mb-2.5 font-display text-[1.2rem] font-bold tracking-[-0.3px] text-text-primary">
-              Production Machine Learning
-            </div>
-            <div className="text-[0.85rem] leading-[1.65] text-text-muted">
-              Full-cycle ML development from problem framing to production
-              deployment — classification, regression, clustering, NLP, and
-              computer vision.
-            </div>
-            <div className="mt-6 flex gap-6">
-              <div>
-                <div className="font-display text-[2rem] font-bold text-metric-value">98%</div>
-                <div className="text-[0.72rem] text-text-muted">Model Accuracy avg.</div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {landingAssessmentSteps.map((step, index) => (
+            <div
+              key={step.title}
+              className="scroll-reveal rounded-surface-xl border border-border-subtle bg-surface-card p-8"
+            >
+              <div className="mb-3 text-[0.7rem] font-bold tracking-[2px] text-brand-cyan">
+                {String(index + 1).padStart(2, "0")}
               </div>
-              <div>
-                <div className="font-display text-[2rem] font-bold text-brand-strong">3x</div>
-                <div className="text-[0.72rem] text-text-muted">Faster Deployment</div>
-              </div>
+              <h3 className="mb-2 font-display text-[1.2rem] font-semibold text-text-primary">
+                {step.title}
+              </h3>
+              <p className="text-[0.9rem] leading-[1.7] text-text-muted">
+                {step.desc}
+              </p>
             </div>
-            <ul className="mt-6 flex list-none flex-col gap-2.5">
-              {[
-                "Feature Engineering & Selection",
-                "Model Training & Hypertuning",
-                "MLOps & Continuous Retraining",
-                "A/B Testing Infrastructure",
-                "Model Monitoring & Drift Detection",
-              ].map((item) => (
+          ))}
+        </div>
+
+        <div className="scroll-reveal mt-10">
+          <a
+            href="/analyze"
+            className="btn-lime inline-flex items-center gap-2 rounded-[10px] px-[30px] py-[15px] text-[0.9rem] no-underline"
+            data-cursor-target
+          >
+            Start my assessment
+            <ArrowRight size={16} />
+          </a>
+        </div>
+      </section>
+
+      {/* 4. AI Consultant */}
+      <section id="consultant" className={cn(sectionClass, "bg-bg-secondary")}>
+        <div className="scroll-reveal mb-[60px] ">
+          <div className="s-label">— AI Consultant</div>
+          <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
+            Chat with an AI consultant
+            <br />
+            that knows your business
+          </h2> 
+        </div>
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div className="scroll-reveal">
+            <p className="mb-8 max-w-[480px] text-base leading-[1.75] text-text-muted">
+              After you share your footprint, the consultant uses your profile,
+              assessment answers, tools, and problems to give personalized
+              recommendations — not generic scripts.
+            </p>
+            <ul className="mb-8 space-y-3">
+              {landingConsultantPoints.map((point) => (
                 <li
-                  key={item}
-                  className="flex items-center gap-2.5 text-[0.82rem] text-text-muted before:text-brand before:content-['→']"
+                  key={point}
+                  className="flex items-start gap-2.5 text-[0.9rem] text-text-muted before:mt-1 before:text-brand before:content-['→']"
                 >
-                  {item}
+                  {point}
                 </li>
               ))}
             </ul>
-          </div>
-
-          <div className="scroll-reveal relative overflow-hidden rounded-surface-xl border border-border-subtle bg-surface-card p-9 transition-colors duration-300 hover:border-border-highlight">
-            <div className="s-label-sm">
-              Data Engineering
-            </div>
-            <div className="mb-2.5 font-display text-[1.2rem] font-bold tracking-[-0.3px] text-text-primary">
-              AI Data Pipelines
-            </div>
-            <div className="text-[0.85rem] leading-[1.65] text-text-muted">
-              Real-time and batch data pipelines that feed your AI systems with
-              clean, structured data — from any source to any destination.
-            </div>
-            <div className="mt-6 flex h-[60px] items-end gap-[5px]">
-              {[40, 60, 45, 80, 65, 90, 75, 100].map((height, index) => (
-                <div
-                  key={height}
-                  className="flex-1 origin-bottom animate-grow-bar rounded-t-[3px] bg-gradient-to-t from-accent-cyan to-accent-cyan/30"
-                  style={{
-                    height: `${height}%`,
-                    animationDelay: `${(index + 1) * 0.1}s`,
-                    background:
-                      index === 7
-                        ? "linear-gradient(0deg, var(--accent-lime), rgba(198,255,0,0.3))"
-                        : undefined,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="scroll-reveal relative overflow-hidden rounded-surface-xl border border-border-subtle bg-surface-card p-9 transition-colors duration-300 hover:border-border-highlight">
-            <div className="s-label-sm text-brand">
-              Predictive Analytics
-            </div>
-            <div className="mb-2.5 font-display text-[1.2rem] font-bold tracking-[-0.3px] text-text-primary">
-              Business Intelligence AI
-            </div>
-            <div className="text-[0.85rem] leading-[1.65] text-text-muted">
-              AI dashboards that auto-generate insights, detect anomalies, and
-              predict outcomes — no analyst required.
-            </div>
-            <div className="mt-5 flex gap-6">
-              <div>
-                <div className="font-display text-[2rem] font-bold text-brand-strong">10x</div>
-                <div className="text-[0.72rem] text-text-muted">Faster insights</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="scroll-reveal relative col-span-2 overflow-hidden rounded-surface-xl border border-border-subtle bg-surface-card p-9 transition-colors duration-300 hover:border-border-highlight max-md:col-span-1">
-            <div className="s-label-sm">
-              NLP & Computer Vision
-            </div>
-            <div className="mb-2.5 font-display text-[1.2rem] font-bold tracking-[-0.3px] text-text-primary">
-              Advanced AI Perception Systems
-            </div>
-            <div className="text-[0.85rem] leading-[1.65] text-text-muted">
-              Deploy state-of-the-art NLP for document understanding, sentiment
-              analysis, and entity extraction. Computer vision for quality
-              control, OCR, and visual inspection at scale.
-            </div>
-            <div className="mt-6 grid grid-cols-4 gap-3">
-              {landingPerceptionItems.map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-lg border border-border-subtle bg-surface-elevated p-3.5 text-center text-[0.72rem] text-text-muted"
-                >
-                  <AnimatedIcon
-                    icon={item.icon}
-                    size={20}
-                    className="mx-auto mb-1.5 text-brand-cyan"
-                  />
-                  <div>{item.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* full spectrum ai services */}
-      <section id="services" className={cn(sectionClass, "bg-bg-secondary")}>
-        <div className="scroll-reveal mb-[70px]">
-          <div className="s-label">
-            — Full Spectrum AI Services
-          </div>
-          <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
-            Every AI Service
-            <br />
-            Your Business Needs
-          </h2>
-          <p className="max-w-[520px] text-base leading-[1.75] text-text-muted">
-            30+ enterprise-grade AI services across automation, agents, models,
-            data, and growth — all under one roof.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-3 gap-6 overflow-hidden max-lg:grid-cols-2 max-md:grid-cols-1">
-          {landingServices.map((service) => (
-            <div
-              key={service.num}
-              className={`${serviceCardClass(service.span)} rounded-surface-xl border border-border-subtle hover:border-border-highlight`}
-              style={
-                {
-                  "--svc-c1": service.c1,
-                  "--svc-c2": service.c2,
-                } as React.CSSProperties
-              }
+            <a
+              href="/analyze"
+              className="btn-ghost inline-flex items-center gap-2 rounded-[10px] px-[30px] py-[15px] text-[0.9rem] no-underline"
+              data-cursor-target
             >
-              <div className="svc-num mb-[22px]">
-                {service.num}
+              <MessageSquare size={16} />
+              Talk to AI Consultant
+            </a>
+          </div>
+
+          <div className="scroll-reveal rounded-surface-xl border border-border-subtle bg-surface-card p-8">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-full bg-accent-cyan/15 text-brand-cyan">
+                <Bot size={20} />
               </div>
-              <div
-                className="svc-icon-wrap mb-[22px] flex size-[54px] items-center justify-center rounded-surface-sm text-brand-cyan transition-transform duration-300 group-hover:scale-[1.08] group-hover:-rotate-3 group-hover:border-accent-lime"
-              >
-                <AnimatedIcon icon={service.icon} size={26} className="text-brand-cyan" />
-              </div>
-              <div className="mb-2.5 font-display text-[1.15rem] font-semibold tracking-[-0.3px] text-text-primary">
-                {service.title}
-              </div>
-              <div className="mb-6 text-[0.875rem] leading-[1.7] text-text-muted">
-                {service.description}
-              </div>
-              <div className="flex flex-wrap gap-[7px]">
-                {service.pills.map((pill) => (
-                  <span key={pill} className="pill">
-                    {pill}
-                  </span>
-                ))}
+              <div>
+                <div className="text-sm font-semibold text-text-primary">
+                  TechTivAI Consultant
+                </div>
+                <div className="text-xs text-text-muted">Online · grounded research</div>
               </div>
             </div>
-          ))}
+            <div className="space-y-3 text-[0.88rem] leading-[1.65]">
+              <div className="rounded-2xl rounded-tl-sm bg-surface-elevated px-4 py-3 text-text-muted">
+                I reviewed your site and social profiles. Your booking flow looks
+                manual — what&apos;s the biggest delay when a lead comes in?
+              </div>
+              <div className="ml-8 rounded-2xl rounded-tr-sm border border-accent-lime/25 bg-accent-lime/5 px-4 py-3 text-text-primary">
+                We still qualify leads by hand in WhatsApp and the CRM.
+              </div>
+              <div className="rounded-2xl rounded-tl-sm bg-surface-elevated px-4 py-3 text-text-muted">
+                Got it. I&apos;ll prioritize lead automation and an AI
+                qualification agent in your blueprint.
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* autonomous ai agents */}
+      {/* 5. AI / Agentic Solutions */}
       <section id="agents" className={cn(sectionClass, "bg-bg-secondary")}>
         <div className="scroll-reveal mb-[70px]">
-          <div className="s-label">
-            — Autonomous AI Agents
-          </div>
+          <div className="s-label">— AI / Agentic Solutions</div>
           <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
-            Meet Your
+            Autonomous agents for
             <br />
-            AI Workforce
+            sales, support, and ops
           </h2>
           <p className="max-w-[520px] text-base leading-[1.75] text-text-muted">
-            Pre-built and custom autonomous agents ready to work across your
-            entire business stack — 24/7, no breaks.
+            Multi-agent systems that plan, use tools, and execute — sales agents,
+            support agents, and operations agents that work around the clock.
           </p>
         </div>
 
         <div className="grid grid-cols-[1.4fr_1fr] gap-6 max-md:grid-cols-1">
           <div className="scroll-reveal relative overflow-hidden rounded-surface-xl border border-border-subtle bg-surface-card p-12 max-md:p-10">
-            <div className="s-label">
-              — Featured Agent Platform
-            </div>
+            <div className="s-label">— Featured</div>
             <h3 className="mb-3.5 font-display text-[1.8rem] leading-tight font-bold tracking-[-0.8px] text-text-primary">
               AgentForce
               <br />
               <span className="text-brand-cyan">Enterprise Suite</span>
             </h3>
             <p className="mb-8 text-[0.9rem] leading-[1.7] text-text-muted">
-              Deploy a coordinated fleet of specialized AI agents that plan,
-              reason, use tools, and execute multi-step workflows autonomously.
-              Built on LangGraph + CrewAI with full observability.
+              Deploy specialized AI agents that collaborate on research,
+              outreach, analysis, and execution — built on LangGraph and CrewAI.
             </p>
-
             <div className="mb-8 grid grid-cols-2 gap-3.5">
               {landingAgentForceCards.map((card) => (
                 <div
@@ -389,18 +320,19 @@ export function LandingPageView() {
                     size={22}
                     className="mb-2 text-brand-cyan"
                   />
-                  <div className="mb-1 text-[0.82rem] font-bold text-text-primary">{card.title}</div>
+                  <div className="mb-1 text-[0.82rem] font-bold text-text-primary">
+                    {card.title}
+                  </div>
                   <div className="text-xs text-text-muted">{card.desc}</div>
                 </div>
               ))}
             </div>
-
             <a
-              href="#contact"
+              href="/analyze"
               className="btn-lime inline-flex items-center gap-2 rounded-[10px] px-[30px] py-[15px] text-[0.9rem] no-underline"
               data-cursor-target
             >
-              Deploy Your Agent Fleet →
+              See if agents fit your business →
             </a>
           </div>
 
@@ -418,8 +350,12 @@ export function LandingPageView() {
                   <AnimatedIcon icon={agent.icon} size={20} />
                 </div>
                 <div className="flex-1">
-                  <div className="text-[0.88rem] font-bold text-text-primary">{agent.name}</div>
-                  <div className="mt-0.5 text-[0.78rem] text-text-muted">{agent.role}</div>
+                  <div className="text-[0.88rem] font-bold text-text-primary">
+                    {agent.name}
+                  </div>
+                  <div className="mt-0.5 text-[0.78rem] text-text-muted">
+                    {agent.role}
+                  </div>
                 </div>
                 <span
                   className={cn(
@@ -435,45 +371,38 @@ export function LandingPageView() {
         </div>
       </section>
 
-      {/* sales & marketing ai */}
-      <section id="marketing" className={cn(sectionClass, "bg-bg-secondary")}>
-        <div className="scroll-reveal mb-[70px]">
-          <div className="s-label">
-            — Sales & Marketing AI
-          </div>
+      {/* 6. AI Automation */}
+      <section id="automation" className={cn(sectionClass, "bg-bg-secondary")}>
+        <div className="scroll-reveal mb-[60px]">
+          <div className="s-label">— AI Automation</div>
           <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
-            Your AI-Powered
+            Workflows that run
             <br />
-            Revenue Engine
+            without the busywork
           </h2>
           <p className="max-w-[520px] text-base leading-[1.75] text-text-muted">
-            Replace entire GTM functions with AI — lead gen, outreach, nurture,
-            conversion, and retention on autopilot.
+            Business process automation with n8n, Make, Zapier, and GHL — CRM,
+            sales, marketing, appointments, and email.
           </p>
         </div>
 
-        <div className="mt-[60px] grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">
-          {landingMarketingCards.map((card) => (
+        <div className="mb-14 grid gap-4 md:grid-cols-3">
+          {landingAutomationItems.map((item) => (
             <div
-              key={card.title}
-              className="scroll-reveal rounded-surface-xl border border-border-subtle bg-surface-card p-[36px_30px] transition-all duration-300 hover:-translate-y-1 hover:border-border-highlight"
+              key={item.title}
+              className="scroll-reveal rounded-surface-xl border border-border-subtle bg-surface-card p-8"
             >
-              <AnimatedIcon icon={card.icon} size={28} className="mb-5 text-brand-cyan" />
-              <div className="mb-2.5 font-display text-[1.1rem] font-bold text-text-primary">
-                {card.title}
-              </div>
-              <div className="mb-5 text-[0.875rem] leading-[1.7] text-text-muted">{card.desc}</div>
-              <div className="flex gap-4">
-                {card.kpis.map(([val, lbl]) => (
-                  <div
-                    key={lbl}
-                    className="flex-1 rounded-lg border border-border-subtle bg-surface-elevated px-3.5 py-2.5 text-center"
-                  >
-                    <div className="font-display text-[1.2rem] font-bold text-brand-strong">
-                      {val}
-                    </div>
-                    <div className="text-[0.68rem] text-text-muted">{lbl}</div>
-                  </div>
+              <h3 className="mb-2 font-display text-[1.15rem] font-semibold text-text-primary">
+                {item.title}
+              </h3>
+              <p className="mb-5 text-[0.88rem] leading-[1.7] text-text-muted">
+                {item.desc}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {item.pills.map((pill) => (
+                  <span key={pill} className="pill">
+                    {pill}
+                  </span>
                 ))}
               </div>
             </div>
@@ -481,291 +410,235 @@ export function LandingPageView() {
         </div>
       </section>
 
-      {/* proven results */}
-      <section id="results" className={cn(sectionClass, "bg-bg-secondary")}>
-        <div className="scroll-reveal mb-[70px]">
-          <div className="s-label">
-            — Proven Results
-          </div>
+      {/* 7. AI-Powered Web & App Development */}
+      <section id="web-app" className={cn(sectionClass, "bg-bg-secondary")}>
+        <div className="scroll-reveal mb-[60px]">
+          <div className="s-label">— AI-Powered Web & App Development</div>
           <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
-            Numbers That
+            Products with AI
             <br />
-            Speak for Themselves
+            built into the experience
           </h2>
+          <p className="max-w-[520px] text-base leading-[1.75] text-text-muted">
+            Websites, SaaS platforms, dashboards, portals, and mobile apps —
+            with AI search, assistants, and automation inside.
+          </p>
         </div>
 
-        <div className="mt-14 grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-px overflow-hidden rounded-surface-xl border border-border-subtle">
-          {landingResults.map(([num, unit, label, sub], index, arr) => (
+        <div className="grid gap-4 md:grid-cols-3">
+          {landingWebAppItems.map((item) => (
             <div
-              key={label}
-              className={cn(
-                "scroll-reveal bg-surface-card px-9 py-11",
-                index < arr.length - 1 && "border-r border-border-subtle max-[250px]:border-r-0",
-              )}
+              key={item.title}
+              className="scroll-reveal rounded-surface-xl border border-border-subtle bg-surface-card p-8"
             >
-              <div className="mb-2 font-display text-[3.5rem] leading-none font-bold text-text-primary">
-                {num}
-                <span className="result-num-unit">{unit}</span>
+              <h3 className="mb-2 font-display text-[1.15rem] font-semibold text-text-primary">
+                {item.title}
+              </h3>
+              <p className="text-[0.9rem] leading-[1.7] text-text-muted">
+                {item.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-14 grid grid-cols-3 gap-6 overflow-hidden max-lg:grid-cols-2 max-md:grid-cols-1">
+          {landingServices.slice(0, 3).map((service) => (
+            <div
+              key={service.num}
+              className={`${serviceCardClass(service.span)} rounded-surface-xl border border-border-subtle hover:border-border-highlight`}
+              style={
+                {
+                  "--svc-c1": service.c1,
+                  "--svc-c2": service.c2,
+                } as React.CSSProperties
+              }
+            >
+              <div className="svc-num mb-[22px]">{service.num}</div>
+              <div className="svc-icon-wrap mb-[22px] flex size-[54px] items-center justify-center rounded-surface-sm text-brand-cyan">
+                <AnimatedIcon
+                  icon={service.icon}
+                  size={26}
+                  className="text-brand-cyan"
+                />
               </div>
-              <div className="mb-1.5 text-[0.88rem] font-semibold result-label-accent">{label}</div>
-              <div className="text-[0.78rem] leading-normal text-text-muted">{sub}</div>
+              <div className="mb-2.5 font-display text-[1.15rem] font-semibold tracking-[-0.3px] text-text-primary">
+                {service.title}
+              </div>
+              <div className="mb-6 text-[0.875rem] leading-[1.7] text-text-muted">
+                {service.description}
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* our process */}
-      <section id="process" className={cn(sectionClass, "bg-bg-secondary")}>
+      {/* 8. How It Works */}
+      <section id="how-it-works" className={cn(sectionClass, "bg-bg-secondary")}>
         <div className="scroll-reveal mb-[70px]">
-          <div className="s-label">
-            — Our Process
-          </div>
+          <div className="s-label">— How It Works</div>
           <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
-            From Zero to AI-Powered
+            From first link to
             <br />
-            in 6 Weeks
+            full AI Blueprint
           </h2>
         </div>
 
-        <div className="relative mt-[70px] grid grid-cols-6 max-lg:grid-cols-3 max-md:grid-cols-2 before:pointer-events-none before:absolute before:top-[30px] before:right-[5%] before:left-[5%] before:h-px before:bg-border-subtle before:content-['']">
-          {landingProcess.map((step) => {
-            const isOngoing = "ongoing" in step;
-            return (
-              <div key={step.title} className="scroll-reveal px-4">
-                <div
-                  className={cn(
-                    "relative z-[1] mx-auto my-5 flex size-5 items-center justify-center rounded-full border-2 bg-bg-secondary",
-                    isOngoing ? "border-accent-lime" : "border-accent-cyan",
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "size-2 rounded-full",
-                      isOngoing ? "bg-ui-dot" : "bg-brand-cyan",
-                    )}
-                  />
-                </div>
-                <div
-                  className={cn(
-                    "mb-2 text-center text-[0.65rem] font-bold tracking-[2px]",
-                    isOngoing ? "text-brand" : "text-brand-cyan",
-                  )}
-                >
-                  {step.num}
-                </div>
-                <div className="mb-2 text-center font-display text-[0.95rem] font-semibold text-text-primary">
-                  {step.title}
-                </div>
-                <div className="text-center text-[0.78rem] leading-[1.55] text-text-muted">
-                  {step.desc}
-                </div>
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {landingHowItWorks.map((step) => (
+            <div
+              key={step.num}
+              className="scroll-reveal rounded-surface-xl border border-border-subtle bg-surface-card p-7"
+            >
+              <div className="mb-4 font-display text-[1.6rem] font-bold text-brand-cyan">
+                {step.num}
               </div>
-            );
-          })}
+              <h3 className="mb-2 text-[1.05rem] font-semibold text-text-primary">
+                {step.title}
+              </h3>
+              <p className="text-[0.88rem] leading-[1.65] text-text-muted">
+                {step.desc}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* pricing */}
-      <section id="pricing" className={cn(sectionClass, "bg-bg-secondary")}>
-        <div className="scroll-reveal mx-auto mb-[70px] max-w-[600px] text-center">
-          <div className="s-label">
-            — Pricing
+      {/* 9. Blueprint Preview */}
+      <section id="blueprint" className={cn(sectionClass, "bg-bg-secondary")}>
+        <div className="grid items-start gap-12 lg:grid-cols-2">
+          <div className="scroll-reveal">
+            <div className="s-label">— Blueprint Preview</div>
+            <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
+              What&apos;s inside your
+              <br />
+              $5 AI Blueprint
+            </h2>
+            <p className="mb-8 max-w-[480px] text-base leading-[1.75] text-text-muted">
+              A limited preview is free. Unlock the full personalized blueprint
+              and PDF after a $5 payment — then request the services TechTivAI
+              should build for you.
+            </p>
+            <a
+              href="/analyze"
+              className="btn-lime inline-flex items-center gap-2 rounded-[10px] px-[30px] py-[15px] text-[0.9rem] no-underline"
+              data-cursor-target
+            >
+              Get My AI Blueprint — $5
+              <ArrowRight size={16} />
+            </a>
           </div>
+
+          <div className="scroll-reveal rounded-surface-xl border border-border-subtle bg-surface-card p-8">
+            <div className="mb-5 text-[0.72rem] font-bold tracking-[2px] text-text-muted uppercase">
+              Report sections
+            </div>
+            <ul className="space-y-2.5">
+              {landingBlueprintPreviewSections.map((section) => (
+                <li
+                  key={section}
+                  className="flex items-center gap-2.5 border-b border-border-subtle/60 py-2 text-[0.9rem] text-text-primary last:border-0"
+                >
+                  <span className="text-brand">✓</span>
+                  {section}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* 10. Pricing */}
+      <section id="pricing" className={cn(sectionClass, "bg-bg-secondary")}>
+        <div className="scroll-reveal mx-auto mb-[70px] text-center">
+          <div className="s-label">— Pricing</div>
           <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
-            Invest in AI.
+            Start with a $5 Blueprint.
             <br />
-            Get 10x Returns.
+            Scale into delivery.
           </h2>
           <p className="mx-auto max-w-[520px] text-base leading-[1.75] text-text-muted">
-            Transparent pricing with clear ROI. No lock-ins, no surprises.
+            Entry product first. Implementation and ongoing advisory when
+            you&apos;re ready.
           </p>
         </div>
 
-        <div className="mt-[60px] grid grid-cols-3 items-start gap-5 max-md:grid-cols-1">
-          <div className="scroll-reveal relative overflow-hidden rounded-surface-xl border border-border-subtle bg-surface-card p-11 transition-transform duration-300 hover:-translate-y-1">
-            <div className="mb-5 text-[0.7rem] font-bold tracking-[3px] text-text-muted uppercase">
-              Growth
-            </div>
-            <div className="mb-2 flex items-start gap-1 font-display">
-              <span className="pt-2 text-[1.3rem] font-semibold text-text-muted">$</span>
-              <span className="text-[4rem] leading-none font-bold price-num">999</span>
-              <span className="pt-7 text-[0.85rem] text-text-muted">/mo</span>
-            </div>
-            <div className="mb-8 text-[0.88rem] text-text-muted">
-              For SMBs automating their first AI workflows
-            </div>
-            <hr className="my-7 border-0 border-t border-border-subtle" />
-            {[
-              [true, "2 AI Chatbots / Assistants"],
-              [true, "10 Automated Workflows"],
-              [true, "Basic RAG knowledge base"],
-              [true, "CRM + Email Integration"],
-              [true, "Analytics Dashboard"],
-              [true, "50,000 AI interactions/mo"],
-              [false, "Custom AI Agents"],
-              [false, "Fine-tuned LLM"],
-            ].map(([included, text]) => (
-              <div
-                key={String(text)}
-                className="mb-3 flex items-start gap-2.5 text-[0.85rem] leading-normal text-text-muted"
-              >
-                <span
-                  className={cn(
-                    "mt-0.5 shrink-0 text-[0.8rem]",
-                    included ? "text-brand" : "text-faint",
-                  )}
-                >
-                  {included ? "✓" : "✗"}
+        <LandingPricingCards />
+      </section>
+
+      {/* 11. FAQ */}
+      <section id="faq" className={cn(sectionClass, "bg-bg-secondary")}>
+        <div className="scroll-reveal mb-[60px] max-w-[640px]">
+          <div className="s-label">— FAQ</div>
+          <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
+            Questions before you start
+          </h2>
+        </div>
+
+        <div className="mx-auto max-w-[760px] space-y-3">
+          {landingFaqItems.map((item) => (
+            <details
+              key={item.q}
+              className="scroll-reveal group rounded-surface-xl border border-border-subtle bg-surface-card px-6 py-5 open:border-border-highlight"
+            >
+              <summary className="cursor-pointer list-none font-display text-[1.05rem] font-semibold text-text-primary marker:content-none [&::-webkit-details-marker]:hidden">
+                <span className="flex items-center justify-between gap-4">
+                  {item.q}
+                  <span className="text-brand-cyan transition group-open:rotate-45">
+                    +
+                  </span>
                 </span>
-                {text}
-              </div>
-            ))}
-            <a
-              href="#contact"
-              className="mt-8 block rounded-[10px] border border-border-subtle py-3.5 text-center text-[0.9rem] font-bold text-text-body no-underline transition-all duration-200 hover:border-accent-lime hover:text-brand"
-              data-cursor-target
-            >
-              Get Started →
-            </a>
-          </div>
-
-          <div className="scroll-reveal relative overflow-hidden rounded-surface-xl border border-accent-lime/30 bg-gradient-to-br from-accent-lime/[0.04] to-surface-card p-11 shadow-[0_0_60px_rgba(198,255,0,0.06)] transition-transform duration-300 hover:-translate-y-1">
-            <div className="absolute top-0 right-7 rounded-b-lg bg-accent-lime px-3.5 py-1.5 text-[0.68rem] font-extrabold tracking-[1px] text-on-accent">
-              ★ BEST VALUE
-            </div>
-            <div className="mb-5 text-[0.7rem] font-bold tracking-[3px] text-text-muted uppercase">
-              Scale
-            </div>
-            <div className="mb-2 flex items-start gap-1 font-display">
-              <span className="pt-2 text-[1.3rem] font-semibold text-text-muted">$</span>
-              <span className="text-[4rem] leading-none font-bold price-num">1,999</span>
-              <span className="pt-7 text-[0.85rem] text-text-muted">/mo</span>
-            </div>
-            <div className="mb-8 text-[0.88rem] text-text-muted">
-              For growth companies running AI across all functions
-            </div>
-            <hr className="my-7 border-0 border-t border-border-subtle" />
-            {[
-              "Unlimited AI Bots & Assistants",
-              "Unlimited Workflows",
-              "5 Custom AI Agents",
-              "Fine-tuned domain LLM",
-              "Sales + Marketing AI Suite",
-              "Data Pipeline + ML models",
-              "500,000 AI interactions/mo",
-              "Dedicated AI Engineer",
-            ].map((text) => (
-              <div
-                key={text}
-                className="mb-3 flex items-start gap-2.5 text-[0.85rem] leading-normal text-text-muted"
-              >
-                <span className="mt-0.5 shrink-0 text-[0.8rem] text-brand">✓</span>
-                {text}
-              </div>
-            ))}
-            <a
-              href="#contact"
-              className="btn-lime mt-8 block rounded-[10px] py-3.5 text-center text-[0.9rem] no-underline"
-              data-cursor-target
-            >
-              Scale with AI →
-            </a>
-          </div>
-
-          <div className="scroll-reveal relative overflow-hidden rounded-surface-xl border border-border-subtle bg-surface-card p-11 transition-transform duration-300 hover:-translate-y-1">
-            <div className="mb-5 text-[0.7rem] font-bold tracking-[3px] text-text-muted uppercase">
-              Enterprise
-            </div>
-            <div className="mb-2 flex items-center font-display">
-              <span className="text-[2.5rem] leading-none font-bold text-text-primary">Custom</span>
-            </div>
-            <div className="mb-8 text-[0.88rem] text-text-muted">
-              Full AI transformation for large organizations
-            </div>
-            <hr className="my-7 border-0 border-t border-border-subtle" />
-            {[
-              "Unlimited everything",
-              "Custom AI agent fleet",
-              "Proprietary LLM training",
-              "On-premise / private cloud",
-              "Dedicated AI team (3+ engineers)",
-              "SLA + 99.9% uptime guarantee",
-              "White-label options",
-              "Board-level AI strategy",
-            ].map((text) => (
-              <div
-                key={text}
-                className="mb-3 flex items-start gap-2.5 text-[0.85rem] leading-normal text-text-muted"
-              >
-                <span className="mt-0.5 shrink-0 text-[0.8rem] text-brand">✓</span>
-                {text}
-              </div>
-            ))}
-            <a
-              href="#contact"
-              className="mt-8 block rounded-[10px] border border-border-subtle py-3.5 text-center text-[0.9rem] font-bold text-text-body no-underline transition-all duration-200 hover:border-accent-lime hover:text-brand"
-              data-cursor-target
-            >
-              Talk to Sales →
-            </a>
-          </div>
+              </summary>
+              <p className="mt-3 text-[0.92rem] leading-[1.7] text-text-muted">
+                {item.a}
+              </p>
+            </details>
+          ))}
         </div>
       </section>
 
-      {/* contact */}
+      {/* 12. Final CTA */}
       <section id="contact" className={cn(sectionClass, "bg-bg-secondary text-center")}>
-        <div className="mx-auto max-w-[680px]">
-          <div className="scroll-reveal text-center">
-            <div className="s-label">
-              — Let&apos;s Build Together
-            </div>
-            <div className="my-6 font-display text-[clamp(2.5rem,6vw,5.5rem)] leading-none font-bold tracking-[-2px] text-text-primary">
-              <span className="block">Your Business,</span>
+        <div className="mx-auto ">
+          <div className="scroll-reveal text-center scroll-reveal relative overflow-hidden rounded-surface-xl border border-accent-lime/30 bg-surface-card px-6 py-10 sm:px-10 sm:py-12 lg:px-14 lg:py-14">
+            
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-24 right-0 size-64 rounded-full bg-accent-cyan/10 blur-[100px]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-20 left-0 size-56 rounded-full bg-[var(--hero-glow-accent)] blur-[90px]"
+          />
+
+            <div className="s-label">— Final CTA</div>
+            <div className="my-6 font-display text-[clamp(2.5rem,6vw,5rem)] leading-none font-bold tracking-[-2px] text-text-primary">
+              <span className="block">Your next AI move</span>
               <span className="block">
-                <span className="text-brand-cyan">Powered</span> by
-              </span>
-              <span className="block">
-                <span className="text-brand">AI.</span>
+                starts with a{" "}
+                <span className="text-brand">$5 Blueprint.</span>
               </span>
             </div>
             <p className="mb-9 text-base leading-[1.7] text-text-muted">
-              Book a free 45-minute AI Strategy Session. We&apos;ll map out
-              exactly which AI solutions will drive the most ROI for your business
-              — no pitch, just value.
+              Analyze your business, talk to the AI Consultant, and get a clear
+              plan for agents, automation, web, and apps — then build with
+              TechTivAI.
             </p>
-
-            <form
-              className="mx-auto flex max-w-[440px] flex-wrap justify-center gap-3"
-              onSubmit={(event) => event.preventDefault()}
-            >
-              <input
-                type="email"
-                placeholder="Your work email"
-                className="min-w-[200px] flex-1 rounded-[10px] border border-border-subtle bg-surface-elevated px-5 py-3.5 font-[inherit] text-[0.9rem] text-text-body outline-none transition-colors duration-200 placeholder:text-text-muted focus:border-border-highlight"
-              />
-              <button
-                type="submit"
-                className="btn-lime cursor-pointer rounded-[10px] border-none px-7 py-3.5 text-[0.9rem]"
+            <div className="flex flex-wrap items-center justify-center gap-3.5">
+              <a
+                href="/analyze"
+                className="btn-lime inline-flex items-center gap-2 rounded-[10px] px-[30px] py-[15px] text-[0.9rem] no-underline"
                 data-cursor-target
               >
-                Book Free Session →
-              </button>
-            </form>
-
-            <div className="mt-7 flex flex-wrap justify-center gap-2.5">
-              {[
-                "✓ No commitment",
-                "✓ 45-min strategy call",
-                "✓ Custom AI roadmap",
-                "✓ Response in 2hrs",
-              ].map((pill) => (
-                <div
-                  key={pill}
-                  className="flex items-center gap-[7px] rounded-full border border-border-subtle bg-surface-elevated px-5 py-2.5 text-[0.82rem] font-medium text-text-muted"
-                >
-                  {pill}
-                </div>
-              ))}
+                <Rocket size={18} />
+                Get My AI Blueprint — $5
+              </a>
+              <a
+                href="/contact"
+                className="btn-ghost rounded-[10px] px-[30px] py-[15px] text-[0.9rem] no-underline"
+                data-cursor-target
+              >
+                Talk to the team
+              </a>
             </div>
           </div>
         </div>

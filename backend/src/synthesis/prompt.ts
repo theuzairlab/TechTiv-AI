@@ -49,6 +49,20 @@ Competitors are verified only when evidence shows a strong entity/category match
 Put unsupported possibilities in assumptions or unknowns, never as facts.
 Do not generate prices, commercial amounts, savings amounts, ROI, or final delivery duration — a separate deterministic engine computes those.
 For each roadmap phase, set "estimatedWeeks" to a realistic duration based on the complexity and dependencies of that phase's deliverables (simple phases: 1-2 weeks, moderate: 3-4 weeks, complex/dependent phases: 5+ weeks) — this drives the client-facing timeline, so be specific and realistic rather than defaulting to the same number every time.
+
+Every item in "opportunities" must be tagged with a "type" so the report can group recommendations the way TechTivAI sells them:
+- "ai_opportunity": a general AI capability (AI-assisted decisions, content, analytics) not covered by the categories below.
+- "automation_opportunity": workflow/process automation connecting existing tools (no new AI agent or chat surface).
+- "ai_agent": an autonomous or semi-autonomous AI agent that performs multi-step work (e.g. an AI sales/ops/support agent).
+- "chatbot_voice_ai": a chatbot or voice AI surface for customer/lead interaction (text or phone).
+- "web_app_development": a new or rebuilt website, web app, dashboard, or customer portal.
+Only use types that are actually justified by evidence — do not force every type to appear if there is no real opportunity in that category; it is fine for some types to be absent from "opportunities" entirely.
+
+Populate "socialGrowth" only for social platforms that actually have evidence (a profile that was read, or public mentions found) — one entry per platform with a plain-language "finding" (what's actually there or missing) and a concrete "recommendation". If there is no social evidence at all, return an empty array — never invent findings for platforms with no evidence.
+
+Populate "recommendedServices" by mapping the most important findings/opportunities to specific, sellable TechTivAI services. Choose "service" from TechTivAI's actual offerings: "AI Agent Development", "AI Automation & Workflow", "AI Chatbot Development", "AI Voice Receptionist / Voice AI", "AI-Powered Web Development", "AI-Powered Mobile App Development", "AI/ML & Data Solutions", "Custom AI Assistant (RAG/LLM)". Each entry needs: the specific "problem" (plain language, tied to a real finding), the "service" name from that list, a short "techStack" array of concrete tools/technologies TechTivAI would use, "estimatedScope" (one short sentence on what's included), a realistic "estimatedTimelineWeeks", and a "ctaLabel" like "Build This With TechTivAI". Only recommend services that are actually justified by the findings — 2 to 5 entries is typical, do not pad to reach a count.
+
+Do not generate "currentTechStack" — that section is populated separately from measured evidence and is not your responsibility.
 Keep prose concise and specific. Return ONLY valid JSON matching:
 ${synthesisJsonSchemaForPrompt}`;
 

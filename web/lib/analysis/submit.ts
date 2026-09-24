@@ -21,6 +21,7 @@ import {
   createPendingGuestEmail,
   isPendingGuestEmail,
 } from "@/lib/analysis/guest";
+import { ensureCompanyForContact } from "@/lib/companies";
 
 export type AnalysisSubmissionResult =
   | {
@@ -109,6 +110,14 @@ async function registerInProgressNotify(
   });
 }
 
+function analysisDomainOrNull(input: CreateAnalysisInput) {
+  try {
+    return resolveAnalysisDomain(input);
+  } catch {
+    return null;
+  }
+}
+
 async function findOrCreateLead(
   input: CreateAnalysisInput,
   userId: string | null,
@@ -128,6 +137,19 @@ async function findOrCreateLead(
   const businessIntake = buildBusinessIntake(input);
 
   if (existing) {
+    const companyId =
+      existing.companyId ??
+      (await ensureCompanyForContact({
+        email: resolvedEmail,
+        companyName:
+          businessIntake.companyName?.trim() ||
+          input.company?.trim() ||
+          existing.company,
+        personName: input.name?.trim() || existing.name,
+        domain: analysisDomainOrNull(input),
+        userId: userId ?? existing.userId,
+      }));
+
     return prisma.lead.update({
       where: { id: existing.id },
       data: {
@@ -138,6 +160,7 @@ async function findOrCreateLead(
           existing.company,
         source: "discovery",
         userId: userId ?? existing.userId,
+        companyId,
         discoveryAnswers: discoveryAnswers ?? existing.discoveryAnswers ?? undefined,
         metadata: {
           ...((existing.metadata as Record<string, unknown> | null) ?? {}),
@@ -148,6 +171,14 @@ async function findOrCreateLead(
     });
   }
 
+  const companyId = await ensureCompanyForContact({
+    email: resolvedEmail,
+    companyName: businessIntake.companyName?.trim() || input.company?.trim(),
+    personName: input.name?.trim(),
+        domain: analysisDomainOrNull(input),
+    userId,
+  });
+
   return prisma.lead.create({
     data: {
       name: input.name?.trim() || businessIntake.companyName?.trim() || "Discovery visitor",
@@ -155,6 +186,7 @@ async function findOrCreateLead(
       company: businessIntake.companyName?.trim() || input.company?.trim() || null,
       source: "discovery",
       userId,
+      companyId,
       discoveryAnswers,
       metadata: {
         ...(socialMetadata ? { socialLinks: socialMetadata } : {}),

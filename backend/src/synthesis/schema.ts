@@ -2,6 +2,13 @@ import { z } from "zod";
 
 const evidenceRefs = z.array(z.string().min(1)).min(1).max(8);
 const level = z.enum(["high", "medium", "low"]);
+const opportunityType = z.enum([
+  "ai_opportunity",
+  "automation_opportunity",
+  "ai_agent",
+  "chatbot_voice_ai",
+  "web_app_development",
+]);
 
 export const synthesisSchema = z.object({
   businessProfile: z.object({
@@ -61,6 +68,7 @@ export const synthesisSchema = z.object({
         title: z.string().min(1),
         outcome: z.string().min(1),
         workflow: z.string().min(1),
+        type: opportunityType,
         impact: level,
         effort: level,
         integrations: z.array(z.string()).max(8),
@@ -91,6 +99,42 @@ export const synthesisSchema = z.object({
     )
     .min(1)
     .max(5),
+  socialGrowth: z
+    .array(
+      z.object({
+        platform: z.string().min(1),
+        finding: z.string().min(1),
+        recommendation: z.string().min(1),
+        evidenceRefs,
+      }),
+    )
+    .max(6)
+    .optional()
+    .default([]),
+  recommendedServices: z
+    .array(
+      z.object({
+        problem: z.string().min(1),
+        service: z.string().min(1),
+        techStack: z.array(z.string()).max(6),
+        estimatedScope: z.string().min(1),
+        estimatedTimelineWeeks: z.number().int().min(1).max(24),
+        ctaLabel: z.string().min(1),
+      }),
+    )
+    .min(1)
+    .max(6),
+  currentTechStack: z
+    .array(
+      z.object({
+        category: z.string().min(1),
+        tool: z.string().min(1),
+        notes: z.string().min(1),
+      }),
+    )
+    .max(12)
+    .optional()
+    .default([]),
   risks: z.array(z.string().min(1)).max(8),
   assumptions: z.array(z.string().min(1)).max(8),
   unknowns: z.array(z.string().min(1)).max(8),
@@ -108,8 +152,10 @@ export const synthesisJsonSchemaForPrompt = `{
   "scorecard":[{"dimension":"string","score":0,"rationale":"string","evidenceRefs":["evidence-key"]}],
   "findings":[{"title":"string","category":"operations|sales|marketing|customer_experience|technology|seo|local_visibility|answer_readiness|trust","severity":"high|medium|low","summary":"string","evidenceRefs":["evidence-key"]}],
   "competitors":[{"name":"string","url":"https://... optional","positioning":"string","verified":true,"evidenceRefs":["evidence-key"]}],
-  "opportunities":[{"title":"string","outcome":"string","workflow":"string","impact":"high|medium|low","effort":"high|medium|low","integrations":["string"],"evidenceRefs":["evidence-key"]}],
+  "opportunities":[{"title":"string","outcome":"string","workflow":"string","type":"ai_opportunity|automation_opportunity|ai_agent|chatbot_voice_ai|web_app_development","impact":"high|medium|low","effort":"high|medium|low","integrations":["string"],"evidenceRefs":["evidence-key"]}],
   "stackArchitecture":[{"layer":"string","recommendation":"string","reason":"string","evidenceRefs":["evidence-key"]}],
+  "socialGrowth":[{"platform":"string","finding":"string","recommendation":"string","evidenceRefs":["evidence-key"]}],
+  "recommendedServices":[{"problem":"string","service":"string","techStack":["string"],"estimatedScope":"string","estimatedTimelineWeeks":1,"ctaLabel":"string"}],
   "roadmap":[{"phase":"string","objective":"string","deliverables":["string"],"dependencies":["string"],"estimatedWeeks":1}],
   "risks":["string"],"assumptions":["string"],"unknowns":["string"],
   "confidence":{"level":"high|medium|low","rationale":"string"}

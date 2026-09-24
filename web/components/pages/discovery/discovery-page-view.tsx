@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { motion } from "framer-motion";
 import {
   BrainCircuit,
@@ -43,6 +43,10 @@ const platformFeatures = [
 export function DiscoveryPageView() {
   const [step, setStep] = useState(0);
   const [showResults, setShowResults] = useState(false);
+  const handleStepChange = useCallback((nextStep: number, results: boolean) => {
+    setStep(nextStep);
+    setShowResults(results);
+  }, []);
 
   return (
     <>
@@ -71,12 +75,7 @@ export function DiscoveryPageView() {
             </div>
           </div>
 
-          <DiscoveryWizard
-            onStepChange={(nextStep, results) => {
-              setStep(nextStep);
-              setShowResults(results);
-            }}
-          />
+          <DiscoveryWizard onStepChange={handleStepChange} />
         </div>
       </SectionWrapper>
 

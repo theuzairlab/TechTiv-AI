@@ -11,6 +11,7 @@ import {
   type DashboardModuleId,
 } from "@/lib/dashboard-demo";
 import { cn } from "@/lib/utils";
+import { formatNumber } from "@/lib/format-display";
 
 const chartBars = [35, 55, 42, 70, 48, 82, 60, 90, 65, 78, 52, 88];
 
@@ -75,7 +76,7 @@ export function DashboardDemo() {
                 className="rounded-xl border border-glass-border bg-bg-secondary/40 p-3"
               >
                 <p className="font-display text-xl font-semibold text-text-primary sm:text-2xl">
-                  {stat.value.toLocaleString()}
+                  {formatNumber(stat.value)}
                   {stat.suffix}
                 </p>
                 <div className="mt-1 flex items-center justify-between gap-1">

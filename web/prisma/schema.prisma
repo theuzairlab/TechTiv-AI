@@ -18,13 +18,23 @@ model User {
   username        String?   @unique
   displayUsername String?
   role            String    @default("user")
+  companyId       String?
+  company         Company?  @relation("CompanyMembers", fields: [companyId], references: [id], onDelete: SetNull)
   createdAt       DateTime
   updatedAt       DateTime
   sessions        Session[]
   accounts        Account[]
   leads           Lead[]
+  assignedCompanies Company[]      @relation("CompanyAssignee")
+  assignedLeads     Lead[]         @relation("LeadAssignee")
+  clientConversations Conversation[] @relation("ConversationClient")
+  createdConversations Conversation[] @relation("ConversationCreator")
+  sentMessages      Message[]
+  consultantSessions ConsultantSession[]
+  voiceSessions      VoiceSession[]
 
   @@unique([email])
+  @@index([companyId])
   @@map("user")
 }
 
@@ -87,30 +97,106 @@ enum LeadStatus {
   LOST
 }
 
+enum ImplementationStatus {
+  REQUESTED
+  REVIEWING
+  SCOPING
+  IN_PROGRESS
+  DELIVERED
+  CLOSED
+}
+
+model Company {
+  id              String   @id @default(cuid())
+  name            String
+  domain          String?
+  industry        String?
+  assignedAdminId String?
+  assignedAdmin   User?    @relation("CompanyAssignee", fields: [assignedAdminId], references: [id], onDelete: SetNull)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  users           User[]   @relation("CompanyMembers")
+  leads           Lead[]
+  conversations   Conversation[]
+
+  @@index([domain])
+  @@index([assignedAdminId])
+  @@index([createdAt])
+  @@map("company")
+}
+
 model Lead {
-  id               String     @id @default(cuid())
-  name             String
-  email            String
-  company          String?
-  phone            String?
-  industry         String?
-  interest         String?
-  message          String?
-  notes            String?
-  status           LeadStatus @default(NEW)
-  source           String     @default("contact_form")
-  discoveryAnswers Json?
-  metadata         Json?
-  userId           String?
-  user             User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-  analyses         Analysis[]
+  id                     String                 @id @default(cuid())
+  name                   String
+  email                  String
+  company                String?
+  phone                  String?
+  industry               String?
+  interest               String?
+  message                String?
+  notes                  String?
+  status                 LeadStatus             @default(NEW)
+  implementationStatus   ImplementationStatus?
+  source                 String                 @default("contact_form")
+  discoveryAnswers       Json?
+  metadata               Json?
+  userId                 String?
+  user                   User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  companyId              String?
+  companyRecord          Company?               @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  assignedAdminId        String?
+  assignedAdmin          User?                  @relation("LeadAssignee", fields: [assignedAdminId], references: [id], onDelete: SetNull)
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+  analyses               Analysis[]
+  conversations          Conversation[]
 
   @@index([email])
   @@index([status])
   @@index([createdAt])
+  @@index([companyId])
+  @@index([assignedAdminId])
+  @@index([implementationStatus])
   @@map("lead")
+}
+
+model Conversation {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation("ConversationClient", fields: [userId], references: [id], onDelete: Cascade)
+  companyId         String?
+  company           Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  createdById       String
+  createdBy         User      @relation("ConversationCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  relatedLeadId     String?
+  relatedLead       Lead?     @relation(fields: [relatedLeadId], references: [id], onDelete: SetNull)
+  relatedAnalysisId String?
+  relatedAnalysis   Analysis? @relation(fields: [relatedAnalysisId], references: [id], onDelete: SetNull)
+  lastMessageAt     DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+  messages          Message[]
+
+  @@index([userId, lastMessageAt])
+  @@index([companyId])
+  @@index([relatedLeadId])
+  @@index([relatedAnalysisId])
+  @@index([lastMessageAt])
+  @@map("conversation")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderUserId   String
+  sender         User         @relation(fields: [senderUserId], references: [id], onDelete: Cascade)
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([senderUserId])
+  @@map("message")
 }
 
 // ─── Phase 2: Analysis pipeline ────────────────────────────────────────────
@@ -170,6 +256,9 @@ model Analysis {
   activities       AnalysisActivity[]
   runs             AnalysisRun[]
   consultation     ConsultationMessage[]
+  conversations    Conversation[]
+  consultantSessions ConsultantSession[]
+  voiceSessions    VoiceSession[]
   currentRunId     String?
 
   @@index([leadId])
@@ -323,6 +412,61 @@ model ToolUsageLog {
   @@index([provider])
   @@index([createdAt])
   @@map("tool_usage_log")
+}
+
+// ─── Phase 5: AI Consultant (chat + Gemini Live voice) ──────────────────────
+
+model ConsultantSession {
+  id            String               @id @default(cuid())
+  userId        String
+  user          User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysisId    String
+  analysis      Analysis             @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  status        String               @default("ACTIVE")
+  createdAt     DateTime             @default(now())
+  lastMessageAt DateTime             @default(now())
+  messages      ConsultantMessage[]
+  voiceSessions VoiceSession[]
+
+  @@unique([userId, analysisId])
+  @@index([userId, lastMessageAt])
+  @@index([analysisId])
+  @@map("consultant_session")
+}
+
+model ConsultantMessage {
+  id          String            @id @default(cuid())
+  sessionId   String
+  session     ConsultantSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role        String
+  content     String
+  modality    String            @default("text")
+  toolName    String?
+  toolPayload Json?
+  createdAt   DateTime          @default(now())
+
+  @@index([sessionId, createdAt])
+  @@map("consultant_message")
+}
+
+model VoiceSession {
+  id                   String            @id @default(cuid())
+  consultantSessionId  String
+  consultantSession    ConsultantSession @relation(fields: [consultantSessionId], references: [id], onDelete: Cascade)
+  userId               String
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysisId           String
+  analysis             Analysis         @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  provider             String           @default("gemini")
+  model                String
+  status               String            @default("LIVE")
+  startedAt            DateTime          @default(now())
+  endedAt              DateTime?
+  errorMsg             String?
+
+  @@index([userId, startedAt])
+  @@index([analysisId])
+  @@map("voice_session")
 }
 
 // ─── Phase 10: Admin audit trail ───────────────────────────────────────────

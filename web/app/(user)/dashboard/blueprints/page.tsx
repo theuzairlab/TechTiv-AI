@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { listAnalysesForUser } from "@/lib/dashboard/analyses";
+import { formatDateTime, formatUsd } from "@/lib/format-display";
 import { requireUserSession } from "@/lib/session";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,7 @@ export default async function UserBlueprintsPage() {
         <GlassPanel className="p-6">
           <p className="text-sm text-text-muted">
             No completed blueprints yet.{" "}
-            <Link href="/analyze" className="text-brand-cyan hover:text-brand">
+            <Link href="/dashboard/analyze" className="text-brand-cyan hover:text-brand">
               Run a free analysis
             </Link>
             .
@@ -51,15 +52,24 @@ export default async function UserBlueprintsPage() {
                   <p className="font-semibold text-text-primary">{item.domain}</p>
                   <p className="mt-1 text-xs text-text-muted">
                     {item.completedAt
-                      ? new Date(item.completedAt).toLocaleString()
-                      : new Date(item.createdAt).toLocaleString()}
+                      ? formatDateTime(item.completedAt)
+                      : formatDateTime(item.createdAt)}
+                    {item.aiScore != null ? ` · AI score ${item.aiScore}` : ""}
+                    {item.opportunityCount > 0
+                      ? ` · ${item.opportunityCount} opportunities`
+                      : ""}
                     {item.costEstimateUSD != null
-                      ? ` · $${item.costEstimateUSD.toLocaleString()}`
+                      ? ` · ${formatUsd(item.costEstimateUSD)}`
                       : ""}
                     {item.timelineWeeks != null
                       ? ` · ${item.timelineWeeks} weeks`
                       : ""}
                   </p>
+                  {item.topFinding ? (
+                    <p className="mt-1 line-clamp-1 text-sm text-text-muted">
+                      Top problem: {item.topFinding}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="lime">DONE</Badge>

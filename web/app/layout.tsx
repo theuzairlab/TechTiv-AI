@@ -1,17 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import "@fontsource/instrument-serif/400.css";
 import "@fontsource/instrument-serif/400-italic.css";
 import "./globals.css";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { siteConfig } from "@/lib/site";
-import { THEME_STORAGE_KEY } from "@/lib/theme";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
-
-const themeInitScript = `(function(){try{var t=localStorage.getItem("${THEME_STORAGE_KEY}");if(t==="light"){document.body.classList.add("light-mode");document.documentElement.style.colorScheme="light";}}catch(e){}})();`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -69,9 +65,6 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <Script id="theme-init" strategy="beforeInteractive">
-          {themeInitScript}
-        </Script>
         <link
           href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap"
           rel="stylesheet"
