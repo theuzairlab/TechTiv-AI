@@ -3,6 +3,7 @@ import { enqueueAnalysis } from "@/lib/analysis/queue";
 import { writeAnalysisActivity } from "@/lib/analysis/activities";
 import { verifyGuestAccess } from "@/lib/analysis/guest";
 import { logAdminEvent } from "@/lib/admin/event-log";
+import { analysisHeartbeat } from "@/lib/analysis/stall";
 
 export async function retryFailedAnalysisCore(
   analysisId: string,
@@ -16,8 +17,15 @@ export async function retryFailedAnalysisCore(
     throw new Error("Analysis not found");
   }
 
-  if (analysis.status !== "FAILED") {
+  if (analysis.status === "DONE") {
     throw new Error("Only failed analyses can be retried");
+  }
+
+  if (analysis.status !== "FAILED") {
+    const heartbeat = await analysisHeartbeat(analysisId);
+    if (!heartbeat.stalled) {
+      throw new Error("Only failed analyses can be retried");
+    }
   }
 
   const jobId = await prisma.$transaction(async (tx) => {

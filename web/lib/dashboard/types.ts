@@ -144,6 +144,7 @@ export type AnalysisDetail = {
   consultation: ConsultationHistoryMessage[];
   /** Phase 2 will flip this after Stripe entitlement. Until then, owners can download. */
   pdfUnlocked: boolean;
+  reportPublic: boolean;
 };
 
 export function averageScorecardScore(

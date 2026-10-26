@@ -14,9 +14,11 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   confirmConsultation,
+  fetchResearchGate,
   getConsultation,
   replyConsultation,
   startConsultation,
+  type PublicReportLink,
   type ConsultationMessage,
   type ConsultationQuestion,
 } from "@/lib/consultation/client";
@@ -28,10 +30,18 @@ export function AgentConsultation({
   restoredSession,
   onSession,
   onConfirmed,
+  onAbandon,
+  accountEmail = null,
+  returnPath = "/analyze",
+  paymentReceived = false,
 }: {
   restoredSession?: Session | null;
   onSession: (session: Session) => void;
   onConfirmed: (session: Session, companyLabel: string) => void;
+  onAbandon?: () => void;
+  accountEmail?: string | null;
+  returnPath?: string;
+  paymentReceived?: boolean;
 }) {
   const [session, setSession] = useState<Session | null>(
     restoredSession ?? null,
@@ -44,9 +54,15 @@ export function AgentConsultation({
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [waiting, setWaiting] = useState(Boolean(restoredSession));
   const [error, setError] = useState<string | null>(null);
+  const [gate, setGate] = useState<"email" | "pay" | "paid" | null>(
+    paymentReceived ? "paid" : null,
+  );
+  const [billingEmail, setBillingEmail] = useState("");
+  const [publicReport, setPublicReport] = useState<PublicReportLink | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const awaitingAfterAssistantIdRef = useRef<string | null>(null);
   const sendingRef = useRef(false);
+  const abandonedRef = useRef(false);
 
   const latestQuestionTurn = useMemo(() => {
     const message = [...messages]
@@ -60,6 +76,50 @@ export function AgentConsultation({
       : undefined;
   }, [messages]);
   const latestQuestion = latestQuestionTurn?.question;
+
+  useEffect(() => {
+    if (!restoredSession || abandonedRef.current) return;
+    setSession((current) =>
+      current?.analysisId === restoredSession.analysisId ? current : restoredSession,
+    );
+  }, [restoredSession]);
+
+  useEffect(() => {
+    if (!session || messages.length > 0) return;
+    setWaiting(true);
+  }, [session, messages.length]);
+
+  useEffect(() => {
+    if (!session || waiting || !latestQuestion?.complete) return;
+    let cancelled = false;
+    void fetchResearchGate({
+      analysisId: session.analysisId,
+      guestAccessToken: session.guestAccessToken,
+    })
+      .then((result) => {
+        if (cancelled) return;
+        setPublicReport(result.existingPublicReport);
+        if (paymentReceived || result.status === "paid") {
+          setGate("paid");
+          return;
+        }
+        if (result.status === "payment_required") {
+          setGate("pay");
+          return;
+        }
+        if (result.status === "email_required" && !accountEmail) {
+          setGate("email");
+          return;
+        }
+        setGate(null);
+      })
+      .catch(() => {
+        if (!cancelled && paymentReceived) setGate("paid");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [session, waiting, latestQuestion?.complete, accountEmail, paymentReceived]);
 
   useEffect(() => {
     if (!session || !waiting) return;
@@ -87,9 +147,22 @@ export function AgentConsultation({
           return;
         }
       } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Connection lost");
+        if (cancelled) return;
+        const message = err instanceof Error ? err.message : "Connection lost";
+        if (message === "Consultation not found" || message === "Forbidden") {
+          abandonedRef.current = true;
+          setWaiting(false);
+          setSession(null);
+          setMessages([]);
+          setError(null);
+          onAbandon?.();
+          return;
         }
+        sendingRef.current = false;
+        awaitingAfterAssistantIdRef.current = null;
+        setWaiting(false);
+        setError(message);
+        return;
       }
       if (!cancelled) window.setTimeout(poll, 1200);
     };
@@ -183,18 +256,62 @@ export function AgentConsultation({
     }
   };
 
-  const confirm = async () => {
+  const confirm = async (withEmail?: string) => {
     if (!session) return;
+    setError(null);
     setWaiting(true);
     try {
-      await confirmConsultation({
+      const result = await confirmConsultation({
         analysisId: session.analysisId,
         guestAccessToken: session.guestAccessToken,
+        email: withEmail,
       });
+      if (result.status === "email_required") {
+        setGate("email");
+        setWaiting(false);
+        return;
+      }
+      if (result.status === "payment_required") {
+        setGate("pay");
+        setWaiting(false);
+        return;
+      }
+      if (result.status === "cached") {
+        setGate(null);
+        setWaiting(false);
+        setError(result.message);
+        return;
+      }
+      setGate(null);
       onConfirmed(session, companyName || "Your business");
     } catch (err) {
       setWaiting(false);
       setError(err instanceof Error ? err.message : "Could not start research");
+    }
+  };
+
+  const pay = async () => {
+    if (!session) return;
+    setError(null);
+    setWaiting(true);
+    try {
+      const response = await fetch("/api/payments/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          analysisId: session.analysisId,
+          guestAccessToken: session.guestAccessToken,
+          returnPath,
+        }),
+      });
+      const body = (await response.json()) as { url?: string; error?: string };
+      if (!response.ok || !body.url) {
+        throw new Error(body.error ?? "Could not open checkout");
+      }
+      window.location.href = body.url;
+    } catch (err) {
+      setWaiting(false);
+      setError(err instanceof Error ? err.message : "Could not open checkout");
     }
   };
 
@@ -289,7 +406,7 @@ export function AgentConsultation({
             )}
           </motion.div>
         ))}
-        {waiting ? (
+        {waiting && !error ? (
           <div className="flex items-center gap-2 px-3 py-2 text-base text-text-muted">
             <Loader2 size={14} className="animate-spin text-brand-cyan" />
             {latestQuestionTurn
@@ -307,12 +424,60 @@ export function AgentConsultation({
             <div className="flex-1">
               <p className="text-lg font-medium text-text-primary">Brief ready</p>
               <p className="mt-1 text-base text-text-muted">
-                I’ll now verify the evidence, compare the market, and build your
-                action plan.
+                {gate === "paid"
+                  ? "Payment received. Your answers are saved. Start the research now."
+                  : gate === "pay"
+                    ? "Your questions are done. This next research starts after you pay $5."
+                    : "I’ll now verify the evidence, compare the market, and build your action plan."}
               </p>
-              <Button type="button" className="mt-4" onClick={confirm}>
-                Start research <Sparkles size={15} className="ml-2" />
-              </Button>
+              {publicReport ? (
+                <p className="mt-3 text-sm text-text-muted">
+                  This website was analyzed on{" "}
+                  {new Date(publicReport.completedAt).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                  .{" "}
+                  <a
+                    href={publicReport.href}
+                    className="font-medium text-brand-cyan"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open the public report
+                  </a>
+                  . You can still run your own research below.
+                </p>
+              ) : null}
+              {gate === "email" && !accountEmail ? (
+                <form
+                  className="mt-4 flex flex-col gap-3 sm:flex-row"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void confirm(billingEmail);
+                  }}
+                >
+                  <input
+                    type="email"
+                    required
+                    value={billingEmail}
+                    onChange={(event) => setBillingEmail(event.target.value)}
+                    placeholder="Email for this blueprint"
+                    className="h-11 flex-1 rounded-xl border border-border-subtle bg-bg-primary px-3 text-base text-text-primary"
+                  />
+                  <Button type="submit">Continue</Button>
+                </form>
+              ) : gate === "pay" ? (
+                <Button type="button" className="mt-4" onClick={() => void pay()}>
+                  Pay $5 to start research
+                </Button>
+              ) : (
+                <Button type="button" className="mt-4" onClick={() => void confirm()}>
+                  {gate === "paid" ? "Start analysis now" : "Start research"}{" "}
+                  <Sparkles size={15} className="ml-2" />
+                </Button>
+              )}
             </div>
           </div>
         </div>

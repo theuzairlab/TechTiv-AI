@@ -130,6 +130,20 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
     }),
   ]);
 
+  let paidBlueprints = 0;
+  let blueprintRevenueUSD = 0;
+  try {
+    const paid = await prisma.payment.findMany({
+      where: { status: "PAID" },
+      select: { amountCents: true },
+    });
+    paidBlueprints = paid.length;
+    blueprintRevenueUSD =
+      paid.reduce((sum, row) => sum + row.amountCents, 0) / 100;
+  } catch (error) {
+    console.error("[metrics] payment totals skipped:", error);
+  }
+
   const analysesByStatus = {
     QUEUED: 0,
     CRAWLING: 0,
@@ -180,8 +194,8 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
     consultationRequests,
     convertedClients,
     serviceOpportunities,
-    paidBlueprints: 0,
-    blueprintRevenueUSD: 0,
+    paidBlueprints,
+    blueprintRevenueUSD,
     activeSubscriptions: 0,
     voiceCalls,
     aiChatSessions,

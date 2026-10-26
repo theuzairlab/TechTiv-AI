@@ -466,6 +466,124 @@ Phase 9 — Full Automated Flow & Sales Handoff (non-payment items)
 
 
 
+24-Sep-2026
+TechTiv AI
+[✅] Tested the complete system workflow and verified all core tools and services.
+[✅] Prepared the application for production deployment and resolved deployment-related issues.
+[✅] Migrated database schemas to the live database, fixed database connections, and resolved failed service issues.
+[✅] Deployed the backend server to Render, configured production environment variables, and completed the required production setup.
+[✅] Deployed the web frontend to Vercel, configured production environment variables, and completed the production setup.
+[✅] Configured and verified proper API, backend, and database connectivity with the frontend.
+[✅] Tested the AI workflows, including the Analyzer and Gemini Live Voice API, using a real business problem to verify end-to-end functionality.
+NxTechNova
+[✅] Completed development of the redesigned /case-studies page.
+[✅] Improved website responsiveness across different screen sizes and devices.
+[✅] Made the /case-studies page fully responsive and fixed related UI issues across breakpoints.
+[✅] Fixed responsiveness issues with the top announcement bar, poster, and footer social icons on smaller screens.
+[✅] Fixed the hero section responsiveness issue where content was being hidden behind the top bar and navbar.
+[✅] Fixed various UI issues and minor bugs across the NxTechNova codebase.
+
+
+25-Sep-2026
+TechTivAI — Frontend fixes & mobile responsiveness pass
+[✅] Went through the overall website page by page (landing, analyze, discovery, contact, pricing, dashboard, admin) and fixed frontend rendering bugs found along the way — broken layout shifts, elements overlapping on re-render, and inconsistent spacing between sections.
+[✅] Fixed mobile-first responsiveness issues across key pages: hero, technology stack tabs, workflow automation cards, pricing cards, and footer — checked at small (375px), tablet, and desktop breakpoints.
+[✅] Fixed dashboard and admin panel responsiveness on smaller screens — sidebar/nav collapsing behavior, table overflow on narrow viewports, and card grids stacking correctly instead of clipping.
+[✅] Fixed a few client-side hydration/rendering mismatches that showed up as flicker or "disappearing" UI on first load, especially on components using scroll-reveal animations.
+[✅] Cleaned up inconsistent button/link states (hover, disabled, active) that broke on mobile touch instead of hover.
+[✅] Cross-checked text sizing and truncation on smaller screens so headings, badges, and long business names don't overflow their containers.
+
+TechTivAI — Backend, database & production deployment
+[✅] Reviewed backend worker logs and fixed issues surfacing only in the production environment (env var mismatches, provider timeouts under load).
+[✅] Verified and corrected database connection pooling / Prisma client behavior under the live Postgres instance to avoid connection exhaustion.
+[✅] Re-ran and confirmed Prisma migrations are in sync between local, backend worker, and production database — no drift.
+[✅] Checked Render (backend worker) and Vercel (web) production deployments after the latest changes — confirmed builds succeed and environment variables are current.
+[✅] Verified Redis/BullMQ queue health in production so analysis jobs process without stalling.
+[✅] Re-tested the full production path end-to-end (submit analysis → worker processes → report/PDF generated → dashboard shows result) to confirm frontend fixes didn't break the live backend flow.
+
+
+01-Oct-2026
+[✅] Created a HubSpot form and embedded it in the NxTechNova hero section on the main pages.
+[✅] Fixed bugs related to code quality and performance in NxTechNova.
+[✅] Reviewed the analyzer workflow and confirmed it works end to end.
+[✅] Reviewed Gemini Voice AI and confirmed it works.
+[✅] Reviewed the payment integration and left Stripe for a later pass.
+
+
+15-Oct-2026
+[✅] Read the codebase and went through the system closely to find where it was hard to understand.
+[✅] Cleaned the admin and client portal so they are easier to use and clearly show what we do: analyze a business, deliver a blueprint, talk with the consultant, and build it if the client asks.
+[✅] Simplified the client home to one next step: start an analysis, follow one that is running, or open a finished blueprint.
+[✅] Simplified the client menu to Home, Blueprints, Consultant, and Messages.
+[✅] Showed every analysis on the Blueprints page, and kept build requests on their own page.
+[✅] Simplified the admin home to the work that needs a person: reply to new leads, fix failed analyses, and scope open build requests.
+[✅] Grouped admin pages into Today, People, Work, Talk, and Settings, and put all chats and voice calls on one Conversations page.
+[✅] Hid payments and subscriptions until Stripe is connected, so empty billing pages no longer look like part of the product.
+
+
+16-Oct-2026
+TechTivAI
+[✅] Searched and analyzed the codebase and website to find where a user should pay, and why they would pay.
+[✅] The first blueprint stays free and fully open. Payment is for the next new website, and it happens before that analysis starts.
+[✅] Set up Stripe on the backend worker, including configuration and environment variables.
+[✅] Tested the basic Stripe setup so nothing in the current system breaks. The full payment flow is left for a later pass.
+
+NxTechNova
+[✅] Moved the HubSpot form’s third step to the first step.
+[✅] Removed the privacy checkbox and left a privacy text line with a link to the privacy policy page.
+[✅] Tried to add a calendar to the HubSpot form. HubSpot does not have that option.
+[✅] Fixed HubSpot embedded form dropdowns, styling, and alignment.
+
+
+19-Oct-2026
+TechTivAI — payment, backend
+[✅] Added payment records on the backend so one paid credit covers one new analysis, and a repeated Stripe event cannot grant a second run.
+[✅] Connected Stripe checkout and the webhook. The worker starts the next analysis only after Stripe confirms the payment.
+[✅] Kept the first blueprint free and fully open. A second new website needs that paid credit before the analysis starts.
+[✅] Counted the free run by email. The same website inside 90 days reopens the existing report and is not charged again.
+[✅] Stepped through the backend payment flow and tested it. The current analysis path still runs.
+
+
+20-Oct-2026
+TechTivAI — payment, Stripe setup
+[✅] Created a Stripe account and opened the developer dashboard in test mode so demo payments can run without charging a real card.
+[✅] Added the test API keys, webhook secret, and blueprint price on the web app so checkout can start.
+[✅] Set up the Stripe sandbox and ran a demo payment to confirm the keys and the checkout link work.
+[✅] Added an admin switch for payments. When it is off, visitors see no pay step and analyses start as before.
+[✅] Added the $5 checkout after the questions and before deep research, so the next website is charged only when that research is about to start.
+
+21-Oct-2026
+TechTivAI — payment, fixes
+[✅] Fixed to Use the signed-in account email for the charge, so a logged-in user is not asked to type an email. A guest still enters one.
+[✅] Sent the user back to the same questions after checkout, with payment marked done, instead of opening a blank analysis form.
+[✅] Fixed the research list so a finished step shows a check, and the spinner stays only on the step that is still running.
+[✅] Fixed runtime errors found on the first sandbox payment test so the flow can be run again.
+[✅] Updated content in Nxtechnova main page and about page
+
+
+
+
+TechTivAI — payment, retest
+[✅] Added a public option on a finished blueprint. Someone else can open that report, or start their own research on the same website.
+[✅] Fixed the page that kept asking for a deleted analysis and showed “Consultation not found,” so the start form comes back.
+[✅] Cleaned the test account in the database and left the first two analyses in place so a new payment test could start.
+[✅] Retested the sandbox payment and confirmed the demo charge succeeded.
+[✅] Confirmed the paid analysis starts properly after the successful payment.
+
+
+23-Oct-2026
+TechTivAI — research, worker failures
+[✅] Tested a live analysis while the worker lost Redis. The page kept showing “Crawling site” for hours and did not say the run had stopped.
+[✅] Fixed that screen so a run with no new report for five minutes shows “Research paused” and a Try again button, instead of a spinner on finished steps.
+[✅] Fixed the questions step so a dead worker returns a plain error and stops “Reviewing your answer,” instead of a raw JSON failure.
+[✅] Fixed the live research stream so a closed connection no longer crashes the server, and the stream ends when the run has stopped.
+[✅] Retested after the worker was started again. A stopped run can be tried again, and a new answer no longer stays stuck on the spinner.
+
+Nxtechnova - services/ai-automation page 
+[✅] Hid the top promo banner on `/services/ai-automation` for mobile only (desktop unchanged)
+[✅] Hid chatbot intro messages on that page for mobile while keeping the chatbot icon visible
+[✅] Hid the mobile contact dock (call, mail, WhatsApp, scroll-to-top) on `/services/ai-automation` only
+[✅] Added a simple toggle flag so this mobile chrome can be turned back on later without rewriting the components
 
 
 

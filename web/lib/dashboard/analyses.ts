@@ -243,6 +243,7 @@ export async function getAnalysisForUser(
       createdAt: message.createdAt.toISOString(),
     })),
     pdfUnlocked: row.status === "DONE",
+    reportPublic: row.reportPublic,
   };
 }
 
@@ -349,6 +350,10 @@ export async function getDashboardStats(userId: string, email: string) {
       (item) => item.status === "NEW" || item.status === "CONTACTED",
     ).length,
     recent: analyses.slice(0, 5),
+    activeRun:
+      analyses.find(
+        (item) => item.status !== "DONE" && item.status !== "FAILED",
+      ) ?? null,
     highlight,
     serviceRequestPreview: serviceRequests.slice(0, 3),
   };

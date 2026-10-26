@@ -1,15 +1,10 @@
 import {
   BarChart3,
-  Bot,
-  Building2,
   Cpu,
   CreditCard,
-  FileText,
   Inbox,
   LayoutDashboard,
   MessageSquare,
-  Mic,
-  Repeat,
   Search,
   UserRound,
   Users,
@@ -23,34 +18,29 @@ export type AdminNavItem = {
   icon: LucideIcon;
   exact?: boolean;
   badgeKey?: "newLeads" | "inbox";
-  section: "overview" | "crm" | "delivery" | "ops" | "commerce";
+  section: "today" | "people" | "work" | "talk" | "settings";
 };
 
 export const adminNavSections: Array<{
   id: AdminNavItem["section"];
   label: string;
 }> = [
-  { id: "overview", label: "Overview" },
-  { id: "crm", label: "CRM" },
-  { id: "delivery", label: "Delivery" },
-  { id: "ops", label: "Operations" },
-  { id: "commerce", label: "Commerce" },
+  { id: "today", label: "Today" },
+  { id: "people", label: "People" },
+  { id: "work", label: "Work" },
+  { id: "talk", label: "Talk" },
+  { id: "settings", label: "Settings" },
 ];
 
 export const adminNavItems: AdminNavItem[] = [
-  { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true, section: "overview" },
-  { href: "/admin/inbox", label: "Inbox", icon: Inbox, badgeKey: "inbox", section: "crm" },
-  { href: "/admin/clients", label: "Clients", icon: UserRound, section: "crm" },
-  { href: "/admin/companies", label: "Companies", icon: Building2, section: "crm" },
-  { href: "/admin/leads", label: "Leads", icon: Users, badgeKey: "newLeads", section: "crm" },
-  { href: "/admin/implementation", label: "Build requests", icon: Workflow, section: "delivery" },
-  { href: "/admin/analyses", label: "Analyses", icon: Search, section: "delivery" },
-  { href: "/admin/blueprints", label: "Blueprints", icon: FileText, section: "delivery" },
-  { href: "/admin/sessions", label: "AI Sessions", icon: MessageSquare, section: "delivery" },
-  { href: "/admin/consultant-sessions", label: "Consultant Chats", icon: Bot, section: "delivery" },
-  { href: "/admin/providers", label: "Providers", icon: Cpu, section: "ops" },
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart3, section: "ops" },
-  { href: "/admin/payments", label: "Payments", icon: CreditCard, section: "commerce" },
-  { href: "/admin/subscriptions", label: "Subscriptions", icon: Repeat, section: "commerce" },
-  { href: "/admin/voice", label: "Voice", icon: Mic, section: "commerce" },
+  { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true, section: "today" },
+  { href: "/admin/leads", label: "Leads", icon: Users, badgeKey: "newLeads", section: "people" },
+  { href: "/admin/clients", label: "Clients", icon: UserRound, section: "people" },
+  { href: "/admin/analyses", label: "Analyses", icon: Search, section: "work" },
+  { href: "/admin/implementation", label: "Build requests", icon: Workflow, section: "work" },
+  { href: "/admin/inbox", label: "Inbox", icon: Inbox, badgeKey: "inbox", section: "talk" },
+  { href: "/admin/conversations", label: "Conversations", icon: MessageSquare, section: "talk" },
+  { href: "/admin/providers", label: "Providers", icon: Cpu, section: "settings" },
+  { href: "/admin/payments", label: "Payments", icon: CreditCard, section: "settings" },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3, section: "settings" },
 ];

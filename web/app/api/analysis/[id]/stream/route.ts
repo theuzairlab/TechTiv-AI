@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { verifyGuestAccess } from "@/lib/analysis/guest";
+import { RESEARCH_STALL_MS } from "@/lib/analysis/constants";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -10,7 +11,7 @@ export async function GET(request: Request, context: Context) {
   const token = new URL(request.url).searchParams.get("token");
   const analysis = await prisma.analysis.findUnique({
     where: { id },
-    select: { guestAccessToken: true },
+    select: { guestAccessToken: true, createdAt: true },
   });
   if (!analysis || !verifyGuestAccess(analysis.guestAccessToken, token)) {
     return new Response("Forbidden", { status: 403 });
@@ -19,13 +20,29 @@ export async function GET(request: Request, context: Context) {
   const encoder = new TextEncoder();
   let cursor = new Date(0);
   let closed = false;
+  let lastBeat = analysis.createdAt.getTime();
 
   const stream = new ReadableStream({
     async start(controller) {
       const send = (event: string, data: unknown) => {
-        controller.enqueue(
-          encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
-        );
+        if (closed) return;
+        try {
+          controller.enqueue(
+            encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
+          );
+        } catch {
+          closed = true;
+        }
+      };
+
+      const finish = () => {
+        if (closed) return;
+        closed = true;
+        try {
+          controller.close();
+        } catch {
+          // already closed
+        }
       };
 
       const tick = async () => {
@@ -50,21 +67,38 @@ export async function GET(request: Request, context: Context) {
 
           for (const activity of activities) {
             cursor = activity.createdAt;
+            lastBeat = activity.createdAt.getTime();
             send("activity", {
               ...activity,
               createdAt: activity.createdAt.toISOString(),
             });
           }
+
+          const stalled =
+            status != null &&
+            status.status !== "DONE" &&
+            status.status !== "FAILED" &&
+            Date.now() - lastBeat > RESEARCH_STALL_MS;
+
           send("status", {
-            ...status,
+            status: status?.status,
+            errorMsg: status?.errorMsg ?? null,
             completedAt: status?.completedAt?.toISOString() ?? null,
             emailCaptured: Boolean(status?.emailCapturedAt),
+            stalled,
+            lastActivityAt: new Date(lastBeat).toISOString(),
           });
 
-          if (status?.status === "DONE" || status?.status === "FAILED") {
-            send("complete", status);
-            controller.close();
-            closed = true;
+          if (status?.status === "DONE" || status?.status === "FAILED" || stalled) {
+            if (stalled) {
+              send("warning", {
+                message:
+                  "Research stopped. The worker has not reported back. You can try again.",
+              });
+            } else {
+              send("complete", status);
+            }
+            finish();
             return;
           }
         } catch (error) {
@@ -76,12 +110,7 @@ export async function GET(request: Request, context: Context) {
       };
 
       request.signal.addEventListener("abort", () => {
-        closed = true;
-        try {
-          controller.close();
-        } catch {
-          // already closed
-        }
+        finish();
       });
       send("connected", { analysisId: id });
       await tick();

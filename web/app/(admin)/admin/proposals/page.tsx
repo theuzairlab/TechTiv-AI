@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminProposalsRedirectPage() {
-  redirect("/admin/blueprints");
+  redirect("/admin/analyses?status=DONE");
 }

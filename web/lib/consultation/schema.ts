@@ -14,4 +14,5 @@ export const replyConsultationSchema = z.object({
 
 export const consultationAccessSchema = z.object({
   guestAccessToken: z.string().uuid(),
+  email: z.string().trim().email().optional(),
 });

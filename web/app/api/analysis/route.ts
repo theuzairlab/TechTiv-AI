@@ -30,6 +30,14 @@ export async function POST(request: Request) {
       return NextResponse.json(result, { status: 429 });
     }
 
+    if (result.status === "payment_required") {
+      return NextResponse.json(result, { status: 402 });
+    }
+
+    if (result.status === "email_required") {
+      return NextResponse.json(result, { status: 422 });
+    }
+
     if (result.status === "queued") {
       return NextResponse.json(result, { status: 201 });
     }

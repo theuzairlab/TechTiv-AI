@@ -154,5 +154,7 @@ export type AnalysisStatusPayload = {
   proposalStatus: string | null;
   pdfUrl: string | null;
   emailCaptured: boolean;
+  stalled?: boolean;
+  lastActivityAt?: string | null;
 };
 

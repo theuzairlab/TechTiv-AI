@@ -5,6 +5,8 @@ import {
   InvalidDomainError,
 } from "@/lib/analysis/normalize-domain";
 import { checkRateLimit, checkGuestRateLimit } from "@/lib/analysis/rate-limit";
+import { arePaymentsEnabled } from "@/lib/billing/settings";
+import { consumeCredit, gatePipelineStart, releaseCredit } from "@/lib/billing/gate";
 import type { CreateAnalysisInput } from "@/lib/analysis/schema";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import {
@@ -45,6 +47,15 @@ export type AnalysisSubmissionResult =
   | {
       status: "rate_limited";
       retryAfter: string;
+      message: string;
+    }
+  | {
+      status: "email_required";
+      message: string;
+    }
+  | {
+      status: "payment_required";
+      email: string;
       message: string;
     };
 
@@ -235,7 +246,29 @@ export async function submitAnalysis(
     };
   }
 
-  if (input.email?.trim()) {
+  const paymentsOn = await arePaymentsEnabled();
+  let creditId: string | null = null;
+
+  if (paymentsOn) {
+    const gate = await gatePipelineStart({ email: input.email });
+    if (gate.status === "email_required") {
+      return {
+        status: "email_required",
+        message: "Add your email before starting another analysis.",
+      };
+    }
+    if (gate.status === "payment_required") {
+      return {
+        status: "payment_required",
+        email: gate.email,
+        message:
+          "Your first blueprint is free. This next website needs a payment before we start.",
+      };
+    }
+    if (gate.status === "use_credit") {
+      creditId = gate.paymentId;
+    }
+  } else if (input.email?.trim()) {
     const rateLimit = await checkRateLimit(input.email);
     if (!rateLimit.allowed) {
       return {
@@ -298,17 +331,40 @@ export async function submitAnalysis(
     },
   });
 
-  const jobId = await enqueueAnalysis(analysis.id);
+  if (creditId) {
+    const claimed = await consumeCredit(creditId, analysis.id);
+    if (!claimed) {
+      await prisma.analysis.update({
+        where: { id: analysis.id },
+        data: {
+          status: "FAILED",
+          errorMsg: "Payment credit was already used.",
+        },
+      });
+      return {
+        status: "payment_required",
+        email: input.email?.trim().toLowerCase() ?? "",
+        message:
+          "Your first blueprint is free. This next website needs a payment before we start.",
+      };
+    }
+  }
 
-  return {
-    status: "queued",
-    analysisId: analysis.id,
-    jobId,
-    guestAccessToken,
-    message: input.email?.trim()
-      ? "Analysis queued. We'll email you when your blueprint is ready."
-      : "Analysis started. Add your email during processing to receive the full report.",
-  };
+  try {
+    const jobId = await enqueueAnalysis(analysis.id);
+    return {
+      status: "queued",
+      analysisId: analysis.id,
+      jobId,
+      guestAccessToken,
+      message: input.email?.trim()
+        ? "Analysis queued. We'll email you when your blueprint is ready."
+        : "Analysis started. Add your email during processing to receive the full report.",
+    };
+  } catch (error) {
+    if (creditId) await releaseCredit(creditId);
+    throw error;
+  }
 }
 
 export function mapSubmissionError(error: unknown): {

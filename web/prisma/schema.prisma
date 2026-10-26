@@ -150,6 +150,7 @@ model Lead {
   updatedAt              DateTime               @updatedAt
   analyses               Analysis[]
   conversations          Conversation[]
+  payments               Payment[]
 
   @@index([email])
   @@index([status])
@@ -246,6 +247,7 @@ model Analysis {
   businessIntake   Json?
   guestAccessToken String?            @unique
   emailCapturedAt  DateTime?
+  reportPublic     Boolean            @default(false)
   status           AnalysisStatus     @default(QUEUED)
   errorMsg         String?
   createdAt        DateTime           @default(now())
@@ -259,6 +261,7 @@ model Analysis {
   conversations    Conversation[]
   consultantSessions ConsultantSession[]
   voiceSessions    VoiceSession[]
+  payments         Payment[]
   currentRunId     String?
 
   @@index([leadId])
@@ -484,4 +487,55 @@ model AdminEventLog {
   @@index([action])
   @@index([createdAt])
   @@map("admin_event_log")
+}
+
+// ─── Blueprint payments (admin can turn the charge on or off) ──────────────
+
+model BillingSetting {
+  id              String   @id @default("default")
+  paymentsEnabled Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+
+  @@map("billing_setting")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  COMPED
+}
+
+model Payment {
+  id                      String        @id @default(cuid())
+  email                   String
+  analysisId              String?
+  analysis                Analysis?     @relation(fields: [analysisId], references: [id], onDelete: SetNull)
+  leadId                  String?
+  lead                    Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  amountCents             Int           @default(0)
+  currency                String        @default("usd")
+  status                  PaymentStatus @default(PENDING)
+  stripeCheckoutSessionId String?       @unique
+  stripePaymentIntentId   String?       @unique
+  stripeCustomerId        String?
+  consumedAt              DateTime?
+  paidAt                  DateTime?
+  refundedAt              DateTime?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  @@index([email, status, consumedAt])
+  @@index([analysisId])
+  @@index([createdAt])
+  @@map("payment")
+}
+
+model StripeEvent {
+  id        String   @id
+  type      String
+  createdAt DateTime @default(now())
+
+  @@map("stripe_event")
 }

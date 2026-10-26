@@ -41,7 +41,32 @@ function serviceCardClass(span?: 1 | 2 | 3) {
   );
 }
 
-export function LandingPageView() {
+export function LandingPageView({
+  paymentsEnabled = false,
+}: {
+  paymentsEnabled?: boolean;
+}) {
+  const blueprintCta = paymentsEnabled
+    ? "Get My AI Blueprint"
+    : "Get My AI Blueprint — $5";
+  const howItWorks = landingHowItWorks.map((step) =>
+    paymentsEnabled && step.num === "04"
+      ? {
+          ...step,
+          title: "Pay for the next website",
+          desc: "The first blueprint is free. A different website later is a one-time payment before research starts.",
+        }
+      : step,
+  );
+  const faqItems = landingFaqItems.map((item) =>
+    paymentsEnabled && item.q === "Why is the full blueprint $5?"
+      ? {
+          ...item,
+          q: "When do I pay?",
+          a: "The first blueprint is free, including the PDF. A later new website is a one-time payment before we start that analysis. The same website we already analyzed is not charged again.",
+        }
+      : item,
+  );
   const [activeStackTab, setActiveStackTab] = useState<LandingStackTabId>("all");
   const filteredStack = useMemo(
     () =>
@@ -85,7 +110,7 @@ export function LandingPageView() {
               data-cursor-target
             >
               <AnimatedIcon icon={Rocket} size={18} className="text-on-accent" />
-              Get My AI Blueprint — $5
+              {blueprintCta}
             </a>
             <a
               href="/analyze"
@@ -484,7 +509,7 @@ export function LandingPageView() {
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {landingHowItWorks.map((step) => (
+          {howItWorks.map((step) => (
             <div
               key={step.num}
               className="scroll-reveal rounded-surface-xl border border-border-subtle bg-surface-card p-7"
@@ -511,19 +536,19 @@ export function LandingPageView() {
             <h2 className="mb-3.5 font-display text-[clamp(2.2rem,4.5vw,3.8rem)] leading-[1.05] font-bold tracking-[-1.5px] text-text-primary">
               What&apos;s inside your
               <br />
-              $5 AI Blueprint
+              {paymentsEnabled ? "AI Blueprint" : "$5 AI Blueprint"}
             </h2>
             <p className="mb-8 max-w-[480px] text-base leading-[1.75] text-text-muted">
-              A limited preview is free. Unlock the full personalized blueprint
-              and PDF after a $5 payment — then request the services TechTivAI
-              should build for you.
+              {paymentsEnabled
+                ? "Your first blueprint is free, including the PDF. A later new website is a one-time payment before we start it."
+                : "A limited preview is free. Unlock the full personalized blueprint and PDF after a $5 payment — then request the services TechTivAI should build for you."}
             </p>
             <a
               href="/analyze"
               className="btn-lime inline-flex items-center gap-2 rounded-[10px] px-[30px] py-[15px] text-[0.9rem] no-underline"
               data-cursor-target
             >
-              Get My AI Blueprint — $5
+              {blueprintCta}
               <ArrowRight size={16} />
             </a>
           </div>
@@ -562,7 +587,7 @@ export function LandingPageView() {
           </p>
         </div>
 
-        <LandingPricingCards />
+        <LandingPricingCards paymentsEnabled={paymentsEnabled} />
       </section>
 
       {/* 11. FAQ */}
@@ -575,7 +600,7 @@ export function LandingPageView() {
         </div>
 
         <div className="mx-auto max-w-[760px] space-y-3">
-          {landingFaqItems.map((item) => (
+          {faqItems.map((item) => (
             <details
               key={item.q}
               className="scroll-reveal group rounded-surface-xl border border-border-subtle bg-surface-card px-6 py-5 open:border-border-highlight"
@@ -615,7 +640,9 @@ export function LandingPageView() {
               <span className="block">Your next AI move</span>
               <span className="block">
                 starts with a{" "}
-                <span className="text-brand">$5 Blueprint.</span>
+                <span className="text-brand">
+                  {paymentsEnabled ? "free blueprint." : "$5 Blueprint."}
+                </span>
               </span>
             </div>
             <p className="mb-9 text-base leading-[1.7] text-text-muted">
@@ -630,7 +657,7 @@ export function LandingPageView() {
                 data-cursor-target
               >
                 <Rocket size={18} />
-                Get My AI Blueprint — $5
+                {blueprintCta}
               </a>
               <a
                 href="/contact"

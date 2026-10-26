@@ -1,4 +1,5 @@
 import type { AnalysisStatus } from "@/lib/generated/prisma/client";
+import { analysisStatusLabels } from "@/lib/product-labels";
 import { cn } from "@/lib/utils";
 
 const statusStyles: Record<AnalysisStatus, string> = {
@@ -14,19 +15,6 @@ const statusStyles: Record<AnalysisStatus, string> = {
   FAILED: "bg-destructive/15 text-destructive",
 };
 
-const statusLabels: Record<AnalysisStatus, string> = {
-  QUEUED: "Queued",
-  CRAWLING: "Crawling",
-  DISCOVERING: "Discovering",
-  AUDITING: "Auditing",
-  ANALYZING: "Analyzing",
-  SYNTHESIZING: "Synthesizing",
-  PRICING: "Pricing",
-  GENERATING_PDF: "Generating PDF",
-  DONE: "Done",
-  FAILED: "Failed",
-};
-
 export function AnalysisStatusBadge({
   status,
   className,
@@ -37,14 +25,14 @@ export function AnalysisStatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium",
         statusStyles[status],
         className,
       )}
     >
-      {statusLabels[status]}
+      {analysisStatusLabels[status]}
     </span>
   );
 }
 
-export { statusLabels as analysisStatusLabels };
+export { analysisStatusLabels };

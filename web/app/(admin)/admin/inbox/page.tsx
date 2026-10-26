@@ -20,9 +20,9 @@ export default async function AdminInboxPage() {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        label="CRM"
+        label="Talk"
         title="Inbox"
-        description="Two-way conversations with clients. Threads are shared with the client portal."
+        description="Messages with a person. This is not the AI consultant."
       />
       <Suspense fallback={<p className="text-sm text-text-muted">Loading inbox…</p>}>
         <ConversationInbox

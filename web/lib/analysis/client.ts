@@ -27,6 +27,15 @@ export type SubmitAnalysisResponse =
       message: string;
     }
   | {
+      status: "email_required";
+      message: string;
+    }
+  | {
+      status: "payment_required";
+      email: string;
+      message: string;
+    }
+  | {
       error: string;
       details?: string;
     };

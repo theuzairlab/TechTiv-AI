@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { AdminEmptyModule } from "@/components/pages/admin/admin-empty-module";
+import { AdminPageHeader } from "@/components/pages/admin/admin-page-header";
+import { GlassPanel } from "@/components/ui/glass-panel";
 
 export const metadata: Metadata = {
   title: "Subscriptions",
@@ -8,11 +9,18 @@ export const metadata: Metadata = {
 
 export default function AdminSubscriptionsPage() {
   return (
-    <AdminEmptyModule
-      label="Commerce"
-      title="Subscriptions"
-      description="Monthly plans and entitlements will list here once billing is live."
-      columns={["Client", "Plan", "Status", "Renews", "MRR"]}
-    />
+    <div className="space-y-6">
+      <AdminPageHeader
+        label="Billing"
+        title="Subscriptions"
+        description="Monthly plans."
+      />
+      <GlassPanel className="p-8">
+        <p className="text-sm text-text-primary">Billing is off until Stripe is connected.</p>
+        <p className="mt-2 text-sm text-text-muted">
+          Monthly plans are not available yet. No one is being charged.
+        </p>
+      </GlassPanel>
+    </div>
   );
 }

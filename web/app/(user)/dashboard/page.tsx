@@ -7,7 +7,7 @@ import { requireUserSession } from "@/lib/session";
 export const metadata: Metadata = {
   title: "My Portal",
   description:
-    "Your TechTivAI portal — AI scores, blueprints, proposals, and consultation status.",
+    "Your TechTivAI home — the next blueprint, analysis, or build request on this account.",
   robots: { index: false, follow: false },
 };
 
@@ -30,14 +30,8 @@ export default async function UserDashboardPage({
   return (
     <UserDashboardPageView
       firstName={session.user.name.split(" ")[0] ?? "there"}
-      stats={{
-        blueprints: stats.blueprints,
-        proposals: stats.proposals,
-        inFlight: stats.inFlight,
-        serviceRequests: stats.serviceRequests,
-        openServiceRequests: stats.openServiceRequests,
-      }}
       recent={stats.recent}
+      activeRun={stats.activeRun}
       highlight={stats.highlight}
       serviceRequestPreview={stats.serviceRequestPreview}
     />

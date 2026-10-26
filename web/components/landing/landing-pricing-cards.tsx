@@ -135,9 +135,25 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
   );
 }
 
-export function LandingPricingCards() {
+export function LandingPricingCards({
+  paymentsEnabled = false,
+}: {
+  paymentsEnabled?: boolean;
+}) {
   const [index, setIndex] = useState(0);
-  const total = pricingPlans.length;
+  const plans = paymentsEnabled
+    ? pricingPlans.map((plan) =>
+        plan.id === "blueprint"
+          ? {
+              ...plan,
+              description:
+                "First blueprint is free. Each later website is a one-time payment before research starts.",
+              ctaLabel: "Get My AI Blueprint →",
+            }
+          : plan,
+      )
+    : pricingPlans;
+  const total = plans.length;
 
   const goPrev = () => setIndex((current) => (current - 1 + total) % total);
   const goNext = () => setIndex((current) => (current + 1) % total);
@@ -146,7 +162,7 @@ export function LandingPricingCards() {
     <>
       {/* Desktop / tablet: equal-height grid */}
       <div className="mt-[60px] hidden grid-cols-3 items-stretch gap-5 md:grid">
-        {pricingPlans.map((plan) => (
+        {plans.map((plan) => (
           <div key={plan.id} className="scroll-reveal h-full">
             <PricingCard plan={plan} />
           </div>
@@ -156,7 +172,7 @@ export function LandingPricingCards() {
       {/* Mobile: carousel with arrows */}
       <div className="mt-10 md:hidden">
         <div className="relative">
-          <PricingCard plan={pricingPlans[index]!} />
+          <PricingCard plan={plans[index]!} />
 
           <div className="mt-5 flex items-center justify-between gap-3">
             <button

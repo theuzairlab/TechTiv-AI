@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AnalyzePageView } from "@/components/analysis/analyze-page-view";
+import { requireUserSession } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "New analysis",
@@ -8,6 +9,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function DashboardAnalyzePage() {
-  return <AnalyzePageView variant="dashboard" />;
+export default async function DashboardAnalyzePage() {
+  const session = await requireUserSession();
+  return (
+    <AnalyzePageView
+      variant="dashboard"
+      accountEmail={session.user.email}
+    />
+  );
 }

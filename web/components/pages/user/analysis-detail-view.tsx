@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Download, Lock, MessageSquare, Mic } from "lucide-react";
 import type { AnalysisDetail } from "@/lib/dashboard/types";
@@ -19,6 +20,8 @@ export function AnalysisDetailView({ detail }: { detail: AnalysisDetail }) {
   const report = proposal?.reportJson;
   const inFlight = !isTerminalStatus(detail.status);
   const aiScore = averageScorecardScore(report?.scorecard);
+  const [reportPublic, setReportPublic] = useState(detail.reportPublic);
+  const [sharing, setSharing] = useState(false);
 
   return (
     <div className="space-y-7">
@@ -71,6 +74,44 @@ export function AnalysisDetailView({ detail }: { detail: AnalysisDetail }) {
         <GlassPanel className="border-accent-rose/30 bg-accent-rose/10 p-6">
           <p className="text-lg font-semibold text-text-primary">Analysis paused</p>
           <p className="mt-2 text-base text-text-muted">{detail.errorMsg}</p>
+        </GlassPanel>
+      ) : null}
+
+      {detail.status === "DONE" ? (
+        <GlassPanel className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-medium text-text-primary">
+              {reportPublic ? "This blueprint is public" : "This blueprint is private"}
+            </p>
+            <p className="mt-1 text-sm text-text-muted">
+              {reportPublic
+                ? "Anyone analyzing this website can open the public report. They can still run their own research."
+                : "Only this account can open it. Make it public if other people should be able to read this report."}
+            </p>
+          </div>
+          <Button
+            type="button"
+            size="sm"
+            variant={reportPublic ? "outline" : "primary"}
+            disabled={sharing}
+            onClick={() => {
+              setSharing(true);
+              void fetch(`/api/analysis/${detail.id}/visibility`, {
+                method: "PATCH",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ reportPublic: !reportPublic }),
+              })
+                .then(async (response) => {
+                  const body = (await response.json()) as { reportPublic?: boolean };
+                  if (response.ok && typeof body.reportPublic === "boolean") {
+                    setReportPublic(body.reportPublic);
+                  }
+                })
+                .finally(() => setSharing(false));
+            }}
+          >
+            {sharing ? "Saving…" : reportPublic ? "Make private" : "Make public"}
+          </Button>
         </GlassPanel>
       ) : null}
 

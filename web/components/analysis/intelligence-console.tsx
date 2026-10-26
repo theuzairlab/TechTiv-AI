@@ -4,12 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   Bot,
+  Check,
   CheckCircle2,
   ChevronDown,
   Loader2,
   Mail,
   RefreshCw,
-  Search,
   Sparkles,
 } from "lucide-react";
 import {
@@ -95,8 +95,10 @@ export function IntelligenceConsole({
         setStatus(next);
         for (const event of events) addActivity(event);
         if (next.status === "DONE") onComplete?.(next);
-        if (next.status !== "DONE" && next.status !== "FAILED") {
+        if (next.status !== "DONE" && next.status !== "FAILED" && !next.stalled) {
           window.setTimeout(fallback, 5000);
+        } else if (next.stalled) {
+          window.setTimeout(fallback, 20000);
         }
       } catch {
         window.setTimeout(fallback, 3500);
@@ -128,6 +130,7 @@ export function IntelligenceConsole({
   );
   const failed = status?.status === "FAILED";
   const done = status?.status === "DONE";
+  const stalled = !failed && !done && Boolean(status?.stalled);
 
   const retry = async () => {
     setRetrying(true);
@@ -136,7 +139,13 @@ export function IntelligenceConsole({
       await retryAnalysisRequest({ analysisId, guestAccessToken });
       setStatus((current) =>
         current
-          ? { ...current, status: "QUEUED", errorMsg: null, completedAt: null }
+          ? {
+              ...current,
+              status: "QUEUED",
+              errorMsg: null,
+              completedAt: null,
+              stalled: false,
+            }
           : current,
       );
       setActivities([]);
@@ -172,14 +181,14 @@ export function IntelligenceConsole({
           <span
             className={cn(
               "flex size-8 items-center justify-center rounded-xl",
-              failed
+              failed || stalled
                 ? "bg-accent-rose/12 text-accent-rose"
                 : done
                   ? "bg-brand/12 text-brand"
                   : "bg-brand-cyan/12 text-brand-cyan",
             )}
           >
-            {failed ? (
+            {failed || stalled ? (
               <AlertTriangle size={15} />
             ) : done ? (
               <CheckCircle2 size={15} />
@@ -189,16 +198,18 @@ export function IntelligenceConsole({
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-base font-medium text-text-primary">
-              {failed
+              {failed || stalled
                 ? "Research paused"
                 : done
                   ? "Report ready"
                   : currentStep?.label}
             </p>
             <p className="truncate text-sm text-text-muted">
-              {failed
-                ? friendlyErrorMessage(status?.errorMsg)
-                : currentStep?.description}
+              {stalled
+                ? "The worker stopped reporting. Nothing new is running."
+                : failed
+                  ? friendlyErrorMessage(status?.errorMsg)
+                  : currentStep?.description}
             </p>
           </div>
           <span className="text-sm tabular-nums text-text-muted">
@@ -220,8 +231,12 @@ export function IntelligenceConsole({
       </div>
 
       <div className="space-y-3" aria-live="polite">
-        {activities.map((activity) => (
-          <ActivityTurn key={activity.id} activity={activity} />
+        {activities.map((activity, index) => (
+          <ActivityTurn
+            key={activity.id}
+            activity={activity}
+            live={!done && !failed && !stalled && index === activities.length - 1}
+          />
         ))}
       </div>
 
@@ -258,15 +273,17 @@ export function IntelligenceConsole({
         </p>
       ) : null}
 
-      {failed ? (
+      {failed || stalled ? (
         <div className="ml-11 rounded-2xl border border-accent-rose/30 bg-accent-rose/8 p-4">
           <p className="text-base font-medium text-text-primary">
-            I couldn’t complete this pass
+            {stalled ? "Research stopped" : "I couldn’t complete this pass"}
           </p>
           <p className="mt-1 text-base leading-relaxed text-text-muted">
-            {friendlyErrorMessage(status?.errorMsg)}
+            {stalled
+              ? "The worker stopped reporting, so this run is no longer moving. Try again when the worker is back."
+              : friendlyErrorMessage(status?.errorMsg)}
           </p>
-          {status?.errorMsg ? (
+          {!stalled && status?.errorMsg ? (
             <details className="mt-2 text-sm text-text-muted">
               <summary className="cursor-pointer">Technical details</summary>
               <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap wrap-break-word rounded-lg bg-bg-primary/50 p-3 font-mono text-xs leading-relaxed">
@@ -296,13 +313,25 @@ export function IntelligenceConsole({
   );
 }
 
-function ActivityTurn({ activity }: { activity: AnalysisActivityItem }) {
+function ActivityTurn({
+  activity,
+  live,
+}: {
+  activity: AnalysisActivityItem;
+  live: boolean;
+}) {
+  const mark = live ? (
+    <Loader2 size={13} className="animate-spin text-brand-cyan" />
+  ) : (
+    <Check size={13} className="text-brand" />
+  );
+
   if (activity.kind === "search") {
     return (
       <details className="ml-11 rounded-xl border border-border-subtle/60 bg-bg-secondary/20 px-3 py-2">
         <summary className="flex cursor-pointer list-none items-center gap-2 text-sm text-text-muted">
-          <Search size={13} className="text-brand-cyan" />
-          Researching a source
+          {mark}
+          {live ? "Researching a source" : "Source checked"}
           <ChevronDown size={12} className="ml-auto" />
         </summary>
         <p className="mt-2 text-sm leading-relaxed text-text-muted">
@@ -315,7 +344,7 @@ function ActivityTurn({ activity }: { activity: AnalysisActivityItem }) {
   if (activity.kind === "status") {
     return (
       <div className="ml-11 flex items-center gap-2 py-1 text-sm text-text-muted">
-        <Loader2 size={12} className="animate-spin text-brand-cyan" />
+        {mark}
         {activity.message}
       </div>
     );

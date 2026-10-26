@@ -6,13 +6,17 @@ import { LandingNeuralCanvas } from "@/components/landing/landing-neural-canvas"
 import { LandingPageView } from "@/components/landing/landing-page-view";
 import { LandingScrollReveal } from "@/components/landing/landing-scroll-reveal";
 
-export function LandingPage() {
+export function LandingPage({
+  paymentsEnabled = false,
+}: {
+  paymentsEnabled?: boolean;
+}) {
   return (
     <div className="scroll-smooth bg-bg-primary font-body text-base text-text-body overflow-x-hidden">
       <LandingChromeToggle />
       <LandingNeuralCanvas />
       <LandingScrollReveal />
-      <LandingPageView />
+      <LandingPageView paymentsEnabled={paymentsEnabled} />
       <LandingChatWidget />
     </div>
   );

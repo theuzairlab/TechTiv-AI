@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LandingPage } from "@/components/landing/landing-page";
+import { arePaymentsEnabled } from "@/lib/billing/settings";
 
 export const metadata: Metadata = {
   title: "Enterprise AI & Automation",
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function HomePage() {
-  return <LandingPage />;
+export default async function HomePage() {
+  const paymentsEnabled = await arePaymentsEnabled();
+  return <LandingPage paymentsEnabled={paymentsEnabled} />;
 }

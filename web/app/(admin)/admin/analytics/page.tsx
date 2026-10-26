@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AdminPageHeader } from "@/components/pages/admin/admin-page-header";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { getAdminOverviewMetrics } from "@/lib/admin/metrics";
+import { arePaymentsEnabled } from "@/lib/billing/settings";
 
 export const metadata: Metadata = {
   title: "Analytics",
@@ -10,23 +11,23 @@ export const metadata: Metadata = {
 
 export default async function AdminAnalyticsPage() {
   const metrics = await getAdminOverviewMetrics();
+  const paymentsOn = await arePaymentsEnabled();
   const funnel = [
-    { label: "Users", value: metrics.users },
-    { label: "Assessments this month", value: metrics.newAssessments },
-    { label: "Completed blueprints", value: metrics.analysesByStatus.DONE },
-    { label: "AI chat sessions", value: metrics.aiChatSessions },
-    { label: "Service requests", value: metrics.consultationRequests },
-    { label: "Open service opportunities", value: metrics.serviceOpportunities },
-    { label: "Won / converted", value: metrics.convertedClients },
+    { label: "People", value: metrics.users },
+    { label: "Analyses this month", value: metrics.newAssessments },
+    { label: "Blueprints", value: metrics.analysesByStatus.DONE },
+    { label: "Consultant chats", value: metrics.aiChatSessions },
+    { label: "Build requests", value: metrics.consultationRequests },
+    { label: "Won", value: metrics.convertedClients },
   ];
   const max = Math.max(...funnel.map((item) => item.value), 1);
 
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        label="Operations"
+        label="Settings"
         title="Analytics"
-        description="Funnel from signed-in users through assessments, blueprints, and converted service work. Revenue metrics appear after payments."
+        description="From signed-in people to finished blueprints, consultant chats, and build requests."
       />
 
       <GlassPanel className="p-6">
@@ -59,7 +60,11 @@ export default async function AdminAnalyticsPage() {
           <p className="mt-2 font-display text-2xl font-semibold text-text-primary">
             {metrics.paidBlueprints}
           </p>
-          <p className="mt-1 text-xs text-text-muted">Awaiting Stripe</p>
+          <p className="mt-1 text-xs text-text-muted">
+            {paymentsOn
+              ? `$${metrics.blueprintRevenueUSD.toLocaleString()} collected`
+              : "Billing is off"}
+          </p>
         </GlassPanel>
         <GlassPanel className="p-5">
           <p className="text-xs uppercase tracking-wide text-text-muted">
@@ -68,7 +73,7 @@ export default async function AdminAnalyticsPage() {
           <p className="mt-2 font-display text-2xl font-semibold text-text-primary">
             {metrics.activeSubscriptions}
           </p>
-          <p className="mt-1 text-xs text-text-muted">Not enabled yet</p>
+          <p className="mt-1 text-xs text-text-muted">Billing is off</p>
         </GlassPanel>
         <GlassPanel className="p-5">
           <p className="text-xs uppercase tracking-wide text-text-muted">
@@ -77,7 +82,7 @@ export default async function AdminAnalyticsPage() {
           <p className="mt-2 font-display text-2xl font-semibold text-text-primary">
             {metrics.voiceCalls}
           </p>
-          <p className="mt-1 text-xs text-text-muted">Gemini Live sessions</p>
+          <p className="mt-1 text-xs text-text-muted">Calls with the consultant</p>
         </GlassPanel>
       </div>
     </div>

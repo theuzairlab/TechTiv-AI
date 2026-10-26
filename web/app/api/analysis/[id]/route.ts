@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { analysisHeartbeat } from "@/lib/analysis/stall";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -34,6 +35,8 @@ export async function GET(_request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Analysis not found" }, { status: 404 });
     }
 
+    const heartbeat = await analysisHeartbeat(id);
+
     return NextResponse.json({
       analysisId: analysis.id,
       domain: analysis.domain,
@@ -45,6 +48,8 @@ export async function GET(_request: Request, context: RouteContext) {
       proposalStatus: analysis.proposal?.status ?? null,
       pdfUrl: analysis.proposal?.pdfUrl ?? null,
       emailCaptured: Boolean(analysis.emailCapturedAt),
+      stalled: heartbeat.stalled,
+      lastActivityAt: heartbeat.lastActivityAt,
     });
   } catch (error) {
     console.error("[api/analysis/[id]] GET failed:", error);

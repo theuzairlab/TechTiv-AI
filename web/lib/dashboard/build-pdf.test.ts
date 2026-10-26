@@ -15,6 +15,7 @@ describe("buildProposalPdf", () => {
       evidence: [],
       consultation: [],
       pdfUnlocked: true,
+      reportPublic: false,
       proposal: {
         id: "proposal-1",
         status: "SENT",

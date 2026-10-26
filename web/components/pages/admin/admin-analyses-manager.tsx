@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 const SIMPLE_FILTERS = [
   { id: "ALL", label: "All" },
   { id: "IN_PROGRESS", label: "In progress" },
-  { id: "DONE", label: "Ready for client" },
+  { id: "DONE", label: "Ready" },
   { id: "FAILED", label: "Needs retry" },
 ] as const;
 
@@ -105,9 +105,9 @@ export function AdminAnalysesManager({
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        label="Delivery"
+        label="Work"
         title="Analyses"
-        description="Open a report to see the same findings the client received. Pipeline tools stay on a separate tab."
+        description="Every website run. Ready means the blueprint is finished. Open a row to read it."
       />
 
       {error ? (

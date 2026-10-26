@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { listAnalysesForUser } from "@/lib/dashboard/analyses";
 import { requireUserSession } from "@/lib/session";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { GlassPanel } from "@/components/ui/glass-panel";
 import { ConsultantWorkspace } from "@/components/consultant/consultant-workspace";
 
 export const metadata: Metadata = {
-  title: "AI Consultant",
+  title: "Consultant",
   robots: { index: false, follow: false },
 };
 
@@ -42,15 +41,9 @@ export default async function ConsultantPage({ searchParams }: PageProps) {
           AI Consultant
         </h1>
         <p className="text-text-muted">
-          Talk with TivAI about your blueprint. Use chat, or start a voice call
-          from the button on the right.
+          Talk with TivAI about a finished blueprint. Use chat, or start a voice
+          call from the panel.
         </p>
-        {!process.env.GEMINI_API_KEY?.trim() ? (
-          <p className="text-sm text-destructive">
-            Add GEMINI_API_KEY to web/.env, then enable the gemini provider in
-            Admin → Providers.
-          </p>
-        ) : null}
       </div>
 
       {selected ? (
@@ -58,18 +51,11 @@ export default async function ConsultantPage({ searchParams }: PageProps) {
       ) : (
         <GlassPanel className="p-8 text-center">
           <p className="text-sm text-text-muted">
-            Complete an analysis first so the consultant can load your blueprint.
+            Finish an analysis first. The consultant talks from that blueprint.
           </p>
           <Button href="/dashboard/analyze" className="mt-5" size="sm">
             Start analysis
           </Button>
-          <p className="mt-4 text-sm text-text-muted">
-            No completed blueprints yet.{" "}
-            <Link href="/dashboard/analyze" className="text-brand-cyan hover:text-brand">
-              Start an analysis
-            </Link>
-            .
-          </p>
         </GlassPanel>
       )}
     </div>

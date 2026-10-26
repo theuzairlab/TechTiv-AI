@@ -22,7 +22,7 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        label="CRM"
+        label="People"
         title="Clients"
         description="Every signed-in person, their company, and activity across analyses and leads."
       />

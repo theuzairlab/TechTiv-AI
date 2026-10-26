@@ -59,9 +59,9 @@ export default async function AdminImplementationPage() {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        label="Delivery"
+        label="Work"
         title="Build requests"
-        description="When a client taps “Build this with TechTivAI” on their report, the request lands here. Review it, message them, then update status as work moves."
+        description="When a client asks TechTivAI to build something from a blueprint, it lands here."
       />
 
       {rows.length === 0 ? (

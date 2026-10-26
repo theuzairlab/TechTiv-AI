@@ -5,6 +5,7 @@ import { parseBusinessLinks } from "@/lib/analysis/links";
 import { resolveAnalysisDomain } from "@/lib/analysis/intake";
 import { enqueueConsultation } from "@/lib/analysis/queue";
 import { startConsultationSchema } from "@/lib/consultation/schema";
+import { getSession } from "@/lib/session";
 
 export async function POST(request: Request) {
   try {
@@ -35,6 +36,8 @@ export async function POST(request: Request) {
     };
 
     const { guestAccessToken, pendingEmail } = createGuestSession();
+    const session = await getSession();
+    const accountEmail = session?.user.email?.trim().toLowerCase() || null;
 
     const domain = resolveAnalysisDomain({
       company: companyName,
@@ -53,6 +56,7 @@ export async function POST(request: Request) {
       data: {
         domain,
         guestAccessToken,
+        emailCapturedAt: accountEmail ? new Date() : null,
         socialLinks: resolvedSocialLinks,
         businessIntake: {
           companyName,
@@ -63,7 +67,7 @@ export async function POST(request: Request) {
           create: {
             name: companyName,
             company: companyName,
-            email: pendingEmail,
+            email: accountEmail ?? pendingEmail,
             source: "adaptive_consultation",
           },
         },

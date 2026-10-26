@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FileText } from "lucide-react";
 import { listAnalysesForUser } from "@/lib/dashboard/analyses";
-import { formatDateTime, formatUsd } from "@/lib/format-display";
+import { formatDateTime } from "@/lib/format-display";
 import { requireUserSession } from "@/lib/session";
-import { Badge } from "@/components/ui/badge";
+import { AnalysisStatusBadge } from "@/components/pages/admin/analysis-status-badge";
 import { Button } from "@/components/ui/button";
 import { GlassPanel } from "@/components/ui/glass-panel";
 
 export const metadata: Metadata = {
-  title: "My Blueprints",
+  title: "Blueprints",
   robots: { index: false, follow: false },
 };
 
@@ -19,33 +18,37 @@ export default async function UserBlueprintsPage() {
     session.user.id,
     session.user.email,
   );
-  const blueprints = analyses.filter((item) => item.status === "DONE");
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="s-label">— Blueprints</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold text-text-primary">
-          My Blueprints
-        </h1>
-        <p className="mt-2 text-sm text-text-muted">
-          Completed AI analyses with strategy and pricing.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="s-label">— Blueprints</p>
+          <h1 className="mt-2 font-display text-3xl font-semibold text-text-primary">
+            Blueprints
+          </h1>
+          <p className="mt-2 text-sm text-text-muted">
+            Every analysis on this account. A finished one is your blueprint.
+          </p>
+        </div>
+        <Button href="/dashboard/analyze" size="sm">
+          New analysis
+        </Button>
       </div>
 
-      {blueprints.length === 0 ? (
+      {analyses.length === 0 ? (
         <GlassPanel className="p-6">
           <p className="text-sm text-text-muted">
-            No completed blueprints yet.{" "}
+            You haven&apos;t analyzed a business on this account yet.{" "}
             <Link href="/dashboard/analyze" className="text-brand-cyan hover:text-brand">
-              Run a free analysis
+              Start an analysis
             </Link>
             .
           </p>
         </GlassPanel>
       ) : (
         <ul className="space-y-3">
-          {blueprints.map((item) => (
+          {analyses.map((item) => (
             <li key={item.id}>
               <GlassPanel className="flex flex-wrap items-center justify-between gap-3 p-5">
                 <div>
@@ -54,15 +57,9 @@ export default async function UserBlueprintsPage() {
                     {item.completedAt
                       ? formatDateTime(item.completedAt)
                       : formatDateTime(item.createdAt)}
-                    {item.aiScore != null ? ` · AI score ${item.aiScore}` : ""}
+                    {item.aiScore != null ? ` · Score ${item.aiScore}` : ""}
                     {item.opportunityCount > 0
                       ? ` · ${item.opportunityCount} opportunities`
-                      : ""}
-                    {item.costEstimateUSD != null
-                      ? ` · ${formatUsd(item.costEstimateUSD)}`
-                      : ""}
-                    {item.timelineWeeks != null
-                      ? ` · ${item.timelineWeeks} weeks`
                       : ""}
                   </p>
                   {item.topFinding ? (
@@ -72,9 +69,8 @@ export default async function UserBlueprintsPage() {
                   ) : null}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="lime">DONE</Badge>
+                  <AnalysisStatusBadge status={item.status} />
                   <Button href={`/dashboard/analyses/${item.id}`} size="sm">
-                    <FileText size={14} className="mr-1.5" />
                     Open
                   </Button>
                 </div>

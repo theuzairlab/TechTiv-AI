@@ -9,3 +9,6 @@ export const DOMAIN_FRESHNESS_DAYS = 90;
 
 /** BullMQ queue name — must match backend worker. */
 export const ANALYSIS_QUEUE_NAME = "analysis-jobs";
+
+/** If a run reports nothing for this long, the screen treats the worker as stopped. */
+export const RESEARCH_STALL_MS = 5 * 60 * 1000;

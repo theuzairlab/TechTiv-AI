@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   FileText,
-  Globe,
   Inbox,
   LayoutDashboard,
   MessageSquare,
@@ -18,26 +17,33 @@ import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const userNav = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: "/dashboard/blueprints", label: "My Blueprints", icon: Sparkles },
-  { href: "/dashboard/proposals", label: "Proposals", icon: FileText },
+  { href: "/dashboard", label: "Home", icon: LayoutDashboard, exact: true },
+  { href: "/dashboard/blueprints", label: "Blueprints", icon: Sparkles },
+  { href: "/dashboard/consultant", label: "Consultant", icon: MessageSquare },
   { href: "/dashboard/messages", label: "Messages", icon: Inbox },
-  { href: "/dashboard/consultant", label: "AI Consultant", icon: MessageSquare },
-  { href: "/dashboard/analyze", label: "New analysis", icon: Globe },
 ] as const;
+
+const buildRequestsNav = {
+  href: "/dashboard/proposals",
+  label: "Build requests",
+  icon: FileText,
+} as const;
 
 type UserShellProps = {
   session: Session;
   inboxUnreadCount?: number;
+  hasBuildRequests?: boolean;
   children: React.ReactNode;
 };
 
 export function UserShell({
   session,
   inboxUnreadCount = 0,
+  hasBuildRequests = false,
   children,
 }: UserShellProps) {
   const pathname = usePathname();
+  const navItems = hasBuildRequests ? [...userNav, buildRequestsNav] : userNav;
   const user = session.user;
   const showAdminLink = isAdmin(user.role);
   const [unreadCount, setUnreadCount] = useState(inboxUnreadCount);
@@ -104,7 +110,7 @@ export function UserShell({
       <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-8 lg:grid-cols-[200px_1fr] sm:px-6 lg:px-8">
         <nav className="flex gap-1 overflow-x-auto lg:block lg:overflow-visible">
           <ul className="flex gap-1 lg:sticky lg:top-24 lg:flex-col lg:gap-1">
-            {userNav.map((item) => {
+            {navItems.map((item) => {
               const active =
                 "exact" in item && item.exact
                   ? pathname === item.href

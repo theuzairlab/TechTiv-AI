@@ -1,0 +1,1 @@
+ALTER TABLE "analysis" ADD COLUMN "reportPublic" BOOLEAN NOT NULL DEFAULT false;

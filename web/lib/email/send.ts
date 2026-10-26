@@ -111,3 +111,21 @@ export async function sendServiceRequestNotification(
     text: buildServiceRequestText(params),
   });
 }
+
+/** Best-effort. A failed mail must not fail the Stripe webhook. */
+export async function sendPaymentReceivedEmail(input: {
+  to: string;
+  continueUrl: string;
+}): Promise<{ id: string }> {
+  const text = [
+    "Payment received.",
+    "Your next website analysis can start now.",
+    input.continueUrl,
+  ].join("\n");
+  return deliverEmail({
+    to: input.to,
+    subject: "Payment received — you can start the next analysis",
+    text,
+    html: `<p>Payment received.</p><p>Your next website analysis can start now.</p><p><a href="${input.continueUrl}">Return to your analysis</a></p>`,
+  });
+}

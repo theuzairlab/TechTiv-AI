@@ -21,9 +21,9 @@ export default async function AdminCompaniesPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        label="CRM"
+        label="People"
         title="Companies"
-        description="Organizations attached to clients, analyses, and implementation work."
+        description="Organizations linked to a client. Open a client to see their company, analyses, and messages together."
       />
 
       <form className="max-w-md">

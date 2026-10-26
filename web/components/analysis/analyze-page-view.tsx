@@ -33,27 +33,48 @@ const SESSION_KEY = "techtivai_analysis_session_v2";
 type AnalyzePageViewProps = {
   /** Public marketing page vs in-portal shell. Same backend workflow. */
   variant?: "public" | "dashboard";
+  accountEmail?: string | null;
 };
 
 export function AnalyzePageView({
   variant = "public",
+  accountEmail = null,
 }: AnalyzePageViewProps) {
   const isDashboard = variant === "dashboard";
   const [error, setError] = useState<string | null>(null);
+  const [paymentNotice, setPaymentNotice] = useState<string | null>(null);
+  const [paymentReceived, setPaymentReceived] = useState(false);
   const [phase, setPhase] = useState<Phase>({
     kind: "consultation",
     session: null,
   });
+  const [restored, setRestored] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment") === "success") {
+      setPaymentReceived(true);
+      setPaymentNotice(
+        "Payment received. Your questions are still here. Start the research when you are ready.",
+      );
+    } else if (params.get("payment") === "cancel") {
+      setPaymentNotice("Payment was not completed. You can try again.");
+    }
+  }, []);
 
   useEffect(() => {
     const raw = window.sessionStorage.getItem(SESSION_KEY);
-    if (!raw) return;
+    if (!raw) {
+      setRestored(true);
+      return;
+    }
     try {
-      const restored = JSON.parse(raw) as Phase;
-      const timer = window.setTimeout(() => setPhase(restored), 0);
-      return () => window.clearTimeout(timer);
+      const restoredPhase = JSON.parse(raw) as Phase;
+      setPhase(restoredPhase);
     } catch {
       window.sessionStorage.removeItem(SESSION_KEY);
+    } finally {
+      setRestored(true);
     }
   }, []);
 
@@ -165,6 +186,12 @@ export function AnalyzePageView({
           </p>
         </header>
 
+        {paymentNotice ? (
+          <p className="mb-4 rounded-xl border border-brand-cyan/30 bg-brand-cyan/10 p-3 text-sm text-text-primary">
+            {paymentNotice}
+          </p>
+        ) : null}
+
         {error ? (
           <p className="mb-4 rounded-xl border border-accent-rose/30 bg-accent-rose/10 p-3 text-sm text-accent-rose">
             {error}
@@ -172,9 +199,12 @@ export function AnalyzePageView({
         ) : null}
 
         <main>
-          {phase.kind === "consultation" ? (
+          {!restored ? null : phase.kind === "consultation" ? (
             <AgentConsultation
               restoredSession={phase.session}
+              accountEmail={accountEmail}
+              returnPath={isDashboard ? "/dashboard/analyze" : "/analyze"}
+              paymentReceived={paymentReceived}
               onSession={(session) =>
                 persist({ kind: "consultation", session })
               }

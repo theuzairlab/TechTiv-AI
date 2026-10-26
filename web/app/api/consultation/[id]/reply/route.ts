@@ -40,35 +40,46 @@ export async function POST(request: Request, context: Context) {
       ? (analysis.businessIntake as Record<string, unknown>)
       : {};
 
-  await prisma.$transaction([
-    prisma.analysis.update({
-      where: { id },
-      data: {
-        businessIntake: {
-          ...intake,
-          [parsed.data.field]:
-            parsed.data.field === "goals"
-              ? parsed.data.value
-                  .split(/,|\n/)
-                  .map((item) => item.trim())
-                  .filter(Boolean)
-              : parsed.data.value,
-        } as Prisma.InputJsonValue,
-      },
-    }),
-    prisma.consultationMessage.create({
-      data: {
-        analysisId: id,
-        role: "user",
-        content: parsed.data.value,
-        inputJson: {
-          field: parsed.data.field,
-          value: parsed.data.value,
+  try {
+    await prisma.$transaction([
+      prisma.analysis.update({
+        where: { id },
+        data: {
+          businessIntake: {
+            ...intake,
+            [parsed.data.field]:
+              parsed.data.field === "goals"
+                ? parsed.data.value
+                    .split(/,|\n/)
+                    .map((item) => item.trim())
+                    .filter(Boolean)
+                : parsed.data.value,
+          } as Prisma.InputJsonValue,
         },
-      },
-    }),
-  ]);
+      }),
+      prisma.consultationMessage.create({
+        data: {
+          analysisId: id,
+          role: "user",
+          content: parsed.data.value,
+          inputJson: {
+            field: parsed.data.field,
+            value: parsed.data.value,
+          },
+        },
+      }),
+    ]);
 
-  await enqueueConsultation(id);
-  return NextResponse.json({ accepted: true });
+    await enqueueConsultation(id);
+    return NextResponse.json({ accepted: true });
+  } catch (error) {
+    console.error("[consultation/reply]", error);
+    return NextResponse.json(
+      {
+        error:
+          "The research worker is not available right now. Try again in a moment.",
+      },
+      { status: 503 },
+    );
+  }
 }
