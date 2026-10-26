@@ -54,8 +54,9 @@ export async function applyStripeEvent(event: Stripe.Event): Promise<void> {
 
     if (updated.count === 1 && email) {
       const returnPath =
-        session.metadata?.returnPath === "/dashboard/analyze"
-          ? "/dashboard/analyze"
+        session.metadata?.returnPath === "/dashboard/analyze" ||
+        session.metadata?.returnPath === "/dashboard/billing"
+          ? session.metadata.returnPath
           : "/analyze";
       const analysisId = session.metadata?.analysisId;
       try {

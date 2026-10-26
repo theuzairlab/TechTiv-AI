@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
+  CreditCard,
   FileText,
   Inbox,
   LayoutDashboard,
@@ -21,6 +22,7 @@ const userNav = [
   { href: "/dashboard/blueprints", label: "Blueprints", icon: Sparkles },
   { href: "/dashboard/consultant", label: "Consultant", icon: MessageSquare },
   { href: "/dashboard/messages", label: "Messages", icon: Inbox },
+  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
 ] as const;
 
 const buildRequestsNav = {

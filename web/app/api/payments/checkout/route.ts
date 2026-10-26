@@ -5,15 +5,22 @@ import { arePaymentsEnabled } from "@/lib/billing/settings";
 import { hasRealBillingEmail } from "@/lib/billing/gate";
 import { appBaseUrl, blueprintPriceId, getStripe } from "@/lib/billing/stripe";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
 
 const bodySchema = z.object({
   analysisId: z.string().min(1),
-  guestAccessToken: z.string().uuid(),
+  guestAccessToken: z.string().uuid().optional(),
   returnPath: z.string().optional(),
 });
 
 function safeReturnPath(value: string | undefined): string {
-  if (value === "/dashboard/analyze" || value === "/analyze") return value;
+  if (
+    value === "/dashboard/analyze" ||
+    value === "/analyze" ||
+    value === "/dashboard/billing"
+  ) {
+    return value;
+  }
   return "/analyze";
 }
 
@@ -46,17 +53,27 @@ export async function POST(request: Request) {
         id: true,
         guestAccessToken: true,
         leadId: true,
-        lead: { select: { email: true } },
+        lead: { select: { email: true, userId: true } },
       },
     });
     if (!analysis) {
       return NextResponse.json({ error: "Analysis not found" }, { status: 404 });
     }
-    if (!verifyGuestAccess(analysis.guestAccessToken, parsed.data.guestAccessToken)) {
+    const userSession = await getSession();
+    const accountEmail = userSession?.user.email?.trim().toLowerCase() ?? "";
+    const leadEmail = analysis.lead.email.trim().toLowerCase();
+    const ownsAccount =
+      Boolean(accountEmail) &&
+      (leadEmail === accountEmail || analysis.lead.userId === userSession?.user.id);
+    const guestOk = verifyGuestAccess(
+      analysis.guestAccessToken,
+      parsed.data.guestAccessToken,
+    );
+    if (!ownsAccount && !guestOk) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const email = analysis.lead.email.trim().toLowerCase();
+    const email = leadEmail;
     if (!hasRealBillingEmail(email)) {
       return NextResponse.json(
         { error: "Add an email before paying" },
