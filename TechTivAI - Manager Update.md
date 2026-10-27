@@ -1,6 +1,4 @@
-# TechTivAI — Manager update
-
-27 October 2026
+# TechTivAI — Reports
 
 The product from the Final Developer Agenda is live. This note is the current system, in order, and what we should do next.
 
@@ -37,13 +35,8 @@ The product from the Final Developer Agenda is live. This note is the current sy
 ## Recommendations
 
 1. **Keep $5 as one or two extra analyses, not the whole product.** $5 pays for the next website research only. It does not include the build, the monthly service, or unlimited use. Say that on the checkout screen so a client does not think $5 buys the full TechTivAI system.
-
 2. **Research the market, then turn the blueprint into a system that does the work.** Today the product analyzes a business and gives a report to read. It does not run the fix. Before the next build, study products in this space and choose the features that move a client from “read the plan” to “the problem is being handled.” That is the step that makes this a production SaaS, not a report tool.
-
 3. **Add monthly plans for ongoing use.** A plan should include talking to the consultant about the services in that blueprint, and a set number of extra analyses. Agencies need more credits so they can run analyses for their own clients. Build this as a monthly subscription on the same Stripe customer as the $5 charge. Do not replace the $5 entry.
-
 4. **Turn live billing on only after one real $5 test.** Live key, live webhook, live price, admin switch on. Leave the switch off until that test passes.
-
 5. **Alert the team when the worker stops.** The screen now pauses a quiet run. A failed job should also notify the admin. A client retry does not help if the worker is down.
-
 6. **Leave the phone app and phone-number calls for later.** Voice today is in the browser, on the blueprint. A mobile app and a phone line are a separate product.

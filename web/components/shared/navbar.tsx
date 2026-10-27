@@ -6,11 +6,15 @@ import { motion } from "framer-motion";
 import { navLinks } from "@/lib/site";
 import { MobileMenu } from "@/components/shared/mobile-menu";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { data: session } = authClient.useSession();
+  const accountHref = session?.user ? "/dashboard" : "/login";
+  const accountLabel = session?.user ? "My Portal" : "Login";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -61,11 +65,14 @@ export function Navbar() {
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
-            <div className="flex items-center gap-[7px] text-xs text-text-muted">
-              <div className="ui-dot size-[7px] animate-status-blink rounded-full" />
-              All Systems Live
-            </div>
+            
             <ThemeToggle />
+            <Link
+              href={accountHref}
+              className="rounded-[7px] border border-border-subtle px-4 py-[8px] text-[0.82rem] font-semibold text-text-primary no-underline transition-colors hover:border-brand-cyan/40 hover:text-brand-cyan"
+            >
+              {accountLabel}
+            </Link>
             <Link
               href="/analyze"
               className="rounded-[7px] bg-accent-lime px-5 py-[9px] text-[0.82rem] font-bold text-on-accent no-underline shadow-[0_0_20px_var(--shadow-lime)] transition-[box-shadow,transform,background] duration-200 hover:-translate-y-px hover:bg-accent-cyan hover:shadow-[0_0_32px_var(--shadow-cyan)]"
@@ -91,7 +98,12 @@ export function Navbar() {
 
       <div className="h-[68px] shrink-0" aria-hidden />
 
-      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MobileMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        accountHref={accountHref}
+        accountLabel={accountLabel}
+      />
     </>
   );
 }

@@ -10,9 +10,16 @@ import { cn } from "@/lib/utils";
 type MobileMenuProps = {
   open: boolean;
   onClose: () => void;
+  accountHref: string;
+  accountLabel: string;
 };
 
-export function MobileMenu({ open, onClose }: MobileMenuProps) {
+export function MobileMenu({
+  open,
+  onClose,
+  accountHref,
+  accountLabel,
+}: MobileMenuProps) {
   return (
     <AnimatePresence>
       {open ? (
@@ -67,6 +74,9 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                 <span className="text-sm text-text-muted">Theme</span>
                 <ThemeToggle />
               </div>
+              <Button href={accountHref} variant="secondary" size="lg" onClick={onClose}>
+                {accountLabel}
+              </Button>
               <Button href="/analyze" size="lg" onClick={onClose}>
                 Analyze free →
               </Button>

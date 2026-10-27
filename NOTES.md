@@ -586,4 +586,14 @@ Nxtechnova - services/ai-automation page
 [✅] Added a simple toggle flag so this mobile chrome can be turned back on later without rewriting the components
 
 
+26-Oct-2026
+TechTivAI — live deploy and billing
+[✅] Prepared the website for deploy with Stripe payments, so the live site can take the $5 test charge without a local setup.
+[✅] Created a Stripe sandbox webhook secret for the live site, so payment confirmations arrive there and local listening is not required.
+[✅] Fixed the production database failures that were blocking the new payment tables on deploy.
+[✅] Build a Billing page in the client portal. A successful $5 payment shows the amount and time. A charge that has not gone through shows pending, a short note, and Pay now.
+[✅] Tested the live site with new accounts, ran an analysis, and confirmed a sandbox Stripe payment on that site.
+[✅] Prepared the reports of what is complete, how analysis and payment work, and the next recommendations.
+
+
 
